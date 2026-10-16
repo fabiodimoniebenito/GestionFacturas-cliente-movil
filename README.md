@@ -1,6 +1,6 @@
 # GestionFacturas — Cliente (Android + Desktop)
 
-> ⚠️ **Proyecto en fase inicial.** El proyecto base está generado pero aún no hay
+> **Proyecto en fase inicial.** El proyecto base está generado pero aún no hay
 > funcionalidad implementada. Este README describe el diseño acordado y evoluciona con el
 > código.
 
