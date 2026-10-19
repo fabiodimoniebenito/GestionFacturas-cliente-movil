@@ -12,7 +12,7 @@ kotlin {
     jvm()
     
     android {
-       namespace = "com.example.gestionfacturas_cliente.shared"
+       namespace = "com.fabio.gestionfacturas.shared"
        compileSdk = libs.versions.android.compileSdk.get().toInt()
        minSdk = libs.versions.android.minSdk.get().toInt()
     
