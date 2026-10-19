@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    DEBUG builds only (this file lives in the debug source set). Cleartext HTTP is allowed ONLY for
+    the emulator's alias of the host machine (10.0.2.2) and localhost; everything else stays on HTTPS.
+    The release build has no network security config, so cleartext is blocked by default there.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>

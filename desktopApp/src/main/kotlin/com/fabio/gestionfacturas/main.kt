@@ -2,12 +2,16 @@ package com.fabio.gestionfacturas
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import com.fabio.gestionfacturas.di.initKoin
 
-fun main() = application {
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "GestionFacturascliente",
-    ) {
-        App()
+fun main() {
+    initKoin()
+    application {
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "GestionFacturascliente",
+        ) {
+            App()
+        }
     }
 }

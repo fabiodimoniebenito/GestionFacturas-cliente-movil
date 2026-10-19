@@ -53,14 +53,26 @@ kotlin {
             implementation(libs.ktor.client.auth)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.settings.no.arg)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.kermit)
+            implementation(libs.androidx.navigation.compose)
         }
         jvmMain.dependencies{
             implementation(libs.ktor.client.okhttp)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.ktor.client.mock)
         }
     }
+}
+
+compose.resources {
+    // Fixed so imports of the generated Res class do not depend on the project's group/name.
+    packageOfResClass = "com.fabio.gestionfacturas.resources"
 }
 
 dependencies {

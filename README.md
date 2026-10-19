@@ -1,8 +1,8 @@
 # GestionFacturas — Cliente (Android + Desktop)
 
-> **Proyecto en fase inicial.** El proyecto base está generado pero aún no hay
-> funcionalidad implementada. Este README describe el diseño acordado y evoluciona con el
-> código.
+> **Proyecto en desarrollo.** Ya están hechos el login y el registro (con renovación
+> automática del token); el resto de áreas (clientes, gastos, ingresos, dashboard) aún no.
+> Este README describe el diseño acordado y evoluciona con el código.
 
 Cliente de **GestionFacturas**, una aplicación para que **freelances y autónomos** lleven
 el control de su actividad económica: registran **gastos**, **ingresos** y **clientes**, y
@@ -35,8 +35,8 @@ iOS queda fuera del alcance por no disponer de Mac para compilarlo.
 | Red | Ktor Client + kotlinx.serialization |
 | Asincronía | kotlinx.coroutines |
 | Inyección de dependencias | Koin |
-| Almacenamiento local | Multiplatform Settings (solo el token) |
-| Navegación | Navigation Compose (oficial, multiplataforma) |
+| Almacenamiento local | Multiplatform Settings (solo la sesión: tokens, id y email) |
+| Navegación | Navigation Compose (oficial, multiplataforma; versión 2.10.0-rc01, candidata a estable) |
 | Logging | Kermit |
 | Build | Gradle (Kotlin DSL) |
 
@@ -63,8 +63,9 @@ flowchart LR
 - **ui:** pantallas en Compose y ViewModels. Cada ViewModel expone un único `UiState` y la
   pantalla solo lo pinta. Depende únicamente de `domain`.
 - **domain:** Kotlin puro. Modelos e interfaces de repositorio. Los casos de uso solo
-  existen cuando una operación orquesta varias fuentes de datos (por ejemplo, cerrar
-  sesión: revocar el token en el backend y borrar el local).
+  existen cuando una operación orquesta varias fuentes de datos. Por ahora no hay ninguno:
+  cerrar sesión vive en `AuthRepository`, que ya dispone de la API remota y del
+  almacenamiento local (revoca el token en el backend y borra siempre la sesión local).
 - **data:** implementaciones de los repositorios, llamadas a la API, DTOs y
   almacenamiento del token.
 
@@ -103,9 +104,11 @@ común de Kotlin Multiplatform). Se resolverá al construir la parte de gastos.
 ## Estado actual
 
 - [x] Proyecto base generado (Android + Desktop)
-- [x] Dependencias base (Ktor, kotlinx.serialization, Multiplatform Settings)
+- [x] Dependencias base (Ktor, kotlinx.serialization, Multiplatform Settings, Koin, Kermit,
+  Navigation Compose)
 - [x] Contrato de la API documentado (`docs/api-contract.md`)
-- [ ] Login y registro
+- [x] Login y registro (red, almacenamiento de tokens, renovación automática, sesión,
+  pantallas y tests unitarios). Pendiente de probar a mano contra el backend real.
 - [ ] Clientes
 - [ ] Gastos
 - [ ] Ingresos y cobros
@@ -139,14 +142,23 @@ móvil con depuración USB.
 | Emulador de Android | `http://10.0.2.2:8080` |
 | Móvil físico | IP del PC en la red local |
 
+La URL se define por plataforma en `UrlBase.jvm.kt` y `UrlBase.android.kt` (función
+`urlBaseApi()`, dentro de `shared`).
+
 En Android el tráfico HTTP sin cifrar está bloqueado por defecto; en desarrollo se permite
-solo en la compilación de depuración.
+solo en la compilación de depuración y solo para `10.0.2.2` y `localhost`
+(`androidApp/src/debug/`). La compilación de release no lo permite.
 
 ## Notas de seguridad
 
-- El token se guarda con Multiplatform Settings, que **no cifra**. Es aceptable para este
+- Los tokens se guardan con Multiplatform Settings, que **no cifra**. Es aceptable para este
   proyecto personal; el almacenamiento seguro (por ejemplo, Android Keystore) queda como
   mejora pendiente.
+- Autenticación: el token de acceso se renueva solo al recibir un 401 (el backend responde 401,
+  no 403, a un token ausente o caducado). El token de refresco no rota. Si la renovación
+  falla, se borra la sesión y se vuelve al login. Al cerrar sesión se revoca el token de
+  refresco en el backend (si hay red) y siempre se borra la sesión local.
+- El cliente nunca registra contraseñas, tokens ni cuerpos de peticiones.
 - El backend limita las peticiones (login: 10/min por IP; resto: 50/min por usuario). El
   cliente debe tratar el HTTP 429 con un mensaje claro.
 

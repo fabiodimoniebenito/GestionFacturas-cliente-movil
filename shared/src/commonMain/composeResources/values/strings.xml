@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Login -->
+    <string name="login_titulo">Iniciar sesión</string>
+    <string name="login_boton">Entrar</string>
+    <string name="login_ir_a_registro">¿No tienes cuenta? Regístrate</string>
+
+    <!-- Registro -->
+    <string name="registro_titulo">Crear cuenta</string>
+    <string name="registro_boton">Registrarme</string>
+    <string name="registro_volver">Volver</string>
+
+    <!-- Campos -->
+    <string name="campo_email">Correo electrónico</string>
+    <string name="campo_nombre">Nombre</string>
+    <string name="campo_password">Contraseña</string>
+
+    <!-- Validación local de campos -->
+    <string name="campo_error_email_vacio">Introduce tu correo electrónico</string>
+    <string name="campo_error_email_invalido">El correo electrónico no es válido</string>
+    <string name="campo_error_nombre_vacio">Introduce tu nombre</string>
+    <string name="campo_error_password_vacia">Introduce tu contraseña</string>
+
+    <!-- Errores de autenticación -->
+    <string name="error_credenciales">Correo o contraseña incorrectos.</string>
+    <string name="error_demasiadas_peticiones">Demasiados intentos. Inténtalo de nuevo más tarde.</string>
+    <string name="error_demasiadas_peticiones_espera">Demasiados intentos. Inténtalo de nuevo en %1$d segundos.</string>
+    <string name="error_email_registrado">Ese correo electrónico ya está registrado.</string>
+    <string name="error_validacion">Revisa los datos introducidos.</string>
+    <string name="error_sin_conexion">No se pudo conectar con el servidor. Comprueba tu conexión.</string>
+    <string name="error_inesperado">Ha ocurrido un error inesperado. Inténtalo de nuevo.</string>
+
+    <!-- Home (provisional) -->
+    <string name="home_titulo">Sesión iniciada</string>
+    <string name="home_sesion_de">Has iniciado sesión como %1$s</string>
+    <string name="home_cerrar_sesion">Cerrar sesión</string>
+</resources>

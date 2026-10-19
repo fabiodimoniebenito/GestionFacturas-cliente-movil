@@ -60,13 +60,20 @@ Platform-specific implementations (expect/actual) go in `shared/src/androidMain`
   `HttpClient { ... }` and Ktor picks the engine on the classpath. (Ktor 3.6 also offers the
   `ktor-client-engine-defaults` artifact; not adopted yet.)
 - kotlinx.serialization, kotlinx.coroutines
-- Koin (dependency injection) — added when the first ViewModel is wired
-- Multiplatform Settings 1.3.0 (stores the token ONLY; no offline cache for now). Its last
-  release is from Nov 2024; if it ever conflicts with the Kotlin version, switch to
-  AndroidX DataStore (multiplatform).
-- Navigation Compose (official, multiplatform) — isolated in `ui/navigation/`
-- Multiplatform ViewModel/Lifecycle (androidx)
-- Kermit (logging)
+- Koin 4.2.2 (core, compose, compose-viewmodel) — modules in `di/`, started by `initKoin()`
+- Multiplatform Settings 1.3.0 (stores the session only: access token, refresh token, user id
+  and email; no offline cache for now). Its last release is from Nov 2024; it compiles and builds
+  with Kotlin 2.4.20, but has not been run yet (tests use an in-memory fake, and Android's no-arg
+  auto-initialization is unverified at runtime); if it ever conflicts, switch to AndroidX
+  DataStore (multiplatform).
+- Navigation Compose 2.10.0-rc01 (org.jetbrains.androidx.navigation, official, multiplatform) —
+  isolated in `ui/navigation/`. It is a RELEASE CANDIDATE: the latest stable (2.9.2) is built on
+  lifecycle 2.9.x / Compose 1.8 and does not match this project's lifecycle 2.11.0 / CMP 1.12.1.
+  Move to the stable 2.10.x as soon as it is released. Navigation 3 was considered: the CMP docs
+  do not recommend it for new projects, so Navigation Compose stays.
+- Multiplatform ViewModel/Lifecycle (androidx, lifecycle 2.11.0)
+- Kermit 2.2.0 (logging; never given tokens, passwords or bodies)
+- Test only (commonTest): kotlinx-coroutines-test 1.11.0, ktor-client-mock 3.6.0
 - Gradle Kotlin DSL with the version catalog (`gradle/libs.versions.toml`)
 
 Do not add Room, SQLDelight or any local database unless asked: the app is online-only for
@@ -83,9 +90,10 @@ ui  ->  domain  <-  data
 - **ui**: Compose screens + ViewModels. Depends only on `domain`. NEVER imports from `data`.
 - **domain**: plain Kotlin (no Ktor, no Compose, no Settings, no `java.*`): models and
   repository INTERFACES. Use cases only when one operation orchestrates more than one data
-  source or is reused by several ViewModels (example: logout = revoke refresh token in the
-  backend + clear local token). Do NOT create pass-through use cases that only call a
-  repository.
+  source or is reused by several ViewModels. There are none yet. Logout is NOT a use case:
+  `AuthRepository` already owns both the remote API and the local token storage, so it revokes
+  the refresh token and clears the local session itself. Do NOT create pass-through use cases
+  that only call a repository.
 - **data**: repository implementations, Ktor services, DTOs, token storage, DTO -> model
   mappers. Implements the `domain` interfaces.
 
@@ -136,6 +144,9 @@ shared/src/androidMain , shared/src/jvmMain   platform-specific code only (expec
 
 Base URL differs per platform: Desktop `http://localhost:8080`; Android emulator
 `http://10.0.2.2:8080`; physical phone = the PC's LAN IP. Keep it configurable per platform.
+It lives in `expect fun urlBaseApi()` (`data/remote/UrlBase.kt`), with the actuals in
+`shared/src/jvmMain/.../UrlBase.jvm.kt` and `shared/src/androidMain/.../UrlBase.android.kt`
+(edit the Android one to test on a physical phone).
 
 `docs/api-contract.md` is the source of truth for DTO shapes (audited from the backend's
 `/v3/api-docs`). Update it whenever the backend changes.
@@ -165,19 +176,40 @@ Base URL differs per platform: Desktop `http://localhost:8080`; Android emulator
 
 ## Authentication on the client
 
-- Keep access + refresh tokens in Multiplatform Settings. Ktor's Bearer auth plugin loads
-  the access token and refreshes it through `/api/auth/refresh`.
-- Ktor 3.4+ gives explicit control over the Bearer token cache: clear it on logout so old
-  credentials are not sent again.
-- If refreshing fails, clear the stored tokens and send the user back to the login screen.
-- Logout = call the backend logout (revoke the refresh token) AND clear local tokens.
+Implemented flow (all in `data/`):
+- `ApiClient` builds TWO Ktor clients: `plain` (no auth plugin; used by `AuthApi` for
+  `/api/auth/*` and for the refresh call) and `authenticated` (Bearer plugin; for every protected
+  endpoint of the later slices). Both: JSON with `ignoreUnknownKeys`, timeouts (10 s connect,
+  30 s request/socket), base URL from `urlBaseApi()`. There is deliberately NO Ktor logging plugin.
+- Tokens (access, refresh, user id, email) live in `TokenStorage` (Multiplatform Settings).
+  `EstadoSesion` is the single "is there a session" flag, exposed as `AuthRepository.sesionActiva`;
+  it starts true when a refresh token is stored.
+- Bearer: `loadTokens` reads `TokenStorage`; on a 401, `refreshTokens` calls
+  `POST /api/auth/refresh` through the PLAIN client with the stored refresh token. That endpoint
+  returns only an `accessToken`, so the stored refresh token is KEPT. If refreshing fails for any
+  reason (including no network), the stored tokens are cleared and `sesionActiva` becomes false.
+  `sendWithoutRequest { true }` is Ktor 3.6's default and is kept explicit: Ktor only refreshes
+  for requests that already carried the token (`ApiClientRefreshTest` fails if that changes).
+- `AuthRepositoryImpl.logout()` revokes the refresh token on the backend (best effort) and
+  ALWAYS clears the local tokens and Ktor's cached Bearer tokens (`HttpClient.clearAuthTokens()`,
+  Ktor 3.4+), even if the network call fails. Login also clears that cache so a previous
+  user's token is never reused.
+- Registration returns no tokens: `registrar` registers and then logs in with the same
+  credentials.
+- Errors are the sealed `ErrorAuth` (domain): 401 credentials, 429 rate limited (with the
+  numeric `Retry-After` seconds if present), 400 validation (field -> message map; a plain
+  `{"error": ...}` body is kept under the key `error`), 409 email already registered, I/O or
+  timeout = server unreachable, anything else unexpected.
+- Navigation starts on Home if a session exists, else Login; when `sesionActiva` turns false it
+  returns to Login clearing the back stack.
 - KNOWN: Multiplatform Settings does NOT encrypt. Acceptable for this portfolio project;
   secure storage (Android Keystore, etc.) is a pending item.
-- KNOWN BACKEND BEHAVIOR TO CHECK: the backend's security config had no authentication entry
-  point, so protected endpoints answered 403 (not 401) to a missing or expired token. Ktor's
-  Bearer plugin refreshes on 401, so automatic refresh will NOT trigger on a 403. Preferred
-  fix is in the backend (return 401 for unauthenticated requests); alternatively handle 403
-  explicitly. Verify the real behavior before building the refresh flow.
+- 401 vs 403: the backend's `SecurityConfig` returns 401 for a missing, invalid or expired token
+  (`HttpStatusEntryPoint(UNAUTHORIZED)`), which is what triggers Ktor's refresh; there is no
+  need to handle 403. The body is empty and there is no `WWW-Authenticate` header on `main`; an
+  open backend PR adds a JSON `{"error": ...}` body and `WWW-Authenticate: Bearer`. The client
+  does not depend on either. This was read from the backend source; confirm it against the
+  running backend.
 - Never log passwords or tokens (Kermit prints whatever it is given).
 
 ## Money — DECISION PENDING
@@ -200,7 +232,11 @@ representation.
 ## Platform gotchas
 - Android blocks cleartext HTTP by default and the dev backend is `http://`. Allow cleartext
   ONLY for debug builds (network security config / `usesCleartextTraffic` limited to debug),
-  configured in `:androidApp`.
+  configured in `:androidApp`. Done: `androidApp/src/debug/` holds the manifest attribute and
+  `res/xml/network_security_config.xml` (cleartext only for `10.0.2.2` and `localhost`); the main
+  manifest only declares `INTERNET`. The merged release manifest was checked: no
+  `networkSecurityConfig` and no `usesCleartextTraffic`. A physical phone on a LAN IP would need
+  that IP added to the debug config.
 - Desktop needs `kotlinx-coroutines-swing` for `Dispatchers.Main`; if a ViewModel fails with
   "Module with the Main dispatcher is missing", that is the cause.
 - Desktop has no system back button: provide explicit back navigation in the UI.
@@ -218,21 +254,22 @@ representation.
 
 ## Current status
 Project generated from the Android Studio KMP template with the three modules above. The
-template package (`com.example.gestionfacturas_cliente`) is renamed to
-`com.fabio.gestionfacturas`. Base dependencies are added (Ktor 3.6.0, kotlinx-serialization-json
-1.11.0 + serialization plugin, Multiplatform Settings 1.3.0, kotlin-test, coroutines-swing) and the
-API contract is documented in `docs/api-contract.md`. No feature code is implemented yet.
-Next: the **login** vertical slice, in this order: DTOs/models -> Ktor client + per-platform
-base URL -> token storage -> auth repository -> LoginViewModel -> LoginScreen -> test against
-the running backend on Desktop.
+template package is renamed to `com.fabio.gestionfacturas`; the API contract is documented in
+`docs/api-contract.md`.
+The **login / registro vertical slice is DONE** (code, unit tests, builds): networking base,
+token storage, authentication with automatic refresh, session handling, Login and Registro
+screens (Spanish, Material 3, Desktop + Android) and a placeholder Home (email + Logout).
+Unit tests: `./gradlew :shared:jvmTest` (DTOs, repository and refresh flow with Ktor MockEngine,
+ViewModels with a fake repository). NOT yet done: running the app against the real backend
+(Desktop `./gradlew :desktopApp:run`; the owner does this manually, mind the login rate limit of
+10/min).
 Planned slice order after that: clientes -> gastos -> ingresos/cobros -> dashboard.
 
 ## Pending / deferred
 - Money representation (see above).
-- Navigation 3: check whether the Compose Multiplatform docs now recommend it for new
-  projects before wiring the first screen; navigation is isolated in `ui/navigation/` so a
-  switch stays contained.
-- Backend returning 401 vs 403 for unauthenticated requests (see Authentication).
+- Navigation Compose is on a release candidate (2.10.0-rc01): update to the stable 2.10.x when
+  it exists. Navigation 3 was checked and not adopted (see Tech stack); navigation is isolated
+  in `ui/navigation/` so a later switch stays contained.
 - Secure token storage.
 - Mobile layout adaptation (bottom navigation) after the desktop version works.
 - Invoice digitization upload: file picker on desktop, camera/gallery on Android (expect/actual).
