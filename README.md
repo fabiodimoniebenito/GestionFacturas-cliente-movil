@@ -40,6 +40,16 @@ iOS queda fuera del alcance por no disponer de Mac para compilarlo.
 | Logging | Kermit |
 | Build | Gradle (Kotlin DSL) |
 
+## Módulos de Gradle
+
+| Módulo | Contenido |
+|--------|-----------|
+| `:shared` | Todo el código compartido (datos, dominio, UI). El escritorio es el target `jvmMain` |
+| `:androidApp` | Punto de entrada de Android (actividad, manifiesto) |
+| `:desktopApp` | Punto de entrada de escritorio (función `main`, empaquetado) |
+
+Las dos apps son finas y solo llaman a `:shared`.
+
 ## Arquitectura
 
 **MVVM + Clean Architecture ligera.** Las dependencias apuntan hacia el dominio:
@@ -64,14 +74,17 @@ con menos ceremonia, porque el cliente no contiene lógica de negocio.
 
 ### Estructura de paquetes
 
+Paquete raíz `com.fabio.gestionfacturas`, dentro de `shared/src/commonMain/kotlin/`:
+
 ```
-commonMain/
 ├── data/      remote/ (Ktor, DTOs)  ·  local/ (token)  ·  repository/
 ├── domain/    model/  ·  repository/ (interfaces)  ·  usecase/ (solo si orquesta varias fuentes)
 ├── ui/        navigation/  ·  login/  clientes/  gastos/  ingresos/  dashboard/  ·  common/
 └── di/        módulos de Koin
-androidMain/ , desktopMain/    código específico de plataforma (expect/actual)
 ```
+
+El código específico de plataforma (expect/actual) va en `shared/src/androidMain` y
+`shared/src/jvmMain`.
 
 ## Decisiones de diseño
 
@@ -107,11 +120,14 @@ datos, pantalla) antes de empezar la siguiente.
 
 ```bash
 # Escritorio (el ciclo de desarrollo más rápido)
-./gradlew :composeApp:run
+./gradlew :desktopApp:run
+
+# Tests del código compartido
+./gradlew :shared:jvmTest
 ```
 
-El nombre del módulo puede variar según el asistente; `./gradlew projects` lista los
-módulos.
+Para Android, ejecuta la configuración de `androidApp` desde el IDE, con un emulador o un
+móvil con depuración USB.
 
 **URL del backend según plataforma:**
 
