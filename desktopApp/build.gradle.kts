@@ -17,11 +17,11 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.example.gestionfacturas_cliente.MainKt"
+        mainClass = "com.fabio.gestionfacturas.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.example.gestionfacturas_cliente"
+            packageName = "com.fabio.gestionfacturas"
             packageVersion = "1.0.0"
         }
     }

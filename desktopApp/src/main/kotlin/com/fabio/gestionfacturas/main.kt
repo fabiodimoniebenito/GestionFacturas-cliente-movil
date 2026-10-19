@@ -1,4 +1,4 @@
-package com.example.gestionfacturas_cliente
+package com.fabio.gestionfacturas
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application

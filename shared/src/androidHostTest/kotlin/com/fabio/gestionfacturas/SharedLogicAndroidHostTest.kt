@@ -1,9 +1,9 @@
-package com.example.gestionfacturas_cliente
+package com.fabio.gestionfacturas
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SharedLogicDesktopTest {
+class SharedLogicAndroidHostTest {
 
     @Test
     fun example() {
