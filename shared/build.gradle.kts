@@ -70,6 +70,11 @@ kotlin {
     }
 }
 
+compose.resources {
+    // Fixed so imports of the generated Res class do not depend on the project's group/name.
+    packageOfResClass = "com.fabio.gestionfacturas.resources"
+}
+
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
 }
