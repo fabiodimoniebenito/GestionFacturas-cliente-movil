@@ -53,9 +53,10 @@ class ApiClient(
                 refreshTokens {
                     refrescarAccessToken()
                 }
-                // This client only ever talks to our own API, so always send the token. Ktor only
-                // runs refreshTokens after a 401 for a request that already carried the token, and
-                // the backend's 401 has no WWW-Authenticate challenge to trigger it otherwise.
+                // Ktor only runs refreshTokens after a 401 for a request that already carried the
+                // token, so the token must be sent up front. That is Ktor 3.6's default; it is stated
+                // explicitly because the refresh flow silently breaks if it ever becomes false (the
+                // ApiClientRefreshTest tests fail in that case). This client only talks to our own API.
                 sendWithoutRequest { true }
             }
         }
