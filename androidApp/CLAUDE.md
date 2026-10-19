@@ -116,11 +116,20 @@ shared/src/androidMain , shared/src/jvmMain   platform-specific code only (expec
 Base URL differs per platform: Desktop `http://localhost:8080`; Android emulator
 `http://10.0.2.2:8080`; physical phone = the PC's LAN IP. Keep it configurable per platform.
 
-- Auth (public): `POST /api/auth/register`, `/login`, `/refresh`, `/logout`.
-- Protected (Bearer JWT): `/api/gastos` (+ `/{id}`, `POST /digitalizar` multipart),
-  `/api/ingresos` (+ `/{id}/cobro`, `/{id}/cobro/revertir`), `/api/clientes`,
+`docs/api-contract.md` is the source of truth for DTO shapes (audited from the backend's
+`/v3/api-docs`). Update it whenever the backend changes.
+
+- Auth (public by convention; the OpenAPI does not mark them): `POST /api/auth/register`
+  (returns the user, no tokens), `/login`, `/refresh` (returns only a new `accessToken`),
+  `/logout`. Also `GET /api/health`.
+- Protected (Bearer JWT): `/api/gastos` (GET list, POST; `GET /{id}`; `POST /digitalizar`
+  multipart, part `archivo`), `/api/ingresos` (GET list, POST; `GET /{id}`;
+  `POST /{id}/cobro` registers, `DELETE /{id}/cobro` reverts), `/api/clientes` (GET list,
+  POST; `GET|PUT|DELETE /{id}`, DELETE = deactivate), `/api/categorias` (GET list),
   `/api/dashboard/resumen?desde&hasta`, `/api/dashboard/rentabilidad-clientes?desde&hasta`,
   `/api/dashboard/pendientes-cobro`.
+- NOT in the API (as of the audit): edit/delete/review of gastos, edit of ingresos, a pending
+  filter on the ingresos list, setting a gasto's category. See the gaps table in the contract.
 - Tokens: access token ~15 min, refresh token ~7 days (revocable server-side).
 - Status codes: 400 validation/domain error, 401 bad credentials, 404 not found (also for
   another user's resource), 409 conflict (duplicate email/NIF, invalid cobro transition),
@@ -129,8 +138,9 @@ Base URL differs per platform: Desktop `http://localhost:8080`; Android emulator
   are a map of field -> message.
 - Rate limits: login 10/min per IP, register 5/hour per IP, everything else 50/min per user.
   Handle 429 with a friendly message; do not retry in a tight loop.
-- Do NOT guess DTO field names. Copy the exact request/response shapes from the backend's
-  Swagger UI (`/swagger-ui.html`). The login response changed when refresh tokens were added.
+- Do NOT guess DTO field names. Copy the exact request/response shapes from
+  `docs/api-contract.md` (or the backend's `/v3/api-docs` / Swagger UI if the file looks stale).
+  The login response changed when refresh tokens were added.
 
 ## Authentication on the client
 
@@ -188,10 +198,12 @@ representation.
 ## Current status
 Project generated from the Android Studio KMP template with the three modules above. The
 template package (`com.example.gestionfacturas_cliente`) is renamed to
-`com.fabio.gestionfacturas`. Nothing is implemented yet.
-Next: the **login** vertical slice, in this order: clean the template -> add dependencies ->
-DTOs/models -> Ktor client + per-platform base URL -> token storage -> auth repository ->
-LoginViewModel -> LoginScreen -> test against the running backend on Desktop.
+`com.fabio.gestionfacturas`. Base dependencies are added (Ktor 3.6.0, kotlinx-serialization-json
+1.11.0 + serialization plugin, Multiplatform Settings 1.3.0, kotlin-test, coroutines-swing) and the
+API contract is documented in `docs/api-contract.md`. No feature code is implemented yet.
+Next: the **login** vertical slice, in this order: DTOs/models -> Ktor client + per-platform
+base URL -> token storage -> auth repository -> LoginViewModel -> LoginScreen -> test against
+the running backend on Desktop.
 Planned slice order after that: clientes -> gastos -> ingresos/cobros -> dashboard.
 
 ## Pending / deferred

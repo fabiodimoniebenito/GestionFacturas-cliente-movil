@@ -103,6 +103,8 @@ común de Kotlin Multiplatform). Se resolverá al construir la parte de gastos.
 ## Estado actual
 
 - [x] Proyecto base generado (Android + Desktop)
+- [x] Dependencias base (Ktor, kotlinx.serialization, Multiplatform Settings)
+- [x] Contrato de la API documentado (`docs/api-contract.md`)
 - [ ] Login y registro
 - [ ] Clientes
 - [ ] Gastos
