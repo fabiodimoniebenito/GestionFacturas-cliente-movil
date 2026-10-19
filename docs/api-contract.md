@@ -204,7 +204,7 @@ responses (only `200`), no error schema, and no `Retry-After` header.
 | Status | Meaning (per `CLAUDE.md`) |
 |---|---|
 | 400 | Validation or domain error |
-| 401 | Bad credentials |
+| 401 | Bad credentials (login), or a missing / invalid / expired access token on a protected route |
 | 404 | Not found (also used for another user's resource) |
 | 409 | Conflict: duplicate email/NIF, invalid cobro transition |
 | 429 | Rate limited, with `Retry-After` |
@@ -212,8 +212,12 @@ responses (only `200`), no error schema, and no `Retry-After` header.
 - Error bodies are JSON. Domain errors use an `error` message field; validation errors are a map
   of field -> message.
 - Rate limits: login 10/min per IP, register 5/hour per IP, everything else 50/min per user.
-- Also per `CLAUDE.md` and unverified: protected endpoints may answer **403** instead of 401 for a
-  missing/expired token. This was not tested (the audit called no protected endpoint).
+- Correction: protected endpoints answer **401** (not 403) for a missing, invalid or expired token.
+  The earlier "may answer 403" note was wrong. Source: the backend's `SecurityConfig` registers
+  `HttpStatusEntryPoint(UNAUTHORIZED)`; this client's refresh flow relies on the 401. On backend
+  `main` that 401 has an empty body and no `WWW-Authenticate` header; an open backend PR adds a JSON
+  `{"error": ...}` body and `WWW-Authenticate: Bearer`. Read from the backend source and its own
+  tests, not yet re-checked by this client against the running backend.
 
 ## 5. Gaps vs planned screens
 
@@ -277,6 +281,6 @@ Other things noticed:
    real responses and encode defaults in the DTOs.
 8. **Document public endpoints** (`security: []` on `/api/auth/*` and `/api/health`) and error
    responses (400/401/404/409/429 with body schema) in the OpenAPI.
-9. **Verify 401 vs 403** for unauthenticated requests before building the refresh flow (not tested
-   in this audit).
+9. ~~Verify 401 vs 403 for unauthenticated requests~~ — resolved: 401 (see section 4). Still worth
+   confirming once against the running backend.
 10. Clientes: inactive clientes in the list and a reactivate action are undocumented.
