@@ -20,11 +20,11 @@ dependencies {
 }
 
 android {
-    namespace = "com.example.gestionfacturas_cliente"
+    namespace = "com.fabio.gestionfacturas"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.example.gestionfacturas_cliente"
+        applicationId = "com.fabio.gestionfacturas"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
