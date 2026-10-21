@@ -260,9 +260,10 @@ The **login / registro vertical slice is DONE** (code, unit tests, builds): netw
 token storage, authentication with automatic refresh, session handling, Login and Registro
 screens (Spanish, Material 3, Desktop + Android) and a placeholder Home (email + Logout).
 Unit tests: `./gradlew :shared:jvmTest` (DTOs, repository and refresh flow with Ktor MockEngine,
-ViewModels with a fake repository). NOT yet done: running the app against the real backend
-(Desktop `./gradlew :desktopApp:run`; the owner does this manually, mind the login rate limit of
-10/min).
+ViewModels with a fake repository). Desktop run against the real backend: login, registro,
+logout, session restore on restart and wrong credentials confirmed working by the owner
+(`./gradlew :desktopApp:run`; mind the login rate limit of 10/min). NOT yet verified against the
+real backend: backend down (server unreachable message) and the token refresh.
 Planned slice order after that: clientes -> gastos -> ingresos/cobros -> dashboard.
 
 ## Pending / deferred
