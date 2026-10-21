@@ -6,7 +6,9 @@ import com.fabio.gestionfacturas.data.local.TokenStorage
 import com.fabio.gestionfacturas.data.remote.ApiClient
 import com.fabio.gestionfacturas.data.remote.urlBaseApi
 import com.fabio.gestionfacturas.data.repository.AuthRepositoryImpl
+import com.fabio.gestionfacturas.data.repository.ClienteRepositoryImpl
 import com.fabio.gestionfacturas.domain.repository.AuthRepository
+import com.fabio.gestionfacturas.domain.repository.ClienteRepository
 import com.fabio.gestionfacturas.ui.home.HomeViewModel
 import com.fabio.gestionfacturas.ui.login.LoginViewModel
 import com.fabio.gestionfacturas.ui.login.RegistroViewModel
@@ -23,6 +25,7 @@ val moduloDatos = module {
     single { EstadoSesion(get<TokenStorage>().refreshToken() != null) }
     single { ApiClient(baseUrl = urlBaseApi(), tokenStorage = get(), estadoSesion = get()) }
     single<AuthRepository> { AuthRepositoryImpl(apiClient = get(), tokenStorage = get(), estadoSesion = get()) }
+    single<ClienteRepository> { ClienteRepositoryImpl(api = get<ApiClient>().clienteApi) }
 }
 
 val moduloUi = module {
