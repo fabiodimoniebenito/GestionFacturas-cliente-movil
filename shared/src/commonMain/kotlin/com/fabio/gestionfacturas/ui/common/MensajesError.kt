@@ -31,6 +31,8 @@ fun ErrorAuth.mensaje(): String {
         }
         is ErrorAuth.Validacion -> stringResource(Res.string.error_validacion)
         ErrorAuth.EmailYaRegistrado -> stringResource(Res.string.error_email_registrado)
+        // Placeholder until the clientes screens (part 2) get their own texts.
+        ErrorAuth.NoEncontrado, ErrorAuth.Conflicto -> stringResource(Res.string.error_inesperado)
         ErrorAuth.ServidorInaccesible -> stringResource(Res.string.error_sin_conexion)
         ErrorAuth.Inesperado -> stringResource(Res.string.error_inesperado)
     }

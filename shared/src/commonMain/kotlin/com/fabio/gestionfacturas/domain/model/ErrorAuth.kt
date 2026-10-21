@@ -19,6 +19,12 @@ sealed class ErrorAuth(message: String) : Exception(message) {
     /** 409: the email is already registered. */
     data object EmailYaRegistrado : ErrorAuth("Email ya registrado")
 
+    /** 404: the resource does not exist (the backend also answers 404 for another user's resource). */
+    data object NoEncontrado : ErrorAuth("No encontrado")
+
+    /** 409 on a protected resource, e.g. a cliente whose NIF already exists. */
+    data object Conflicto : ErrorAuth("Conflicto")
+
     /** The server could not be reached (no network, refused connection, timeout). */
     data object ServidorInaccesible : ErrorAuth("Servidor inaccesible")
 
