@@ -29,6 +29,11 @@
     <string name="error_validacion">Revisa los datos introducidos.</string>
     <string name="error_sin_conexion">No se pudo conectar con el servidor. Comprueba tu conexión.</string>
     <string name="error_inesperado">Ha ocurrido un error inesperado. Inténtalo de nuevo.</string>
+    <string name="error_no_encontrado">El elemento ya no existe.</string>
+    <string name="error_conflicto">La operación entra en conflicto con datos existentes.</string>
+
+    <!-- Estados comunes (carga, vacío, error) -->
+    <string name="estado_reintentar">Reintentar</string>
 
     <!-- Home (provisional) -->
     <string name="home_titulo">Sesión iniciada</string>
