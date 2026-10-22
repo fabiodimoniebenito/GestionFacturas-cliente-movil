@@ -62,6 +62,8 @@ class ApiClient(
         }
     }
 
+    val clienteApi: ClienteApi = ClienteApi(authenticated)
+
     /** Drops the access/refresh tokens Ktor's Bearer plugin has cached, so old credentials are not sent again. */
     fun limpiarTokensEnCache() {
         authenticated.clearAuthTokens()

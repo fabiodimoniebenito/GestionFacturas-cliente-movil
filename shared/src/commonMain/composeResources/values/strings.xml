@@ -29,9 +29,55 @@
     <string name="error_validacion">Revisa los datos introducidos.</string>
     <string name="error_sin_conexion">No se pudo conectar con el servidor. Comprueba tu conexión.</string>
     <string name="error_inesperado">Ha ocurrido un error inesperado. Inténtalo de nuevo.</string>
+    <string name="error_no_encontrado">El elemento ya no existe.</string>
+    <string name="error_conflicto">La operación entra en conflicto con datos existentes.</string>
 
-    <!-- Home (provisional) -->
-    <string name="home_titulo">Sesión iniciada</string>
-    <string name="home_sesion_de">Has iniciado sesión como %1$s</string>
-    <string name="home_cerrar_sesion">Cerrar sesión</string>
+    <!-- Estados comunes (carga, vacío, error) -->
+    <string name="estado_reintentar">Reintentar</string>
+
+    <!-- Común -->
+    <string name="comun_volver">Volver</string>
+
+    <!-- Menú lateral -->
+    <string name="menu_app_titulo">GestionFacturas</string>
+    <string name="menu_clientes">Clientes</string>
+    <string name="menu_gastos">Gastos</string>
+    <string name="menu_ingresos">Ingresos</string>
+    <string name="menu_dashboard">Dashboard</string>
+    <string name="menu_proximamente">próximamente</string>
+    <string name="menu_cerrar_sesion">Cerrar sesión</string>
+
+    <!-- Clientes -->
+    <string name="clientes_titulo">Clientes</string>
+    <string name="clientes_nuevo">Nuevo cliente</string>
+    <string name="clientes_actualizar">Actualizar</string>
+    <string name="clientes_editar">Editar</string>
+    <string name="clientes_desactivar">Desactivar</string>
+    <string name="clientes_cancelar">Cancelar</string>
+    <string name="clientes_inactivo">Inactivo</string>
+    <string name="clientes_nif">NIF</string>
+    <string name="clientes_email">Correo</string>
+    <string name="clientes_telefono">Teléfono</string>
+    <string name="clientes_sin_dato">—</string>
+    <string name="clientes_vacio">Todavía no tienes clientes.</string>
+    <string name="clientes_confirmar_desactivar_titulo">Desactivar cliente</string>
+    <string name="clientes_confirmar_desactivar_texto">¿Seguro que quieres desactivar a %1$s? Podrás seguir viendo sus datos, pero quedará marcado como inactivo.</string>
+    <string name="clientes_confirmar_desactivar">Desactivar</string>
+    <string name="clientes_ya_no_existe">Ese cliente ya no existe. Se ha actualizado la lista.</string>
+    <string name="clientes_desactivar_fallido">No se pudo desactivar el cliente.</string>
+    <string name="clientes_actualizar_fallido">No se pudo actualizar la lista.</string>
+    <string name="nuevo_cliente_titulo">Nuevo cliente</string>
+    <string name="editar_cliente_titulo">Editar cliente</string>
+
+    <!-- Formulario de cliente -->
+    <string name="cliente_form_nombre">Nombre *</string>
+    <string name="cliente_form_nif">NIF *</string>
+    <string name="cliente_form_email">Correo electrónico</string>
+    <string name="cliente_form_telefono">Teléfono</string>
+    <string name="cliente_form_nif_no_editable">El NIF no se puede modificar.</string>
+    <string name="cliente_form_guardar">Guardar</string>
+    <string name="cliente_form_cancelar">Cancelar</string>
+    <string name="cliente_form_error_nombre_vacio">Introduce el nombre del cliente</string>
+    <string name="cliente_form_error_nif_vacio">Introduce el NIF del cliente</string>
+    <string name="cliente_form_error_nif_duplicado">Ya existe un cliente con ese NIF. Puede ser un cliente desactivado: los clientes desactivados también cuentan y no se pueden reactivar.</string>
 </resources>

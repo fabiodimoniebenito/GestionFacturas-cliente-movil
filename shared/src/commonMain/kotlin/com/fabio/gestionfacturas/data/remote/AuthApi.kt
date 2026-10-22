@@ -13,16 +13,12 @@ import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
 import kotlinx.io.IOException
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * The auth endpoints under `/api/auth`. Always goes through the PLAIN client (no Bearer plugin): these
@@ -88,31 +84,5 @@ class AuthApi(private val client: HttpClient) {
             HttpStatusCode.BadRequest -> ErrorAuth.Validacion(camposDeError(respuesta))
             else -> ErrorAuth.Inesperado
         }
-    }
-
-    /** 400 bodies are a field -> message map (validation) or `{"error": "..."}` (domain rule). */
-    private suspend fun camposDeError(respuesta: HttpResponse): Map<String, String> {
-        val cuerpo = try {
-            respuesta.bodyAsText()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Throwable) {
-            return emptyMap()
-        }
-        val raiz = try {
-            Json.parseToJsonElement(cuerpo)
-        } catch (e: Exception) {
-            return emptyMap()
-        }
-        if (raiz !is JsonObject) {
-            return emptyMap()
-        }
-        val campos = mutableMapOf<String, String>()
-        for ((clave, valor) in raiz) {
-            if (valor is JsonPrimitive) {
-                campos[clave] = valor.content
-            }
-        }
-        return campos
     }
 }

@@ -132,9 +132,13 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   ├── repository/  repository interfaces
 │   └── usecase/     only for multi-source orchestration (e.g. LogoutUseCase)
 ├── ui/
-│   ├── navigation/  routes + navigation graph + app shell
-│   ├── login/ clientes/ gastos/ ingresos/ dashboard/   (Screen + ViewModel + UiState each)
-│   └── common/      shared composables and theme
+│   ├── navigation/  routes + outer graph (Login, Registro, Shell) + ShellScreen (sidebar + content
+│   │                area with its own nested NavHost) + ShellViewModel (email, logout)
+│   ├── login/ clientes/ gastos/ ingresos/ dashboard/   (Screen + ViewModel + UiState each;
+│   │                clientes/ has the list and the create/edit form)
+│   └── common/      shared composables: Estados (loading / empty / error + retry), BarraTitulo
+│                    (title + explicit Volver), Formulario (form container, fields, buttons),
+│                    MensajesError (the single place that maps errors to texts)
 └── di/              Koin modules
 shared/src/androidMain , shared/src/jvmMain   platform-specific code only (expect/actual):
                      base URL, Settings factory, file picker later
@@ -200,8 +204,8 @@ Implemented flow (all in `data/`):
   numeric `Retry-After` seconds if present), 400 validation (field -> message map; a plain
   `{"error": ...}` body is kept under the key `error`), 409 email already registered, I/O or
   timeout = server unreachable, anything else unexpected.
-- Navigation starts on Home if a session exists, else Login; when `sesionActiva` turns false it
-  returns to Login clearing the back stack.
+- Navigation starts on the Shell (sidebar + content area) if a session exists, else Login; when
+  `sesionActiva` turns false it returns to Login clearing the back stack, from any screen.
 - KNOWN: Multiplatform Settings does NOT encrypt. Acceptable for this portfolio project;
   secure storage (Android Keystore, etc.) is a pending item.
 - 401 vs 403: the backend's `SecurityConfig` returns 401 for a missing, invalid or expired token
@@ -258,15 +262,26 @@ template package is renamed to `com.fabio.gestionfacturas`; the API contract is 
 `docs/api-contract.md`.
 The **login / registro vertical slice is DONE** (code, unit tests, builds): networking base,
 token storage, authentication with automatic refresh, session handling, Login and Registro
-screens (Spanish, Material 3, Desktop + Android) and a placeholder Home (email + Logout).
+screens (Spanish, Material 3, Desktop + Android).
 Unit tests: `./gradlew :shared:jvmTest` (DTOs, repository and refresh flow with Ktor MockEngine,
 ViewModels with a fake repository). Desktop run against the real backend: login, registro,
 logout, session restore on restart and wrong credentials confirmed working by the owner
 (`./gradlew :desktopApp:run`; mind the login rate limit of 10/min). NOT yet verified against the
 real backend: backend down (server unreachable message) and the token refresh.
-Planned slice order after that: clientes -> gastos -> ingresos/cobros -> dashboard.
+The **clientes vertical slice is DONE** (code, unit tests, builds; not yet run against the real
+backend): domain, data, the logged-in shell (sidebar with Clientes and disabled Gastos / Ingresos /
+Dashboard placeholders, email and logout), the list (loading / empty / error / content, refresh,
+deactivate with confirmation), and one create/edit form (NIF editable only on create; required
+fields checked on the client, everything else shown per field from the backend's 400 map; 404 on
+edit returns to the list with a message). The list also shows deactivated clientes (tagged
+"Inactivo"). Unit tests cover the list and form ViewModels with a fake repository.
+Planned slice order after that: gastos -> ingresos/cobros -> dashboard.
 
 ## Pending / deferred
+- KNOWN ISSUE (clientes): creating a cliente whose NIF already exists returns 409, and the backend
+  counts deactivated clientes too. There is no reactivate endpoint, so a deactivated cliente's NIF
+  cannot be reused or recovered from the client. The form says so on a 409; the real fix needs a
+  backend change (reactivate endpoint or excluding deactivated clientes from the NIF check).
 - Money representation (see above).
 - Navigation Compose is on a release candidate (2.10.0-rc01): update to the stable 2.10.x when
   it exists. Navigation 3 was checked and not adopted (see Tech stack); navigation is isolated

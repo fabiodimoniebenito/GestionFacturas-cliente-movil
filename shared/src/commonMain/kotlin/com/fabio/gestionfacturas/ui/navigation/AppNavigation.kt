@@ -11,14 +11,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fabio.gestionfacturas.domain.repository.AuthRepository
-import com.fabio.gestionfacturas.ui.home.HomeScreen
 import com.fabio.gestionfacturas.ui.login.LoginScreen
 import com.fabio.gestionfacturas.ui.login.RegistroScreen
 import org.koin.compose.koinInject
 
 /**
- * App shell. Starts on Home when a session exists, otherwise on Login, and returns to Login
- * (clearing the back stack) whenever the session ends: logout, or a failed token refresh.
+ * App shell. Starts on the logged-in shell when a session exists, otherwise on Login, and returns
+ * to Login (clearing the back stack) whenever the session ends: logout, or a failed token refresh.
  */
 @Composable
 fun AppNavigation(
@@ -29,15 +28,16 @@ fun AppNavigation(
 
     val destinoInicial: Any = remember {
         if (authRepository.sesionActiva.value) {
-            RutaHome
+            RutaShell
         } else {
             RutaLogin
         }
     }
 
     LaunchedEffect(sesionActiva) {
-        val enHome = navController.currentDestination?.hasRoute<RutaHome>() == true
-        if (!sesionActiva && enHome) {
+        val destino = navController.currentDestination
+        val enPantallaPublica = destino?.hasRoute<RutaLogin>() == true || destino?.hasRoute<RutaRegistro>() == true
+        if (!sesionActiva && !enPantallaPublica) {
             navController.navigate(RutaLogin) {
                 popUpTo(navController.graph.id) { inclusive = true }
             }
@@ -47,24 +47,24 @@ fun AppNavigation(
     NavHost(navController = navController, startDestination = destinoInicial) {
         composable<RutaLogin> {
             LoginScreen(
-                alIniciarSesion = { navController.irAHomeLimpiandoPila() },
+                alIniciarSesion = { navController.irAlShellLimpiandoPila() },
                 alIrARegistro = { navController.navigate(RutaRegistro) },
             )
         }
         composable<RutaRegistro> {
             RegistroScreen(
-                alRegistrarse = { navController.irAHomeLimpiandoPila() },
+                alRegistrarse = { navController.irAlShellLimpiandoPila() },
                 alVolver = { navController.popBackStack() },
             )
         }
-        composable<RutaHome> {
-            HomeScreen()
+        composable<RutaShell> {
+            ShellScreen()
         }
     }
 }
 
-private fun NavHostController.irAHomeLimpiandoPila() {
-    navigate(RutaHome) {
+private fun NavHostController.irAlShellLimpiandoPila() {
+    navigate(RutaShell) {
         popUpTo(graph.id) { inclusive = true }
     }
 }

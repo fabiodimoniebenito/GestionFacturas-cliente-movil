@@ -1,7 +1,8 @@
 # GestionFacturas — Cliente (Android + Desktop)
 
 > **Proyecto en desarrollo.** Ya están hechos el login y el registro (con renovación
-> automática del token); el resto de áreas (clientes, gastos, ingresos, dashboard) aún no.
+> automática del token) y la gestión de clientes; el resto de áreas (gastos, ingresos,
+> dashboard) aún no.
 > Este README describe el diseño acordado y evoluciona con el código.
 
 Cliente de **GestionFacturas**, una aplicación para que **freelances y autónomos** lleven
@@ -109,7 +110,8 @@ común de Kotlin Multiplatform). Se resolverá al construir la parte de gastos.
 - [x] Contrato de la API documentado (`docs/api-contract.md`)
 - [x] Login y registro (red, almacenamiento de tokens, renovación automática, sesión,
   pantallas y tests unitarios). Pendiente de probar a mano contra el backend real.
-- [ ] Clientes
+- [x] Clientes (estructura con menú lateral, listado, alta, edición y desactivación). Pendiente
+  de probar a mano contra el backend real.
 - [ ] Gastos
 - [ ] Ingresos y cobros
 - [ ] Dashboard (resumen, rentabilidad por cliente, pendientes de cobro)
@@ -117,6 +119,11 @@ común de Kotlin Multiplatform). Se resolverá al construir la parte de gastos.
 
 Se construye por **rebanadas verticales**: cada área se completa de punta a punta (red,
 datos, pantalla) antes de empezar la siguiente.
+
+**Limitación conocida (clientes):** si se crea un cliente con un NIF que ya existe, el backend
+responde con un conflicto (409), y esto incluye a los clientes desactivados. Como el backend no
+tiene un endpoint para reactivar clientes, el NIF de un cliente desactivado no se puede volver a
+usar desde la aplicación. El formulario lo avisa; la solución real requiere un cambio en el backend.
 
 ## Cómo arrancar (desarrollo)
 
