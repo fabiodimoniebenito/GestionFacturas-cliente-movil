@@ -69,6 +69,14 @@ class ClientesViewModel(
         }
     }
 
+    /** The create/edit form closed: reload after a save, or explain that the cliente is gone. */
+    fun onVolverDelFormulario(resultado: ResultadoFormulario) {
+        if (resultado == ResultadoFormulario.NO_ENCONTRADO) {
+            _uiState.update { it.copy(mensaje = MensajeClientes.YaNoExiste) }
+        }
+        onRefrescar()
+    }
+
     fun onMensajeConsumido() {
         _uiState.update { it.copy(mensaje = null) }
     }

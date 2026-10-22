@@ -253,6 +253,43 @@ class ClientesViewModelTest {
     }
 
     @Test
+    fun alVolverDelFormularioGuardadoRecargaLaLista() {
+        repositorio.resultadoListar = Result.success(listOf(ana))
+        val viewModel = crearViewModel()
+        repositorio.resultadoListar = Result.success(listOf(ana, luis))
+
+        viewModel.onVolverDelFormulario(ResultadoFormulario.GUARDADO)
+
+        assertEquals(CargaClientes.Contenido(listOf(ana, luis)), viewModel.uiState.value.carga)
+        assertNull(viewModel.uiState.value.mensaje)
+        assertEquals(2, repositorio.llamadasListar)
+    }
+
+    @Test
+    fun alVolverDelFormularioConUnClienteQueNoExisteAvisaYRecarga() {
+        repositorio.resultadoListar = Result.success(listOf(ana, luis))
+        val viewModel = crearViewModel()
+        repositorio.resultadoListar = Result.success(listOf(luis))
+
+        viewModel.onVolverDelFormulario(ResultadoFormulario.NO_ENCONTRADO)
+
+        assertEquals(MensajeClientes.YaNoExiste, viewModel.uiState.value.mensaje)
+        assertEquals(CargaClientes.Contenido(listOf(luis)), viewModel.uiState.value.carga)
+        assertEquals(2, repositorio.llamadasListar)
+    }
+
+    @Test
+    fun alVolverDelFormularioMientrasCargaMantieneElMensajeSinSegundaLlamada() {
+        repositorio.puertaListar = CompletableDeferred()
+        val viewModel = crearViewModel()
+
+        viewModel.onVolverDelFormulario(ResultadoFormulario.NO_ENCONTRADO)
+
+        assertEquals(MensajeClientes.YaNoExiste, viewModel.uiState.value.mensaje)
+        assertEquals(1, repositorio.llamadasListar)
+    }
+
+    @Test
     fun elMensajeSeLimpiaAlConsumirlo() {
         repositorio.resultadoListar = Result.success(listOf(ana))
         val viewModel = crearViewModel()
