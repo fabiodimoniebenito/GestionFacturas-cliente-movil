@@ -1,4 +1,4 @@
-package com.fabio.gestionfacturas.ui.home
+package com.fabio.gestionfacturas.ui.navigation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HomeViewModel(
+class ShellViewModel(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState(email = authRepository.sesionActual()?.email.orEmpty()))
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(ShellUiState(email = authRepository.sesionActual()?.email.orEmpty()))
+    val uiState: StateFlow<ShellUiState> = _uiState.asStateFlow()
 
     /** Clears the session; the navigation reacts to `sesionActiva` turning false. */
     fun onCerrarSesion() {

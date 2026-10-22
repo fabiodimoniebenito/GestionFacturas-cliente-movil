@@ -1,4 +1,4 @@
-package com.fabio.gestionfacturas.ui.home
+package com.fabio.gestionfacturas.ui.navigation
 
 import com.fabio.gestionfacturas.domain.model.Sesion
 import com.fabio.gestionfacturas.testutil.FakeAuthRepository
@@ -16,7 +16,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class HomeViewModelTest {
+class ShellViewModelTest {
 
     private val repositorio = FakeAuthRepository()
 
@@ -34,7 +34,7 @@ class HomeViewModelTest {
     fun muestraElEmailDeLaSesionGuardada() {
         repositorio.sesion = Sesion(7L, "ana@example.com")
 
-        val viewModel = HomeViewModel(repositorio)
+        val viewModel = ShellViewModel(repositorio)
 
         assertEquals("ana@example.com", viewModel.uiState.value.email)
     }
@@ -43,7 +43,7 @@ class HomeViewModelTest {
     fun cerrarSesionLlamaAlLogoutDelRepositorioYVuelveAEstarInactivo() {
         val puerta = CompletableDeferred<Unit>()
         repositorio.puerta = puerta
-        val viewModel = HomeViewModel(repositorio)
+        val viewModel = ShellViewModel(repositorio)
 
         viewModel.onCerrarSesion()
 
@@ -58,7 +58,7 @@ class HomeViewModelTest {
     @Test
     fun pulsarDosVecesCerrarSesionSoloLlamaUnaVez() {
         repositorio.puerta = CompletableDeferred()
-        val viewModel = HomeViewModel(repositorio)
+        val viewModel = ShellViewModel(repositorio)
 
         viewModel.onCerrarSesion()
         viewModel.onCerrarSesion()

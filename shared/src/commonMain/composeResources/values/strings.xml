@@ -35,8 +35,21 @@
     <!-- Estados comunes (carga, vacío, error) -->
     <string name="estado_reintentar">Reintentar</string>
 
-    <!-- Home (provisional) -->
-    <string name="home_titulo">Sesión iniciada</string>
-    <string name="home_sesion_de">Has iniciado sesión como %1$s</string>
-    <string name="home_cerrar_sesion">Cerrar sesión</string>
+    <!-- Común -->
+    <string name="comun_volver">Volver</string>
+
+    <!-- Menú lateral -->
+    <string name="menu_app_titulo">GestionFacturas</string>
+    <string name="menu_clientes">Clientes</string>
+    <string name="menu_gastos">Gastos</string>
+    <string name="menu_ingresos">Ingresos</string>
+    <string name="menu_dashboard">Dashboard</string>
+    <string name="menu_proximamente">próximamente</string>
+    <string name="menu_cerrar_sesion">Cerrar sesión</string>
+
+    <!-- Clientes (provisional hasta la lista y los formularios) -->
+    <string name="clientes_titulo">Clientes</string>
+    <string name="nuevo_cliente_titulo">Nuevo cliente</string>
+    <string name="editar_cliente_titulo">Editar cliente</string>
+    <string name="pendiente_parte_3">Este formulario todavía no está disponible.</string>
 </resources>
