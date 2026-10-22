@@ -9,6 +9,7 @@ import com.fabio.gestionfacturas.data.repository.AuthRepositoryImpl
 import com.fabio.gestionfacturas.data.repository.ClienteRepositoryImpl
 import com.fabio.gestionfacturas.domain.repository.AuthRepository
 import com.fabio.gestionfacturas.domain.repository.ClienteRepository
+import com.fabio.gestionfacturas.ui.clientes.ClienteFormViewModel
 import com.fabio.gestionfacturas.ui.clientes.ClientesViewModel
 import com.fabio.gestionfacturas.ui.login.LoginViewModel
 import com.fabio.gestionfacturas.ui.login.RegistroViewModel
@@ -34,6 +35,7 @@ val moduloUi = module {
     viewModel { RegistroViewModel(get()) }
     viewModel { ShellViewModel(get()) }
     viewModel { ClientesViewModel(get()) }
+    viewModel { parametros -> ClienteFormViewModel(parametros.getOrNull<Long>(), get()) }
 }
 
 /** Starts Koin once; calling it again (e.g. Android activity recreation) is a no-op. */

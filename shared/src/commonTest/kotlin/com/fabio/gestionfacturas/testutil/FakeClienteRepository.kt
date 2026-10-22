@@ -18,8 +18,18 @@ class FakeClienteRepository : ClienteRepository {
     var puertaListar: CompletableDeferred<Unit>? = null
     var puertaDesactivar: CompletableDeferred<Unit>? = null
 
+    var resultadoObtener: Result<Cliente> = Result.failure(ErrorAuth.Inesperado)
+    var resultadoCrear: Result<Cliente> = Result.failure(ErrorAuth.Inesperado)
+    var resultadoEditar: Result<Cliente> = Result.failure(ErrorAuth.Inesperado)
+    var puertaObtener: CompletableDeferred<Unit>? = null
+    /** Gates both [crear] and [editar]. */
+    var puertaGuardar: CompletableDeferred<Unit>? = null
+
     var llamadasListar = 0
     val desactivados = mutableListOf<Long>()
+    val obtenidos = mutableListOf<Long>()
+    val creados = mutableListOf<NuevoCliente>()
+    val editados = mutableListOf<Pair<Long, DatosCliente>>()
 
     override suspend fun listar(): Result<List<Cliente>> {
         llamadasListar++
@@ -33,11 +43,21 @@ class FakeClienteRepository : ClienteRepository {
         return resultadoDesactivar
     }
 
-    // Not used by the list screen.
-    override suspend fun obtener(id: Long): Result<Cliente> = Result.failure(ErrorAuth.Inesperado)
+    override suspend fun obtener(id: Long): Result<Cliente> {
+        obtenidos.add(id)
+        puertaObtener?.await()
+        return resultadoObtener
+    }
 
-    override suspend fun crear(nuevo: NuevoCliente): Result<Cliente> = Result.failure(ErrorAuth.Inesperado)
+    override suspend fun crear(nuevo: NuevoCliente): Result<Cliente> {
+        creados.add(nuevo)
+        puertaGuardar?.await()
+        return resultadoCrear
+    }
 
-    override suspend fun editar(id: Long, datos: DatosCliente): Result<Cliente> =
-        Result.failure(ErrorAuth.Inesperado)
+    override suspend fun editar(id: Long, datos: DatosCliente): Result<Cliente> {
+        editados.add(id to datos)
+        puertaGuardar?.await()
+        return resultadoEditar
+    }
 }
