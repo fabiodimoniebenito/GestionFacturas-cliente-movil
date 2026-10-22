@@ -27,7 +27,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.fabio.gestionfacturas.resources.Res
-import com.fabio.gestionfacturas.resources.clientes_titulo
 import com.fabio.gestionfacturas.resources.editar_cliente_titulo
 import com.fabio.gestionfacturas.resources.menu_app_titulo
 import com.fabio.gestionfacturas.resources.menu_cerrar_sesion
@@ -39,6 +38,7 @@ import com.fabio.gestionfacturas.resources.menu_proximamente
 import com.fabio.gestionfacturas.resources.nuevo_cliente_titulo
 import com.fabio.gestionfacturas.resources.pendiente_parte_3
 import com.fabio.gestionfacturas.ui.common.BarraTitulo
+import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.common.BotonPrincipal
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -118,10 +118,9 @@ private fun ElementoPendiente(nombre: String) {
 private fun ContenidoShell(navController: NavHostController) {
     NavHost(navController = navController, startDestination = RutaClientes) {
         composable<RutaClientes> {
-            // Replaced by ClientesScreen in a later commit.
-            PantallaProvisional(
-                titulo = stringResource(Res.string.clientes_titulo),
-                alVolver = null,
+            ClientesScreen(
+                alNuevo = { navController.navigate(RutaNuevoCliente) },
+                alEditar = { id -> navController.navigate(RutaEditarCliente(id)) },
             )
         }
         composable<RutaNuevoCliente> {

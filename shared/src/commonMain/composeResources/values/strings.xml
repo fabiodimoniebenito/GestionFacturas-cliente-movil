@@ -47,8 +47,25 @@
     <string name="menu_proximamente">próximamente</string>
     <string name="menu_cerrar_sesion">Cerrar sesión</string>
 
-    <!-- Clientes (provisional hasta la lista y los formularios) -->
+    <!-- Clientes -->
     <string name="clientes_titulo">Clientes</string>
+    <string name="clientes_nuevo">Nuevo cliente</string>
+    <string name="clientes_actualizar">Actualizar</string>
+    <string name="clientes_editar">Editar</string>
+    <string name="clientes_desactivar">Desactivar</string>
+    <string name="clientes_cancelar">Cancelar</string>
+    <string name="clientes_inactivo">Inactivo</string>
+    <string name="clientes_nif">NIF</string>
+    <string name="clientes_email">Correo</string>
+    <string name="clientes_telefono">Teléfono</string>
+    <string name="clientes_sin_dato">—</string>
+    <string name="clientes_vacio">Todavía no tienes clientes.</string>
+    <string name="clientes_confirmar_desactivar_titulo">Desactivar cliente</string>
+    <string name="clientes_confirmar_desactivar_texto">¿Seguro que quieres desactivar a %1$s? Podrás seguir viendo sus datos, pero quedará marcado como inactivo.</string>
+    <string name="clientes_confirmar_desactivar">Desactivar</string>
+    <string name="clientes_ya_no_existe">Ese cliente ya no existe. Se ha actualizado la lista.</string>
+    <string name="clientes_desactivar_fallido">No se pudo desactivar el cliente.</string>
+    <string name="clientes_actualizar_fallido">No se pudo actualizar la lista.</string>
     <string name="nuevo_cliente_titulo">Nuevo cliente</string>
     <string name="editar_cliente_titulo">Editar cliente</string>
     <string name="pendiente_parte_3">Este formulario todavía no está disponible.</string>
