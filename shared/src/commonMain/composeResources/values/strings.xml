@@ -68,5 +68,16 @@
     <string name="clientes_actualizar_fallido">No se pudo actualizar la lista.</string>
     <string name="nuevo_cliente_titulo">Nuevo cliente</string>
     <string name="editar_cliente_titulo">Editar cliente</string>
-    <string name="pendiente_parte_3">Este formulario todavía no está disponible.</string>
+
+    <!-- Formulario de cliente -->
+    <string name="cliente_form_nombre">Nombre *</string>
+    <string name="cliente_form_nif">NIF *</string>
+    <string name="cliente_form_email">Correo electrónico</string>
+    <string name="cliente_form_telefono">Teléfono</string>
+    <string name="cliente_form_nif_no_editable">El NIF no se puede modificar.</string>
+    <string name="cliente_form_guardar">Guardar</string>
+    <string name="cliente_form_cancelar">Cancelar</string>
+    <string name="cliente_form_error_nombre_vacio">Introduce el nombre del cliente</string>
+    <string name="cliente_form_error_nif_vacio">Introduce el NIF del cliente</string>
+    <string name="cliente_form_error_nif_duplicado">Ya existe un cliente con ese NIF. Puede ser un cliente desactivado: los clientes desactivados también cuentan y no se pueden reactivar.</string>
 </resources>

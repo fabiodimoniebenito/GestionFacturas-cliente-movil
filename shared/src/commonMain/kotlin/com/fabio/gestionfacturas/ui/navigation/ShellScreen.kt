@@ -27,7 +27,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.fabio.gestionfacturas.resources.Res
-import com.fabio.gestionfacturas.resources.editar_cliente_titulo
 import com.fabio.gestionfacturas.resources.menu_app_titulo
 import com.fabio.gestionfacturas.resources.menu_cerrar_sesion
 import com.fabio.gestionfacturas.resources.menu_clientes
@@ -35,10 +34,9 @@ import com.fabio.gestionfacturas.resources.menu_dashboard
 import com.fabio.gestionfacturas.resources.menu_gastos
 import com.fabio.gestionfacturas.resources.menu_ingresos
 import com.fabio.gestionfacturas.resources.menu_proximamente
-import com.fabio.gestionfacturas.resources.nuevo_cliente_titulo
-import com.fabio.gestionfacturas.resources.pendiente_parte_3
-import com.fabio.gestionfacturas.ui.common.BarraTitulo
+import com.fabio.gestionfacturas.ui.clientes.ClienteFormScreen
 import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
+import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.BotonPrincipal
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -114,39 +112,42 @@ private fun ElementoPendiente(nombre: String) {
     )
 }
 
+/** Key under which the form leaves its result for the list (read once, then cleared). */
+private const val CLAVE_RESULTADO_FORMULARIO = "resultadoFormulario"
+
 @Composable
 private fun ContenidoShell(navController: NavHostController) {
+    val terminarFormulario: (ResultadoFormulario) -> Unit = { resultado ->
+        navController.previousBackStackEntry?.savedStateHandle?.set(CLAVE_RESULTADO_FORMULARIO, resultado.name)
+        navController.popBackStack()
+    }
+
     NavHost(navController = navController, startDestination = RutaClientes) {
-        composable<RutaClientes> {
+        composable<RutaClientes> { entrada ->
+            val resultado by entrada.savedStateHandle
+                .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
+                .collectAsStateWithLifecycle()
             ClientesScreen(
                 alNuevo = { navController.navigate(RutaNuevoCliente) },
                 alEditar = { id -> navController.navigate(RutaEditarCliente(id)) },
+                resultadoFormulario = resultado?.let { ResultadoFormulario.valueOf(it) },
+                alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
             )
         }
         composable<RutaNuevoCliente> {
-            PantallaProvisional(
-                titulo = stringResource(Res.string.nuevo_cliente_titulo),
+            ClienteFormScreen(
+                idCliente = null,
                 alVolver = { navController.popBackStack() },
+                alTerminar = terminarFormulario,
             )
         }
         composable<RutaEditarCliente> { entrada ->
             val ruta = entrada.toRoute<RutaEditarCliente>()
-            PantallaProvisional(
-                titulo = stringResource(Res.string.editar_cliente_titulo) + " #" + ruta.id,
+            ClienteFormScreen(
+                idCliente = ruta.id,
                 alVolver = { navController.popBackStack() },
+                alTerminar = terminarFormulario,
             )
         }
-    }
-}
-
-/** Stub for screens that a later part implements. */
-@Composable
-private fun PantallaProvisional(titulo: String, alVolver: (() -> Unit)?) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        BarraTitulo(titulo = titulo, alVolver = alVolver)
-        Text(stringResource(Res.string.pendiente_parte_3))
     }
 }

@@ -64,9 +64,19 @@ private val AnchoMaximo = 900.dp
 fun ClientesScreen(
     alNuevo: () -> Unit,
     alEditar: (Long) -> Unit,
+    resultadoFormulario: ResultadoFormulario? = null,
+    alConsumirResultadoFormulario: () -> Unit = {},
     viewModel: ClientesViewModel = koinViewModel(),
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // The form left a result for this screen: act on it once, then clear it.
+    LaunchedEffect(resultadoFormulario) {
+        if (resultadoFormulario != null) {
+            viewModel.onVolverDelFormulario(resultadoFormulario)
+            alConsumirResultadoFormulario()
+        }
+    }
 
     ClientesContent(
         estado = estado,
