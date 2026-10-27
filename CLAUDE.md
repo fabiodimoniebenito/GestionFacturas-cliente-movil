@@ -164,8 +164,10 @@ It lives in `expect fun urlBaseApi()` (`data/remote/UrlBase.kt`), with the actua
   POST; `GET|PUT|DELETE /{id}`, DELETE = deactivate), `/api/categorias` (GET list),
   `/api/dashboard/resumen?desde&hasta`, `/api/dashboard/rentabilidad-clientes?desde&hasta`,
   `/api/dashboard/pendientes-cobro`.
-- NOT in the API (as of the audit): edit/delete/review of gastos, edit of ingresos, a pending
-  filter on the ingresos list, setting a gasto's category. See the gaps table in the contract.
+- Gastos also have `PUT /{id}` (edit; the only way to set a gasto's category and `deducible`) and
+  `POST /{id}/revisar`.
+- NOT in the API (as of the 2026-10-27 audit): delete of gastos, edit of ingresos, a pending
+  filter on the ingresos list, category on gasto creation. See the gaps table in the contract.
 - Tokens: access token ~15 min, refresh token ~7 days (revocable server-side).
 - Status codes: 400 validation/domain error, 401 bad credentials, 404 not found (also for
   another user's resource), 409 conflict (duplicate email/NIF, invalid cobro transition),
