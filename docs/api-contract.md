@@ -1,9 +1,53 @@
 # API contract
 
 Source: `GET http://localhost:8080/v3/api-docs` (OpenAPI 3.1.0, `info.version` = `v0`), fetched
-2026-10-19. Field names and types below are copied from that document. This file is the source
-of truth for DTO shapes in this client and **must be updated whenever the backend changes**.
-The backend lives in another repository (`GestionFacturas-api`); this client only documents it.
+2026-10-27 (previous audit: 2026-10-19). Field names and types below are copied from that
+document. This file is the source of truth for DTO shapes in this client and **must be updated
+whenever the backend changes**. The backend lives in another repository (`GestionFacturas-api`);
+this client only documents it.
+
+## Changes since last audit (2026-10-19 -> 2026-10-27)
+
+26 operations (was 24), 22 schemas (was 21). Compared against the schema, field by field.
+
+**Added endpoints**
+
+| Method | Path | operationId | Request | Response (200) |
+|---|---|---|---|---|
+| PUT | `/api/gastos/{id}` | `editar` | `EditarGastoRequest` (body required), path `id` int64 | `GastoResponse` |
+| POST | `/api/gastos/{id}/revisar` | `revisar` | no body, path `id` int64 | `GastoResponse` |
+
+**Removed endpoints:** none.
+
+**Added schema:** `EditarGastoRequest` — required: `total`.
+
+| Field | Type | Constraints |
+|---|---|---|
+| emisor | string | optional |
+| fechaEmision | string, format `date` | optional |
+| baseImponible | number (no format) | minimum 0, optional |
+| iva | number (no format) | minimum 0, optional |
+| total | number (no format) | minimum 0, **required** |
+| moneda | string | optional |
+| clienteId | integer int64 | optional |
+| categoriaId | integer int64 | optional (not in `CrearGastoRequest`) |
+| deducible | boolean | optional (not in `CrearGastoRequest`) |
+
+**Changed enum values** (both were plain `string` without enum before):
+
+| Field | Now declared as |
+|---|---|
+| `GastoResponse.estado` | `string`, enum `BORRADOR`, `PROCESADA`, `REVISADA`, `EXPORTADA` |
+| `IngresoResponse.estadoCobro` | `string`, enum `PENDIENTE`, `COBRADA` |
+
+**Changed fields (name / type / nullability) on existing schemas:** none. All other request and
+response schemas are identical to the previous audit. Still true: no `required` list on any
+response schema, no `nullable`, only `200` documented, `GastoResponse` has no `total`, no
+`security: []` override on any operation.
+
+**Not in the schema, observed on the running backend (2026-10-27):** unauthenticated and
+invalid-token requests to protected GETs return `401` with header `WWW-Authenticate: Bearer` and
+JSON body `{"error":"No autenticado. Inicia sesión de nuevo."}` (see section 4).
 
 ## Conventions seen in the document
 
@@ -18,7 +62,9 @@ The backend lives in another repository (`GestionFacturas-api`); this client onl
 - No list endpoint declares pagination, sorting or filter parameters.
 - `int64` ids are JSON integers. Dates are `string` / `format: date` (`yyyy-MM-dd`); timestamps are
   `string` / `format: date-time`.
-- Enumerations are not declared: `estadoCobro` and `estado` are plain `string`.
+- Only two enumerations are declared, both on responses: `GastoResponse.estado` and
+  `IngresoResponse.estadoCobro` (`string` with `enum`, values in "Changes since last audit"). The
+  schema does not say which transitions are allowed.
 
 ## 1. Endpoints
 
@@ -39,6 +85,8 @@ Auth legend: **P\*** = public per backend convention (not verified from the Open
 | GET | `/api/gastos` | B | – | – | `GastoResponse[]` |
 | POST | `/api/gastos` | B | `CrearGastoRequest` | – | `GastoResponse` |
 | GET | `/api/gastos/{id}` | B | – | path `id` int64 | `GastoResponse` |
+| PUT | `/api/gastos/{id}` (operationId `editar`) | B | `EditarGastoRequest` | path `id` int64 | `GastoResponse` |
+| POST | `/api/gastos/{id}/revisar` (operationId `revisar`) | B | – | path `id` int64 | `GastoResponse` |
 | POST | `/api/gastos/digitalizar` | B | multipart: `archivo` (binary, required) | – | `GastoResponse` |
 | GET | `/api/ingresos` | B | – | – | `IngresoResponse[]` |
 | POST | `/api/ingresos` | B | `CrearIngresoRequest` | – | `IngresoResponse` |
@@ -50,8 +98,8 @@ Auth legend: **P\*** = public per backend convention (not verified from the Open
 | GET | `/api/dashboard/rentabilidad-clientes` | B | – | `desde` date (required), `hasta` date (required) | `RentabilidadClienteResponse[]` |
 | GET | `/api/dashboard/pendientes-cobro` | B | – | – | `PendientesCobroResponse` |
 
-There are no other paths. In particular there is no `PUT`/`DELETE` on `/api/gastos/{id}`, no
-`PUT`/`DELETE` on `/api/ingresos/{id}`, and no review endpoint for gastos.
+There are no other paths. In particular there is no `DELETE` on `/api/gastos/{id}` and no
+`PUT`/`DELETE` on `/api/ingresos/{id}`.
 
 ### Request schemas
 
@@ -117,6 +165,9 @@ There are no other paths. In particular there is no `PUT`/`DELETE` on `/api/gast
 | total | **number** (no format) | minimum 0, **required** |
 | moneda | string | optional |
 
+`EditarGastoRequest` — required: `total` (fields in "Changes since last audit", same as
+`CrearGastoRequest` plus `categoriaId` int64 and `deducible` boolean)
+
 `RegistrarCobroRequest` — no required fields
 
 | Field | Type | Constraints |
@@ -143,12 +194,13 @@ field below is, by the schema alone, of unspecified presence (see section 3).
 
 `GastoResponse`: `id` int64, `usuarioId` int64, `categoriaId` int64, `clienteId` int64,
 `emisor` string, `fechaEmision` date, `baseImponible` number, `iva` number, `moneda` string,
-`deducible` boolean, `estado` string, `creadoEn` date-time.
+`deducible` boolean, `estado` string (enum `BORRADOR`, `PROCESADA`, `REVISADA`, `EXPORTADA`),
+`creadoEn` date-time.
 **There is no `total` field in `GastoResponse`**, although `CrearGastoRequest` has one.
 
 `IngresoResponse`: `id` int64, `usuarioId` int64, `clienteId` int64, `concepto` string,
 `fechaEmision` date, `baseImponible` number, `iva` number, `total` number, `moneda` string,
-`estadoCobro` string, `fechaCobro` date, `creadoEn` date-time.
+`estadoCobro` string (enum `PENDIENTE`, `COBRADA`), `fechaCobro` date, `creadoEn` date-time.
 
 `CategoriaResponse`: `id` int64, `nombre` string, `deduciblePorDefecto` boolean.
 
@@ -171,6 +223,7 @@ not a string). The client-side representation is **not decided here** (pending o
 | Schema | Money fields |
 |---|---|
 | `CrearGastoRequest` | `baseImponible`, `iva`, `total` (minimum 0) |
+| `EditarGastoRequest` | `baseImponible`, `iva`, `total` (minimum 0) |
 | `CrearIngresoRequest` | `baseImponible`, `iva`, `total` (minimum 0) |
 | `GastoResponse` | `baseImponible`, `iva` (no `total`) |
 | `IngresoResponse` | `baseImponible`, `iva`, `total` |
@@ -198,26 +251,31 @@ whether the server serializes decimals as JSON numbers with trailing zeros.
 
 ## 4. Error handling
 
-**Per backend convention, NOT verified from the OpenAPI.** The document declares no error
-responses (only `200`), no error schema, and no `Retry-After` header.
+The OpenAPI declares no error responses (only `200`), no error schema and no `Retry-After` header.
+
+**VERIFIED against the running backend (2026-10-27, `curl`, no data created):** protected
+endpoints return **401** (not 403) when the token is missing or invalid. Tested with no
+`Authorization` header and with `Authorization: Bearer garbage` on `GET /api/gastos`,
+`/api/clientes`, `/api/ingresos`, `/api/categorias`, `/api/dashboard/pendientes-cobro` and
+`/api/dashboard/resumen?desde&hasta`: all 12 calls answered 401, with header
+`WWW-Authenticate: Bearer` and body `{"error":"No autenticado. Inicia sesión de nuevo."}`.
+**NOT yet verified:** the 401 for an *expired* token and the client's refresh-and-retry on it
+(needs a real login; pending a manual run of `./gradlew :desktopApp:run` with an expired access
+token). Until then that part rests on the backend source (`HttpStatusEntryPoint(UNAUTHORIZED)`).
+
+Everything below is **per backend convention, NOT verified**:
 
 | Status | Meaning (per `CLAUDE.md`) |
 |---|---|
 | 400 | Validation or domain error |
-| 401 | Bad credentials (login), or a missing / invalid / expired access token on a protected route |
+| 401 | Bad credentials (login) |
 | 404 | Not found (also used for another user's resource) |
 | 409 | Conflict: duplicate email/NIF, invalid cobro transition |
 | 429 | Rate limited, with `Retry-After` |
 
 - Error bodies are JSON. Domain errors use an `error` message field; validation errors are a map
-  of field -> message.
+  of field -> message. (Only the 401 body above has been seen.)
 - Rate limits: login 10/min per IP, register 5/hour per IP, everything else 50/min per user.
-- Correction: protected endpoints answer **401** (not 403) for a missing, invalid or expired token.
-  The earlier "may answer 403" note was wrong. Source: the backend's `SecurityConfig` registers
-  `HttpStatusEntryPoint(UNAUTHORIZED)`; this client's refresh flow relies on the 401. On backend
-  `main` that 401 has an empty body and no `WWW-Authenticate` header; an open backend PR adds a JSON
-  `{"error": ...}` body and `WWW-Authenticate: Bearer`. Read from the backend source and its own
-  tests, not yet re-checked by this client against the running backend.
 
 ## 5. Gaps vs planned screens
 
@@ -237,18 +295,18 @@ Status is judged only from the paths and schemas above.
 | Gastos list | AVAILABLE | `GET /api/gastos`; no filters/pagination |
 | Gastos create | AVAILABLE | `POST /api/gastos`; request has no `categoriaId` |
 | Gastos detail | AVAILABLE | `GET /api/gastos/{id}` |
-| Gastos edit | MISSING | No `PUT`/`PATCH` on `/api/gastos/{id}` |
-| Gastos review | MISSING | No review endpoint; `GastoResponse.estado` (string) hints at a state, but no operation changes it |
+| Gastos edit | AVAILABLE | `PUT /api/gastos/{id}` with `EditarGastoRequest` (`total` required; also `categoriaId`, `deducible`). Whether editing a `REVISADA`/`EXPORTADA` gasto is allowed is UNCLEAR |
+| Gastos review | AVAILABLE | `POST /api/gastos/{id}/revisar`, no body, returns `GastoResponse`. Allowed source states and idempotency are UNCLEAR (`estado` enum: `BORRADOR`, `PROCESADA`, `REVISADA`, `EXPORTADA`) |
 | Gastos delete | MISSING | No `DELETE` on `/api/gastos/{id}` |
 | Ingresos list | AVAILABLE | `GET /api/ingresos` |
-| Ingresos list with pending filter | MISSING | List takes no parameters. Workarounds exist but are not a filter: `GET /api/dashboard/pendientes-cobro` (separate, slimmer shape) or filter client-side on `estadoCobro` (values undeclared) |
+| Ingresos list with pending filter | MISSING | List takes no parameters. Workarounds exist but are not a filter: `GET /api/dashboard/pendientes-cobro` (separate, slimmer shape) or filter client-side on `estadoCobro` (now declared: `PENDIENTE`, `COBRADA`) |
 | Ingresos create | AVAILABLE | `POST /api/ingresos` (`total` required) |
 | Ingresos detail | AVAILABLE | `GET /api/ingresos/{id}` |
 | Ingresos edit | MISSING | No `PUT`/`PATCH` on `/api/ingresos/{id}` |
 | Ingresos registrar cobro | AVAILABLE | `POST /api/ingresos/{id}/cobro` with optional `fechaCobro` |
 | Ingresos revertir cobro | AVAILABLE | `DELETE /api/ingresos/{id}/cobro` |
 | Categorias list | AVAILABLE | `GET /api/categorias` |
-| Category assigned to a gasto | UNCLEAR | `CrearGastoRequest` has no `categoriaId`; `GastoResponse` has `categoriaId` and `deducible`. No endpoint to set it, so it is presumably assigned server-side (e.g. by the digitalizar flow). Not stated in the schema |
+| Category assigned to a gasto | AVAILABLE (on edit only) | `EditarGastoRequest` has `categoriaId` and `deducible`; `CrearGastoRequest` still has neither, so a new gasto cannot be created with a category. Whether the server assigns one by default (e.g. in digitalizar) is UNCLEAR |
 | Dashboard resumen | AVAILABLE | `GET /api/dashboard/resumen?desde&hasta` (both required) |
 | Dashboard rentabilidad-clientes | AVAILABLE | `GET /api/dashboard/rentabilidad-clientes?desde&hasta`; only `clienteId` (no client name) |
 | Dashboard pendientes-cobro | AVAILABLE | `GET /api/dashboard/pendientes-cobro` |
@@ -256,8 +314,8 @@ Status is judged only from the paths and schemas above.
 
 Other things noticed:
 - `GastoResponse` has **no `total`** (only `baseImponible` and `iva`), unlike `IngresoResponse`.
-- `GastoResponse.estado` and `IngresoResponse.estadoCobro` are free strings: the possible values are
-  not in the schema.
+- `GastoResponse.estado` and `IngresoResponse.estadoCobro` are now declared enums (see top). The
+  allowed transitions are not in the schema.
 - Responses reference clients only by `clienteId`; there is no embedded client name, so lists need
   a join with `GET /api/clientes`.
 - `GET /api/health` exists (not in the planned screens; useful for a "server unreachable" check).
@@ -268,19 +326,21 @@ Other things noticed:
 1. **Money representation** (still pending): the API sends plain JSON `number`s with no declared
    scale. Decide the client type before building gastos, bearing in mind the JSON parser will see a
    number, not a string.
-2. **Gastos edit / review / delete are missing.** Either the backend adds them, or those screens are
-   dropped or reduced to list/create/detail.
+2. **Gastos delete is missing.** The backend adds it, or the gastos screen has no delete.
+   (Edit and review now exist.)
 3. **Ingresos edit is missing** — same decision.
 4. **Pending-ingresos filter**: use `pendientes-cobro` from the dashboard, filter client-side on
-   `estadoCobro`, or ask for a backend filter parameter (needs the `estadoCobro` values documented).
-5. **Category assignment for a gasto** is unclear: ask how `categoriaId` is set (server-side from
-   digitalizar? a missing field in `CrearGastoRequest`?).
-6. **`GastoResponse` lacks `total`**: confirm whether it is intentional (derive in client = breaks the
-   "no arithmetic on amounts" rule) or a missing field.
-7. **Response nullability**: ask the backend to declare `required`/nullable on responses, or verify
+   `estadoCobro` (`PENDIENTE`), or ask for a backend filter parameter.
+5. **Category on create**: `CrearGastoRequest` has no `categoriaId`. Ask whether to create then
+   `PUT` the category (two calls) or add the field to the create request.
+6. **`GastoResponse` lacks `total`** (but `EditarGastoRequest`/`CrearGastoRequest` require it): confirm
+   whether it is intentional (deriving it in the client breaks the "no arithmetic on amounts" rule)
+   or a missing field. It matters now that edit exists: the form cannot be pre-filled with `total`.
+7. **Gasto state rules**: which `estado` transitions are allowed, whether `revisar` is idempotent, and
+   whether a `REVISADA`/`EXPORTADA` gasto can be edited. The client must not guess these.
+8. **Response nullability**: ask the backend to declare `required`/nullable on responses, or verify
    real responses and encode defaults in the DTOs.
-8. **Document public endpoints** (`security: []` on `/api/auth/*` and `/api/health`) and error
+9. **Document public endpoints** (`security: []` on `/api/auth/*` and `/api/health`) and error
    responses (400/401/404/409/429 with body schema) in the OpenAPI.
-9. ~~Verify 401 vs 403 for unauthenticated requests~~ — resolved: 401 (see section 4). Still worth
-   confirming once against the running backend.
 10. Clientes: inactive clientes in the list and a reactivate action are undocumented.
+11. Verify the expired-token 401 + refresh against the running backend (section 4).

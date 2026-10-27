@@ -164,8 +164,10 @@ It lives in `expect fun urlBaseApi()` (`data/remote/UrlBase.kt`), with the actua
   POST; `GET|PUT|DELETE /{id}`, DELETE = deactivate), `/api/categorias` (GET list),
   `/api/dashboard/resumen?desde&hasta`, `/api/dashboard/rentabilidad-clientes?desde&hasta`,
   `/api/dashboard/pendientes-cobro`.
-- NOT in the API (as of the audit): edit/delete/review of gastos, edit of ingresos, a pending
-  filter on the ingresos list, setting a gasto's category. See the gaps table in the contract.
+- Gastos also have `PUT /{id}` (edit; the only way to set a gasto's category and `deducible`) and
+  `POST /{id}/revisar`.
+- NOT in the API (as of the 2026-10-27 audit): delete of gastos, edit of ingresos, a pending
+  filter on the ingresos list, category on gasto creation. See the gaps table in the contract.
 - Tokens: access token ~15 min, refresh token ~7 days (revocable server-side).
 - Status codes: 400 validation/domain error, 401 bad credentials, 404 not found (also for
   another user's resource), 409 conflict (duplicate email/NIF, invalid cobro transition),
@@ -208,12 +210,12 @@ Implemented flow (all in `data/`):
   `sesionActiva` turns false it returns to Login clearing the back stack, from any screen.
 - KNOWN: Multiplatform Settings does NOT encrypt. Acceptable for this portfolio project;
   secure storage (Android Keystore, etc.) is a pending item.
-- 401 vs 403: the backend's `SecurityConfig` returns 401 for a missing, invalid or expired token
-  (`HttpStatusEntryPoint(UNAUTHORIZED)`), which is what triggers Ktor's refresh; there is no
-  need to handle 403. The body is empty and there is no `WWW-Authenticate` header on `main`; an
-  open backend PR adds a JSON `{"error": ...}` body and `WWW-Authenticate: Bearer`. The client
-  does not depend on either. This was read from the backend source; confirm it against the
-  running backend.
+- 401 vs 403: protected endpoints return 401 for a missing or invalid token (VERIFIED against the
+  running backend on 2026-10-27), with `WWW-Authenticate: Bearer` and the JSON body
+  `{"error":"No autenticado. Inicia sesión de nuevo."}`. That 401 is what triggers Ktor's
+  refresh; there is no need to handle 403. The client does not depend on the body or the header.
+  The 401 for an EXPIRED token and the refresh-and-retry are not yet verified against the running
+  backend (they rest on `SecurityConfig`'s `HttpStatusEntryPoint(UNAUTHORIZED)`).
 - Never log passwords or tokens (Kermit prints whatever it is given).
 
 ## Money — DECISION PENDING
