@@ -1,14 +1,34 @@
 # API contract
 
 Source: `GET http://localhost:8080/v3/api-docs` (OpenAPI 3.1.0, `info.version` = `v0`), fetched
-2026-10-27 (previous audit: 2026-10-19). Field names and types below are copied from that
+2026-10-28 (previous audit: 2026-10-27). Field names and types below are copied from that
 document. This file is the source of truth for DTO shapes in this client and **must be updated
 whenever the backend changes**. The backend lives in another repository (`GestionFacturas-api`);
 this client only documents it.
 
-## Changes since last audit (2026-10-19 -> 2026-10-27)
+## Changes since last audit (2026-10-27 -> 2026-10-28)
 
-26 operations (was 24), 22 schemas (was 21). Compared against the schema, field by field.
+`docs/openapi.json` (pretty-printed copy of the fetched document) did not exist before, so there
+was no file diff; this audit is a first audit of that file: every path, operation, schema, field,
+type, `required` list and enum in it was compared against this contract.
+
+**Result: no API changes.** Endpoints, request/response fields, types, nullability (still none
+declared) and enum values are identical to what this file already documented.
+
+- Paths: 18; operations: **25**; schemas: 22.
+- **Correction (documentation only):** the previous section said "26 operations (was 24)". The
+  document has 25 (the endpoint table in section 1 lists all 25). The two added endpoints
+  (`PUT /api/gastos/{id}`, `POST /api/gastos/{id}/revisar`) were real; the total was miscounted.
+- Money fields: all still `"type": "number"` with no `format`.
+- Still true: global `security: [bearerAuth]` with no per-operation override, only `200`
+  documented, no `required` list on any response schema, no `nullable`, `GastoResponse` has no
+  `total`, `revertirCobro` is `DELETE /api/ingresos/{id}/cobro`.
+- Error handling: unchanged. Only "401 on missing/invalid token" is VERIFIED (2026-10-27); the
+  expired-token 401 and everything in the status table of section 4 stay NOT verified.
+
+## Previous audit (2026-10-19 -> 2026-10-27)
+
+26 operations (was 24; see the correction above), 22 schemas (was 21). Compared against the schema, field by field.
 
 **Added endpoints**
 
