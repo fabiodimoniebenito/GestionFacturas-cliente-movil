@@ -6,6 +6,7 @@ import com.fabio.gestionfacturas.domain.model.Gasto
 import com.fabio.gestionfacturas.domain.model.Importe
 import com.fabio.gestionfacturas.testutil.FakeGastoRepository
 import com.fabio.gestionfacturas.testutil.gastoVacio
+import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -167,5 +168,28 @@ class GastosViewModelTest {
         viewModel.onMensajeConsumido()
 
         assertNull(viewModel.uiState.value.mensaje)
+    }
+
+    @Test
+    fun alVolverDelFormularioGuardadoRecargaLaLista() {
+        repositorio.resultadoListar = Result.success(listOf(completo))
+        val viewModel = crearViewModel()
+        repositorio.resultadoListar = Result.success(listOf(completo, borrador))
+
+        viewModel.onVolverDelFormulario(ResultadoFormulario.GUARDADO)
+
+        assertEquals(CargaGastos.Contenido(listOf(completo, borrador)), viewModel.uiState.value.carga)
+        assertNull(viewModel.uiState.value.mensaje)
+    }
+
+    @Test
+    fun alVolverDelFormularioConUnGastoQueYaNoExisteAvisaYRecarga() {
+        repositorio.resultadoListar = Result.success(listOf(completo))
+        val viewModel = crearViewModel()
+
+        viewModel.onVolverDelFormulario(ResultadoFormulario.NO_ENCONTRADO)
+
+        assertEquals(MensajeGastos.YaNoExiste, viewModel.uiState.value.mensaje)
+        assertEquals(2, repositorio.llamadasListar)
     }
 }

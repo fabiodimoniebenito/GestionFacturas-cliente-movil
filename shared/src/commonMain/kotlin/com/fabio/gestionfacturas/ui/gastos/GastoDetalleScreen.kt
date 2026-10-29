@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import com.fabio.gestionfacturas.resources.gasto_detalle_si
 import com.fabio.gestionfacturas.resources.gasto_detalle_titulo
 import com.fabio.gestionfacturas.resources.gasto_detalle_ya_no_existe
 import com.fabio.gestionfacturas.resources.gastos_sin_dato
+import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.BarraTitulo
 import com.fabio.gestionfacturas.ui.common.EstadoCargando
 import com.fabio.gestionfacturas.ui.common.EstadoError
@@ -56,15 +58,32 @@ private val AnchoMaximo = 900.dp
 fun GastoDetalleScreen(
     idGasto: Long,
     alVolver: () -> Unit,
+    alEditar: () -> Unit,
+    resultadoFormulario: ResultadoFormulario?,
+    alConsumirResultadoFormulario: () -> Unit,
+    alHuboCambios: () -> Unit,
+    alYaNoExiste: () -> Unit,
     viewModel: GastoDetalleViewModel = koinViewModel(parameters = { parametersOf(idGasto) }),
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
+    // The edit form left a result for this screen: act on it once, then clear it.
+    LaunchedEffect(resultadoFormulario) {
+        when (resultadoFormulario) {
+            ResultadoFormulario.GUARDADO -> {
+                viewModel.onRecargar()
+                alHuboCambios()
+            }
+            ResultadoFormulario.NO_ENCONTRADO -> alYaNoExiste()
+            null -> return@LaunchedEffect
+        }
+        alConsumirResultadoFormulario()
+    }
     GastoDetalleContent(
         estado = estado,
         alVolver = alVolver,
         alReintentar = viewModel::onReintentar,
-        // Wired in part 3 of the gastos slice.
-        alEditar = {},
+        alEditar = alEditar,
+        // Wired in the review commit.
         alRevisar = {},
     )
 }

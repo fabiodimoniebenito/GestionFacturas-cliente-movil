@@ -41,6 +41,7 @@ import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.BotonPrincipal
 import com.fabio.gestionfacturas.ui.gastos.GastoDetalleScreen
+import com.fabio.gestionfacturas.ui.gastos.GastoFormScreen
 import com.fabio.gestionfacturas.ui.gastos.GastosScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -144,6 +145,11 @@ private fun ElementoPendiente(nombre: String) {
 /** Key under which the form leaves its result for the list (read once, then cleared). */
 private const val CLAVE_RESULTADO_FORMULARIO = "resultadoFormulario"
 
+/** Leaves [resultado] for the screen below the current one (the gastos list). */
+private fun avisarALaLista(navController: NavHostController, resultado: ResultadoFormulario) {
+    navController.previousBackStackEntry?.savedStateHandle?.set(CLAVE_RESULTADO_FORMULARIO, resultado.name)
+}
+
 @Composable
 private fun ContenidoShell(navController: NavHostController) {
     val terminarFormulario: (ResultadoFormulario) -> Unit = { resultado ->
@@ -163,12 +169,51 @@ private fun ContenidoShell(navController: NavHostController) {
                 alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
             )
         }
-        composable<RutaGastos> {
-            GastosScreen(alAbrir = { id -> navController.navigate(RutaDetalleGasto(id)) })
+        composable<RutaGastos> { entrada ->
+            val resultado by entrada.savedStateHandle
+                .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
+                .collectAsStateWithLifecycle()
+            GastosScreen(
+                alNuevo = { navController.navigate(RutaNuevoGasto) },
+                alAbrir = { id -> navController.navigate(RutaDetalleGasto(id)) },
+                resultadoFormulario = resultado?.let { ResultadoFormulario.valueOf(it) },
+                alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+            )
         }
         composable<RutaDetalleGasto> { entrada ->
             val ruta = entrada.toRoute<RutaDetalleGasto>()
-            GastoDetalleScreen(idGasto = ruta.id, alVolver = { navController.popBackStack() })
+            val resultado by entrada.savedStateHandle
+                .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
+                .collectAsStateWithLifecycle()
+            GastoDetalleScreen(
+                idGasto = ruta.id,
+                alVolver = { navController.popBackStack() },
+                alEditar = { navController.navigate(RutaEditarGasto(ruta.id)) },
+                resultadoFormulario = resultado?.let { ResultadoFormulario.valueOf(it) },
+                alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+                // The list below must refresh after a save or a review made from here.
+                alHuboCambios = { avisarALaLista(navController, ResultadoFormulario.GUARDADO) },
+                // The gasto is gone: back to the list, which explains it.
+                alYaNoExiste = {
+                    avisarALaLista(navController, ResultadoFormulario.NO_ENCONTRADO)
+                    navController.popBackStack()
+                },
+            )
+        }
+        composable<RutaNuevoGasto> {
+            GastoFormScreen(
+                idGasto = null,
+                alVolver = { navController.popBackStack() },
+                alTerminar = terminarFormulario,
+            )
+        }
+        composable<RutaEditarGasto> { entrada ->
+            val ruta = entrada.toRoute<RutaEditarGasto>()
+            GastoFormScreen(
+                idGasto = ruta.id,
+                alVolver = { navController.popBackStack() },
+                alTerminar = terminarFormulario,
+            )
         }
         composable<RutaNuevoCliente> {
             ClienteFormScreen(

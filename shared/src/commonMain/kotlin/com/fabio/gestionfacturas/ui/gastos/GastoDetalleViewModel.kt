@@ -24,6 +24,11 @@ class GastoDetalleViewModel(
         cargar()
     }
 
+    /** The edit form saved: show the new data. */
+    fun onRecargar() {
+        cargar()
+    }
+
     fun onReintentar() {
         if (_uiState.value.carga is CargaGastoDetalle.Cargando) {
             return

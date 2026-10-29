@@ -12,6 +12,9 @@ sealed interface CargaGastos {
 
 /** One-shot messages: the screen shows one and tells the ViewModel to clear it. */
 sealed interface MensajeGastos {
+    /** The form or the detail found that the gasto no longer exists. */
+    data object YaNoExiste : MensajeGastos
+
     /** A reload failed while a list was already on screen, so the old list is kept. */
     data class ActualizarFallido(val error: ErrorAuth) : MensajeGastos
 }

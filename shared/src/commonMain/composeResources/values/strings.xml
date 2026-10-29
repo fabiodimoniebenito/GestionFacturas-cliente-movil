@@ -114,4 +114,29 @@
     <string name="gasto_detalle_editar">Editar</string>
     <string name="gasto_detalle_revisar">Marcar como revisado</string>
     <string name="gasto_detalle_ya_no_existe">Ese gasto ya no existe.</string>
+
+    <!-- Formulario de gasto -->
+    <string name="gastos_nuevo">Nuevo gasto</string>
+    <string name="gastos_ya_no_existe">Ese gasto ya no existe. Se ha actualizado la lista.</string>
+    <string name="gasto_form_titulo_nuevo">Nuevo gasto</string>
+    <string name="gasto_form_titulo_editar">Editar gasto</string>
+    <string name="gasto_form_emisor">Emisor</string>
+    <string name="gasto_form_fecha_emision">Fecha de emisión (AAAA-MM-DD)</string>
+    <string name="gasto_form_base_imponible">Base imponible</string>
+    <string name="gasto_form_iva">IVA</string>
+    <string name="gasto_form_total">Total *</string>
+    <string name="gasto_form_total_edicion">Total * (vuelve a introducirlo)</string>
+    <string name="gasto_form_moneda">Moneda</string>
+    <string name="gasto_form_deducible">Deducible</string>
+    <string name="gasto_form_cliente">Cliente</string>
+    <string name="gasto_form_categoria">Categoría</string>
+    <string name="gasto_form_ninguno">Ninguno</string>
+    <string name="gasto_form_guardar">Guardar</string>
+    <string name="gasto_form_cancelar">Cancelar</string>
+    <string name="gasto_form_error_total_vacio">Introduce el total</string>
+    <string name="gasto_form_error_importe_invalido">Importe no válido: usa números con hasta 2 decimales</string>
+    <string name="gasto_form_error_fecha_invalida">Fecha no válida: usa el formato AAAA-MM-DD</string>
+    <string name="gasto_form_conflicto">Este gasto ya no se puede editar en su estado actual.</string>
+    <string name="gasto_form_selectores_fallidos">No se pudieron cargar o actualizar los clientes o las categorías.</string>
+    <string name="gasto_form_recargar_listas">Recargar listas</string>
 </resources>

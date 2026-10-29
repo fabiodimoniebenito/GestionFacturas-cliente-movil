@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -35,11 +36,14 @@ import com.fabio.gestionfacturas.resources.gastos_actualizar
 import com.fabio.gestionfacturas.resources.gastos_actualizar_fallido
 import com.fabio.gestionfacturas.resources.gastos_base_imponible
 import com.fabio.gestionfacturas.resources.gastos_iva
+import com.fabio.gestionfacturas.resources.gastos_nuevo
+import com.fabio.gestionfacturas.resources.gastos_ya_no_existe
 import com.fabio.gestionfacturas.resources.gastos_pendiente_revision
 import com.fabio.gestionfacturas.resources.gastos_sin_dato
 import com.fabio.gestionfacturas.resources.gastos_sin_emisor
 import com.fabio.gestionfacturas.resources.gastos_titulo
 import com.fabio.gestionfacturas.resources.gastos_vacio
+import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.EstadoCargando
 import com.fabio.gestionfacturas.ui.common.EstadoError
 import com.fabio.gestionfacturas.ui.common.EstadoVacio
@@ -52,12 +56,23 @@ private val AnchoMaximo = 900.dp
 
 @Composable
 fun GastosScreen(
+    alNuevo: () -> Unit,
     alAbrir: (Long) -> Unit,
+    resultadoFormulario: ResultadoFormulario? = null,
+    alConsumirResultadoFormulario: () -> Unit = {},
     viewModel: GastosViewModel = koinViewModel(),
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
+    // The form or the detail left a result for this screen: act on it once, then clear it.
+    LaunchedEffect(resultadoFormulario) {
+        if (resultadoFormulario != null) {
+            viewModel.onVolverDelFormulario(resultadoFormulario)
+            alConsumirResultadoFormulario()
+        }
+    }
     GastosContent(
         estado = estado,
+        alNuevo = alNuevo,
         alAbrir = alAbrir,
         alRefrescar = viewModel::onRefrescar,
         alConsumirMensaje = viewModel::onMensajeConsumido,
@@ -67,6 +82,7 @@ fun GastosScreen(
 @Composable
 fun GastosContent(
     estado: GastosUiState,
+    alNuevo: () -> Unit,
     alAbrir: (Long) -> Unit,
     alRefrescar: () -> Unit,
     alConsumirMensaje: () -> Unit,
@@ -98,6 +114,7 @@ fun GastosContent(
             ) {
                 Cabecera(
                     habilitado = estado.carga !is CargaGastos.Cargando && !estado.refrescando,
+                    alNuevo = alNuevo,
                     alRefrescar = alRefrescar,
                 )
                 if (estado.refrescando) {
@@ -105,7 +122,11 @@ fun GastosContent(
                 }
                 when (val carga = estado.carga) {
                     CargaGastos.Cargando -> EstadoCargando()
-                    CargaGastos.Vacio -> EstadoVacio(mensaje = stringResource(Res.string.gastos_vacio))
+                    CargaGastos.Vacio -> EstadoVacio(
+                        mensaje = stringResource(Res.string.gastos_vacio),
+                        textoAccion = stringResource(Res.string.gastos_nuevo),
+                        alPulsarAccion = alNuevo,
+                    )
                     is CargaGastos.Error -> EstadoError(mensaje = carga.error.mensaje(), alReintentar = alRefrescar)
                     is CargaGastos.Contenido -> ListaGastos(gastos = carga.gastos, alAbrir = alAbrir)
                 }
@@ -115,7 +136,7 @@ fun GastosContent(
 }
 
 @Composable
-private fun Cabecera(habilitado: Boolean, alRefrescar: () -> Unit) {
+private fun Cabecera(habilitado: Boolean, alNuevo: () -> Unit, alRefrescar: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -129,6 +150,7 @@ private fun Cabecera(habilitado: Boolean, alRefrescar: () -> Unit) {
         OutlinedButton(onClick = alRefrescar, enabled = habilitado) {
             Text(stringResource(Res.string.gastos_actualizar))
         }
+        Button(onClick = alNuevo) { Text(stringResource(Res.string.gastos_nuevo)) }
     }
 }
 
@@ -185,5 +207,6 @@ private fun FilaGasto(gasto: Gasto, alAbrir: (Long) -> Unit) {
 /** The text for a one-shot message; the error detail comes from the shared error texts. */
 @Composable
 private fun MensajeGastos.texto(): String = when (this) {
+    MensajeGastos.YaNoExiste -> stringResource(Res.string.gastos_ya_no_existe)
     is MensajeGastos.ActualizarFallido -> stringResource(Res.string.gastos_actualizar_fallido) + " " + error.mensaje()
 }

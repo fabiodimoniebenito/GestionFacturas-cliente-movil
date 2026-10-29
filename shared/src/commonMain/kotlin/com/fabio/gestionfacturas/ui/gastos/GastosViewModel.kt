@@ -3,6 +3,7 @@ package com.fabio.gestionfacturas.ui.gastos
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fabio.gestionfacturas.domain.repository.GastoRepository
+import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.comoErrorAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,14 @@ class GastosViewModel(
             return
         }
         viewModelScope.launch { recargar() }
+    }
+
+    /** The form (or the detail) closed: reload after a save, or explain that the gasto is gone. */
+    fun onVolverDelFormulario(resultado: ResultadoFormulario) {
+        if (resultado == ResultadoFormulario.NO_ENCONTRADO) {
+            _uiState.update { it.copy(mensaje = MensajeGastos.YaNoExiste) }
+        }
+        onRefrescar()
     }
 
     fun onMensajeConsumido() {
