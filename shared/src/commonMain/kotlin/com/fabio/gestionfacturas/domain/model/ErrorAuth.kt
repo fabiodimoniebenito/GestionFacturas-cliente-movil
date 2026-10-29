@@ -25,6 +25,15 @@ sealed class ErrorAuth(message: String) : Exception(message) {
     /** 409 on a protected resource, e.g. a cliente whose NIF already exists. */
     data object Conflicto : ErrorAuth("Conflicto")
 
+    /**
+     * 404 with the backend's `error` message (null if the body had none). On a save it can mean the
+     * gasto, the category or the cliente, so the message is what tells them apart.
+     */
+    data class NoEncontradoConDetalle(val detalle: String?) : ErrorAuth("No encontrado")
+
+    /** 409 with the backend's `error` message, e.g. an invalid state transition. */
+    data class ConflictoConDetalle(val detalle: String?) : ErrorAuth("Conflicto")
+
     /** The server could not be reached (no network, refused connection, timeout). */
     data object ServidorInaccesible : ErrorAuth("Servidor inaccesible")
 
