@@ -32,9 +32,15 @@ class FakeGastoRepository : GastoRepository {
     var resultadoRevisar: Result<Gasto> = Result.failure(ErrorAuth.Inesperado)
     var puertaListar: CompletableDeferred<Unit>? = null
     var puertaObtener: CompletableDeferred<Unit>? = null
+    /** Gates both [crear] and [editar]. */
+    var puertaGuardar: CompletableDeferred<Unit>? = null
+    var puertaRevisar: CompletableDeferred<Unit>? = null
 
     var llamadasListar = 0
     val obtenidos = mutableListOf<Long>()
+    val creados = mutableListOf<NuevoGasto>()
+    val editados = mutableListOf<Pair<Long, DatosGasto>>()
+    val revisados = mutableListOf<Long>()
 
     override suspend fun listar(): Result<List<Gasto>> {
         llamadasListar++
@@ -48,9 +54,21 @@ class FakeGastoRepository : GastoRepository {
         return resultadoObtener
     }
 
-    override suspend fun crear(nuevo: NuevoGasto): Result<Gasto> = resultadoCrear
+    override suspend fun crear(nuevo: NuevoGasto): Result<Gasto> {
+        creados.add(nuevo)
+        puertaGuardar?.await()
+        return resultadoCrear
+    }
 
-    override suspend fun editar(id: Long, datos: DatosGasto): Result<Gasto> = resultadoEditar
+    override suspend fun editar(id: Long, datos: DatosGasto): Result<Gasto> {
+        editados.add(id to datos)
+        puertaGuardar?.await()
+        return resultadoEditar
+    }
 
-    override suspend fun revisar(id: Long): Result<Gasto> = resultadoRevisar
+    override suspend fun revisar(id: Long): Result<Gasto> {
+        revisados.add(id)
+        puertaRevisar?.await()
+        return resultadoRevisar
+    }
 }
