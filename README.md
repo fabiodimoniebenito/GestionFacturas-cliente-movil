@@ -1,7 +1,7 @@
 # GestionFacturas — Cliente (Android + Desktop)
 
 > **Proyecto en desarrollo.** Ya están hechos el login y el registro (con renovación
-> automática del token) y la gestión de clientes; el resto de áreas (gastos, ingresos,
+> automática del token), la gestión de clientes y la de gastos; el resto de áreas (ingresos,
 > dashboard) aún no.
 > Este README describe el diseño acordado y evoluciona con el código.
 
@@ -35,6 +35,7 @@ iOS queda fuera del alcance por no disponer de Mac para compilarlo.
 | Lenguaje y UI | Kotlin Multiplatform + Compose Multiplatform (Material 3) |
 | Red | Ktor Client + kotlinx.serialization |
 | Asincronía | kotlinx.coroutines |
+| Fechas | kotlinx-datetime |
 | Inyección de dependencias | Koin |
 | Almacenamiento local | Multiplatform Settings (solo la sesión: tokens, id y email) |
 | Navegación | Navigation Compose (oficial, multiplataforma; versión 2.10.0-rc01, candidata a estable) |
@@ -99,8 +100,11 @@ El código específico de plataforma (expect/actual) va en `shared/src/androidMa
 | Navegación | Navigation Compose oficial | Soporte oficial, se integra con ViewModel y Koin |
 | Almacenamiento | Solo el token, sin caché offline | La app es online; se amplía solo si surge la necesidad |
 
-**Pendiente de decidir:** cómo representar los importes (`BigDecimal` no existe en código
-común de Kotlin Multiplatform). Se resolverá al construir la parte de gastos.
+**Importes:** `BigDecimal` no existe en código común de Kotlin Multiplatform, así que los
+importes se guardan como **texto** (`Importe`, en `domain/model`), sin ninguna operación
+aritmética en el cliente: el backend calcula los totales. `Importe` valida lo que escribe el
+usuario (hasta 2 decimales, coma o punto) y la capa de datos lo lee y lo escribe como número JSON,
+conservando los ceros finales (`121.00`).
 
 ## Estado actual
 
@@ -112,7 +116,8 @@ común de Kotlin Multiplatform). Se resolverá al construir la parte de gastos.
   pantallas y tests unitarios). Pendiente de probar a mano contra el backend real.
 - [x] Clientes (estructura con menú lateral, listado, alta, edición y desactivación). Pendiente
   de probar a mano contra el backend real.
-- [ ] Gastos
+- [x] Gastos (listado, detalle, alta, edición y revisión). Pendiente de probar a mano contra el
+  backend real. Falta la digitalización de facturas (subida de archivo).
 - [ ] Ingresos y cobros
 - [ ] Dashboard (resumen, rentabilidad por cliente, pendientes de cobro)
 - [ ] Adaptación del diseño a móvil

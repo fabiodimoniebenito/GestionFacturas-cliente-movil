@@ -6,11 +6,18 @@ import com.fabio.gestionfacturas.data.local.TokenStorage
 import com.fabio.gestionfacturas.data.remote.ApiClient
 import com.fabio.gestionfacturas.data.remote.urlBaseApi
 import com.fabio.gestionfacturas.data.repository.AuthRepositoryImpl
+import com.fabio.gestionfacturas.data.repository.CategoriaRepositoryImpl
+import com.fabio.gestionfacturas.data.repository.GastoRepositoryImpl
+import com.fabio.gestionfacturas.domain.repository.CategoriaRepository
+import com.fabio.gestionfacturas.domain.repository.GastoRepository
 import com.fabio.gestionfacturas.data.repository.ClienteRepositoryImpl
 import com.fabio.gestionfacturas.domain.repository.AuthRepository
 import com.fabio.gestionfacturas.domain.repository.ClienteRepository
 import com.fabio.gestionfacturas.ui.clientes.ClienteFormViewModel
 import com.fabio.gestionfacturas.ui.clientes.ClientesViewModel
+import com.fabio.gestionfacturas.ui.gastos.GastoDetalleViewModel
+import com.fabio.gestionfacturas.ui.gastos.GastoFormViewModel
+import com.fabio.gestionfacturas.ui.gastos.GastosViewModel
 import com.fabio.gestionfacturas.ui.login.LoginViewModel
 import com.fabio.gestionfacturas.ui.login.RegistroViewModel
 import com.fabio.gestionfacturas.ui.navigation.ShellViewModel
@@ -28,6 +35,8 @@ val moduloDatos = module {
     single { ApiClient(baseUrl = urlBaseApi(), tokenStorage = get(), estadoSesion = get()) }
     single<AuthRepository> { AuthRepositoryImpl(apiClient = get(), tokenStorage = get(), estadoSesion = get()) }
     single<ClienteRepository> { ClienteRepositoryImpl(api = get<ApiClient>().clienteApi) }
+    single<GastoRepository> { GastoRepositoryImpl(api = get<ApiClient>().gastoApi) }
+    single<CategoriaRepository> { CategoriaRepositoryImpl(api = get<ApiClient>().categoriaApi) }
 }
 
 val moduloUi = module {
@@ -35,6 +44,9 @@ val moduloUi = module {
     viewModel { RegistroViewModel(get()) }
     viewModel { ShellViewModel(get()) }
     viewModel { ClientesViewModel(get()) }
+    viewModel { GastosViewModel(get()) }
+    viewModel { parametros -> GastoFormViewModel(parametros.getOrNull<Long>(), get(), get(), get()) }
+    viewModel { parametros -> GastoDetalleViewModel(parametros.get<Long>(), get(), get()) }
     viewModel { parametros -> ClienteFormViewModel(parametros.getOrNull<Long>(), get()) }
 }
 

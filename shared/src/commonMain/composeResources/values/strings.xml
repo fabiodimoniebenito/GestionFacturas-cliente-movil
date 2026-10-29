@@ -80,4 +80,73 @@
     <string name="cliente_form_error_nombre_vacio">Introduce el nombre del cliente</string>
     <string name="cliente_form_error_nif_vacio">Introduce el NIF del cliente</string>
     <string name="cliente_form_error_nif_duplicado">Ya existe un cliente con ese NIF. Puede ser un cliente desactivado: los clientes desactivados también cuentan y no se pueden reactivar.</string>
+
+    <!-- Gastos -->
+    <string name="gastos_titulo">Gastos</string>
+    <string name="gastos_actualizar">Actualizar</string>
+    <string name="gastos_vacio">Todavía no tienes gastos.</string>
+    <string name="gastos_actualizar_fallido">No se pudo actualizar la lista.</string>
+    <string name="gastos_sin_dato">—</string>
+    <string name="gastos_sin_emisor">Sin emisor</string>
+    <string name="gastos_base_imponible">Base imponible</string>
+    <string name="gastos_iva">IVA</string>
+    <string name="gastos_pendiente_revision">Pendiente de revisión</string>
+    <string name="gasto_estado_borrador">Borrador</string>
+    <string name="gasto_estado_procesada">Procesada</string>
+    <string name="gasto_estado_revisada">Revisada</string>
+    <string name="gasto_estado_exportada">Exportada</string>
+
+    <!-- Detalle de gasto -->
+    <string name="gasto_detalle_titulo">Detalle del gasto</string>
+    <string name="gasto_detalle_id">Número</string>
+    <string name="gasto_detalle_estado">Estado</string>
+    <string name="gasto_detalle_emisor">Emisor</string>
+    <string name="gasto_detalle_fecha_emision">Fecha de emisión</string>
+    <string name="gasto_detalle_base_imponible">Base imponible</string>
+    <string name="gasto_detalle_iva">IVA</string>
+    <string name="gasto_detalle_moneda">Moneda</string>
+    <string name="gasto_detalle_categoria">Categoría</string>
+    <string name="gasto_detalle_cliente">Cliente</string>
+    <string name="gasto_detalle_deducible">Deducible</string>
+    <string name="gasto_detalle_creado_en">Creado</string>
+    <string name="gasto_detalle_si">Sí</string>
+    <string name="gasto_detalle_no">No</string>
+    <string name="gasto_detalle_editar">Editar</string>
+    <string name="gasto_detalle_revisar">Marcar como revisado</string>
+    <string name="gasto_detalle_ya_no_existe">Ese gasto ya no existe.</string>
+
+    <!-- Formulario de gasto -->
+    <string name="gastos_nuevo">Nuevo gasto</string>
+    <string name="gastos_ya_no_existe">Ese gasto ya no existe. Se ha actualizado la lista.</string>
+    <string name="gasto_form_titulo_nuevo">Nuevo gasto</string>
+    <string name="gasto_form_titulo_editar">Editar gasto</string>
+    <string name="gasto_form_emisor">Emisor</string>
+    <string name="gasto_form_fecha_emision">Fecha de emisión (AAAA-MM-DD)</string>
+    <string name="gasto_form_base_imponible">Base imponible</string>
+    <string name="gasto_form_iva">IVA</string>
+    <string name="gasto_form_total">Total *</string>
+    <string name="gasto_form_total_edicion">Total * (vuelve a introducirlo)</string>
+    <string name="gasto_form_moneda">Moneda</string>
+    <string name="gasto_form_deducible">Deducible</string>
+    <string name="gasto_form_cliente">Cliente</string>
+    <string name="gasto_form_categoria">Categoría</string>
+    <string name="gasto_form_ninguno">Ninguno</string>
+    <string name="gasto_form_guardar">Guardar</string>
+    <string name="gasto_form_cancelar">Cancelar</string>
+    <string name="gasto_form_error_total_vacio">Introduce el total</string>
+    <string name="gasto_form_error_importe_invalido">Importe no válido: usa números con hasta 2 decimales</string>
+    <string name="gasto_form_error_fecha_invalida">Fecha no válida: usa el formato AAAA-MM-DD</string>
+    <string name="gasto_form_conflicto">Este gasto ya no se puede editar en su estado actual.</string>
+    <string name="gasto_form_selectores_fallidos">No se pudieron cargar o actualizar los clientes o las categorías.</string>
+    <string name="gasto_form_recargar_listas">Recargar listas</string>
+
+    <!-- Revisión de gasto -->
+    <string name="gasto_revisar_titulo">Marcar como revisado</string>
+    <string name="gasto_revisar_texto">¿Confirmas que has revisado los datos de este gasto? Después ya no se podrá revisar de nuevo.</string>
+    <string name="gasto_revisar_confirmar">Marcar como revisado</string>
+    <string name="gasto_revisar_cancelar">Cancelar</string>
+    <string name="gasto_revisar_ok">Gasto marcado como revisado.</string>
+    <string name="gasto_revisar_fallido">No se pudo marcar como revisado.</string>
+    <string name="gasto_revisar_falta_datos">Faltan datos para revisarlo (por ejemplo la fecha o el total). Edita el gasto y vuelve a intentarlo.</string>
+    <string name="gasto_revisar_conflicto">Este gasto ya no se puede revisar en su estado actual.</string>
 </resources>

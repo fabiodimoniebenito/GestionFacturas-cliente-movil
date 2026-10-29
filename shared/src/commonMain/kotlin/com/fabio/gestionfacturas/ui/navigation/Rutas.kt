@@ -23,3 +23,15 @@ data object RutaNuevoCliente
 
 @Serializable
 data class RutaEditarCliente(val id: Long)
+
+@Serializable
+data object RutaGastos
+
+@Serializable
+data class RutaDetalleGasto(val id: Long)
+
+@Serializable
+data object RutaNuevoGasto
+
+@Serializable
+data class RutaEditarGasto(val id: Long)

@@ -21,7 +21,9 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -38,6 +40,9 @@ import com.fabio.gestionfacturas.ui.clientes.ClienteFormScreen
 import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.BotonPrincipal
+import com.fabio.gestionfacturas.ui.gastos.GastoDetalleScreen
+import com.fabio.gestionfacturas.ui.gastos.GastoFormScreen
+import com.fabio.gestionfacturas.ui.gastos.GastosScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -48,9 +53,18 @@ fun ShellScreen(
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
+    val destino = navController.currentBackStackEntryAsState().value?.destination
+    val enGastos = destino?.hasRoute<RutaGastos>() == true || destino?.hasRoute<RutaDetalleGasto>() == true
+    val enClientes = destino?.hasRoute<RutaClientes>() == true ||
+        destino?.hasRoute<RutaNuevoCliente>() == true ||
+        destino?.hasRoute<RutaEditarCliente>() == true
 
     Row(modifier = Modifier.fillMaxSize()) {
         BarraLateral(
+            enClientes = enClientes,
+            enGastos = enGastos,
+            alIrAClientes = { irA(navController, RutaClientes) },
+            alIrAGastos = { irA(navController, RutaGastos) },
             email = estado.email,
             cerrandoSesion = estado.cerrandoSesion,
             alCerrarSesion = viewModel::onCerrarSesion,
@@ -63,6 +77,10 @@ fun ShellScreen(
 
 @Composable
 private fun BarraLateral(
+    enClientes: Boolean,
+    enGastos: Boolean,
+    alIrAClientes: () -> Unit,
+    alIrAGastos: () -> Unit,
     email: String,
     cerrandoSesion: Boolean,
     alCerrarSesion: () -> Unit,
@@ -77,13 +95,17 @@ private fun BarraLateral(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(12.dp),
             )
-            // Clientes is the only area built so far; its inner routes all belong to it.
+            // Each area owns its inner routes (list, form, detail), so the item stays selected inside them.
             NavigationDrawerItem(
                 label = { Text(stringResource(Res.string.menu_clientes)) },
-                selected = true,
-                onClick = {},
+                selected = enClientes,
+                onClick = alIrAClientes,
             )
-            ElementoPendiente(stringResource(Res.string.menu_gastos))
+            NavigationDrawerItem(
+                label = { Text(stringResource(Res.string.menu_gastos)) },
+                selected = enGastos,
+                onClick = alIrAGastos,
+            )
             ElementoPendiente(stringResource(Res.string.menu_ingresos))
             ElementoPendiente(stringResource(Res.string.menu_dashboard))
             Spacer(Modifier.weight(1f))
@@ -101,6 +123,14 @@ private fun BarraLateral(
     }
 }
 
+/** Switches area: the back stack returns to the start so areas do not pile up. */
+private fun irA(navController: NavHostController, ruta: Any) {
+    navController.navigate(ruta) {
+        popUpTo(RutaClientes) { inclusive = false }
+        launchSingleTop = true
+    }
+}
+
 /** An area that does not exist yet: visible but not usable. */
 @Composable
 private fun ElementoPendiente(nombre: String) {
@@ -114,6 +144,11 @@ private fun ElementoPendiente(nombre: String) {
 
 /** Key under which the form leaves its result for the list (read once, then cleared). */
 private const val CLAVE_RESULTADO_FORMULARIO = "resultadoFormulario"
+
+/** Leaves [resultado] for the screen below the current one (the gastos list). */
+private fun avisarALaLista(navController: NavHostController, resultado: ResultadoFormulario) {
+    navController.previousBackStackEntry?.savedStateHandle?.set(CLAVE_RESULTADO_FORMULARIO, resultado.name)
+}
 
 @Composable
 private fun ContenidoShell(navController: NavHostController) {
@@ -132,6 +167,52 @@ private fun ContenidoShell(navController: NavHostController) {
                 alEditar = { id -> navController.navigate(RutaEditarCliente(id)) },
                 resultadoFormulario = resultado?.let { ResultadoFormulario.valueOf(it) },
                 alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+            )
+        }
+        composable<RutaGastos> { entrada ->
+            val resultado by entrada.savedStateHandle
+                .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
+                .collectAsStateWithLifecycle()
+            GastosScreen(
+                alNuevo = { navController.navigate(RutaNuevoGasto) },
+                alAbrir = { id -> navController.navigate(RutaDetalleGasto(id)) },
+                resultadoFormulario = resultado?.let { ResultadoFormulario.valueOf(it) },
+                alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+            )
+        }
+        composable<RutaDetalleGasto> { entrada ->
+            val ruta = entrada.toRoute<RutaDetalleGasto>()
+            val resultado by entrada.savedStateHandle
+                .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
+                .collectAsStateWithLifecycle()
+            GastoDetalleScreen(
+                idGasto = ruta.id,
+                alVolver = { navController.popBackStack() },
+                alEditar = { navController.navigate(RutaEditarGasto(ruta.id)) },
+                resultadoFormulario = resultado?.let { ResultadoFormulario.valueOf(it) },
+                alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+                // The list below must refresh after a save or a review made from here.
+                alHuboCambios = { avisarALaLista(navController, ResultadoFormulario.GUARDADO) },
+                // The gasto is gone: back to the list, which explains it.
+                alYaNoExiste = {
+                    avisarALaLista(navController, ResultadoFormulario.NO_ENCONTRADO)
+                    navController.popBackStack()
+                },
+            )
+        }
+        composable<RutaNuevoGasto> {
+            GastoFormScreen(
+                idGasto = null,
+                alVolver = { navController.popBackStack() },
+                alTerminar = terminarFormulario,
+            )
+        }
+        composable<RutaEditarGasto> { entrada ->
+            val ruta = entrada.toRoute<RutaEditarGasto>()
+            GastoFormScreen(
+                idGasto = ruta.id,
+                alVolver = { navController.popBackStack() },
+                alTerminar = terminarFormulario,
             )
         }
         composable<RutaNuevoCliente> {

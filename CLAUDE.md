@@ -59,7 +59,7 @@ Platform-specific implementations (expect/actual) go in `shared/src/androidMain`
   HTTP engine: OkHttp on androidMain and jvmMain; common code builds the client with
   `HttpClient { ... }` and Ktor picks the engine on the classpath. (Ktor 3.6 also offers the
   `ktor-client-engine-defaults` artifact; not adopted yet.)
-- kotlinx.serialization, kotlinx.coroutines
+- kotlinx.serialization, kotlinx.coroutines, kotlinx-datetime 0.8.0 (`LocalDate` / `LocalDateTime`; no `java.time` in commonMain)
 - Koin 4.2.2 (core, compose, compose-viewmodel) — modules in `di/`, started by `initKoin()`
 - Multiplatform Settings 1.3.0 (stores the session only: access token, refresh token, user id
   and email; no offline cache for now). Its last release is from Nov 2024; it compiles and builds
@@ -135,7 +135,8 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   ├── navigation/  routes + outer graph (Login, Registro, Shell) + ShellScreen (sidebar + content
 │   │                area with its own nested NavHost) + ShellViewModel (email, logout)
 │   ├── login/ clientes/ gastos/ ingresos/ dashboard/   (Screen + ViewModel + UiState each;
-│   │                clientes/ has the list and the create/edit form)
+│   │                clientes/ has the list and the create/edit form; gastos/ has the list, the
+│   │                read-only detail (with the review action) and the create/edit form)
 │   └── common/      shared composables: Estados (loading / empty / error + retry), BarraTitulo
 │                    (title + explicit Volver), Formulario (form container, fields, buttons),
 │                    MensajesError (the single place that maps errors to texts)
@@ -218,12 +219,13 @@ Implemented flow (all in `data/`):
   backend (they rest on `SecurityConfig`'s `HttpStatusEntryPoint(UNAUTHORIZED)`).
 - Never log passwords or tokens (Kermit prints whatever it is given).
 
-## Money — DECISION PENDING
-`BigDecimal` does not exist in `commonMain`, and the backend uses it for all money. The
-representation (String, Long cents, or a multiplatform decimal library) will be decided when
-the gastos area is built. Until then: never use `Double`/`Float` for money, do no arithmetic
-on amounts in the client (the backend computes totals and profit), and ask before choosing a
-representation.
+## Money — DECIDED
+Amounts are TEXT in the client, with NO arithmetic (the backend computes totals and profit).
+`domain/model/Importe` is a value class over String: `Importe.de(texto)` validates user input
+(digits, at most 2 decimals, comma or dot) and normalizes to a dot; `mostrar()` gives the comma
+display, using string operations only. `data/remote/dto/ImporteSerializer` reads the JSON number
+as its literal text (`121.00` keeps its zeros) and writes it back as a JSON NUMBER, not a string.
+Never use `Double`/`Float` for money.
 
 ## Code conventions
 - Domain terms in Spanish (Gasto, Ingreso, Cliente, ResumenPeriodo...); technical suffixes
@@ -271,26 +273,40 @@ logout, session restore on restart and wrong credentials confirmed working by th
 (`./gradlew :desktopApp:run`; mind the login rate limit of 10/min). NOT yet verified against the
 real backend: backend down (server unreachable message) and the token refresh.
 The **clientes vertical slice is DONE** (code, unit tests, builds; not yet run against the real
-backend): domain, data, the logged-in shell (sidebar with Clientes and disabled Gastos / Ingresos /
+backend): domain, data, the logged-in shell (sidebar with Clientes, Gastos and disabled Ingresos /
 Dashboard placeholders, email and logout), the list (loading / empty / error / content, refresh,
 deactivate with confirmation), and one create/edit form (NIF editable only on create; required
 fields checked on the client, everything else shown per field from the backend's 400 map; 404 on
 edit returns to the list with a message). The list also shows deactivated clientes (tagged
 "Inactivo"). Unit tests cover the list and form ViewModels with a fake repository.
-Planned slice order after that: gastos -> ingresos/cobros -> dashboard.
+The **gastos vertical slice is DONE** (code, unit tests, builds; not yet run against the real
+backend): `Importe` money type, domain, data (`GastoApi`, `CategoriaApi`), list (BORRADOR rows stand
+out as pending review), read-only detail, one create/edit form (cliente selector from the active
+clientes; category selector and `deducible` switch on edit only, because the create request has
+neither; fecha as a `yyyy-MM-dd` text field, no date picker; required `total` checked on the client,
+everything else per field from the backend's 400 map) and the "Marcar como revisado" action with
+confirmation (enabled for BORRADOR / PROCESADA only). Invoice digitization (`/digitalizar`) is NOT
+built. `GastoResponse` has no `total`, so the list shows base imponible and IVA, and the edit form
+cannot prefill the total: the user types it again. Unit tests cover the list, detail and form
+ViewModels with fake repositories, and the repositories with MockEngine.
+Planned slice order after that: ingresos/cobros -> dashboard.
 
 ## Pending / deferred
 - KNOWN ISSUE (clientes): creating a cliente whose NIF already exists returns 409, and the backend
   counts deactivated clientes too. There is no reactivate endpoint, so a deactivated cliente's NIF
   cannot be reused or recovered from the client. The form says so on a 409; the real fix needs a
   backend change (reactivate endpoint or excluding deactivated clientes from the NIF check).
-- Money representation (see above).
 - Navigation Compose is on a release candidate (2.10.0-rc01): update to the stable 2.10.x when
   it exists. Navigation 3 was checked and not adopted (see Tech stack); navigation is isolated
   in `ui/navigation/` so a later switch stays contained.
 - Secure token storage.
 - Mobile layout adaptation (bottom navigation) after the desktop version works.
-- Invoice digitization upload: file picker on desktop, camera/gallery on Android (expect/actual).
+- Invoice digitization upload (`POST /api/gastos/digitalizar`): file picker on desktop, camera/gallery
+  on Android (expect/actual).
+- Gastos: the backend does not return `total` in `GastoResponse` (open item in the API contract), and
+  does not document whether REVISADA / EXPORTADA gastos can be edited; "Editar" is offered for every
+  estado and the backend's 409 is explained in the form. A date picker was not adopted because it was
+  not verified on Desktop.
 - Optional offline cache (Room KMP) only if a real need appears.
 
 ## Working style

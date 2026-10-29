@@ -35,6 +35,8 @@ fun ErrorAuth.mensaje(): String {
         ErrorAuth.EmailYaRegistrado -> stringResource(Res.string.error_email_registrado)
         ErrorAuth.NoEncontrado -> stringResource(Res.string.error_no_encontrado)
         ErrorAuth.Conflicto -> stringResource(Res.string.error_conflicto)
+        is ErrorAuth.NoEncontradoConDetalle -> stringResource(Res.string.error_no_encontrado)
+        is ErrorAuth.ConflictoConDetalle -> stringResource(Res.string.error_conflicto)
         ErrorAuth.ServidorInaccesible -> stringResource(Res.string.error_sin_conexion)
         ErrorAuth.Inesperado -> stringResource(Res.string.error_inesperado)
     }
