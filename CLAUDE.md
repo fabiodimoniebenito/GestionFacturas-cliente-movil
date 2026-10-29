@@ -218,12 +218,13 @@ Implemented flow (all in `data/`):
   backend (they rest on `SecurityConfig`'s `HttpStatusEntryPoint(UNAUTHORIZED)`).
 - Never log passwords or tokens (Kermit prints whatever it is given).
 
-## Money — DECISION PENDING
-`BigDecimal` does not exist in `commonMain`, and the backend uses it for all money. The
-representation (String, Long cents, or a multiplatform decimal library) will be decided when
-the gastos area is built. Until then: never use `Double`/`Float` for money, do no arithmetic
-on amounts in the client (the backend computes totals and profit), and ask before choosing a
-representation.
+## Money — DECIDED
+Amounts are TEXT in the client, with NO arithmetic (the backend computes totals and profit).
+`domain/model/Importe` is a value class over String: `Importe.de(texto)` validates user input
+(digits, at most 2 decimals, comma or dot) and normalizes to a dot; `mostrar()` gives the comma
+display, using string operations only. `data/remote/dto/ImporteSerializer` reads the JSON number
+as its literal text (`121.00` keeps its zeros) and writes it back as a JSON NUMBER, not a string.
+Never use `Double`/`Float` for money.
 
 ## Code conventions
 - Domain terms in Spanish (Gasto, Ingreso, Cliente, ResumenPeriodo...); technical suffixes
@@ -284,7 +285,6 @@ Planned slice order after that: gastos -> ingresos/cobros -> dashboard.
   counts deactivated clientes too. There is no reactivate endpoint, so a deactivated cliente's NIF
   cannot be reused or recovered from the client. The form says so on a 409; the real fix needs a
   backend change (reactivate endpoint or excluding deactivated clientes from the NIF check).
-- Money representation (see above).
 - Navigation Compose is on a release candidate (2.10.0-rc01): update to the stable 2.10.x when
   it exists. Navigation 3 was checked and not adopted (see Tech stack); navigation is isolated
   in `ui/navigation/` so a later switch stays contained.
