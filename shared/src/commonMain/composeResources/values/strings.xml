@@ -80,4 +80,38 @@
     <string name="cliente_form_error_nombre_vacio">Introduce el nombre del cliente</string>
     <string name="cliente_form_error_nif_vacio">Introduce el NIF del cliente</string>
     <string name="cliente_form_error_nif_duplicado">Ya existe un cliente con ese NIF. Puede ser un cliente desactivado: los clientes desactivados también cuentan y no se pueden reactivar.</string>
+
+    <!-- Gastos -->
+    <string name="gastos_titulo">Gastos</string>
+    <string name="gastos_actualizar">Actualizar</string>
+    <string name="gastos_vacio">Todavía no tienes gastos.</string>
+    <string name="gastos_actualizar_fallido">No se pudo actualizar la lista.</string>
+    <string name="gastos_sin_dato">—</string>
+    <string name="gastos_sin_emisor">Sin emisor</string>
+    <string name="gastos_base_imponible">Base imponible</string>
+    <string name="gastos_iva">IVA</string>
+    <string name="gastos_pendiente_revision">Pendiente de revisión</string>
+    <string name="gasto_estado_borrador">Borrador</string>
+    <string name="gasto_estado_procesada">Procesada</string>
+    <string name="gasto_estado_revisada">Revisada</string>
+    <string name="gasto_estado_exportada">Exportada</string>
+
+    <!-- Detalle de gasto -->
+    <string name="gasto_detalle_titulo">Detalle del gasto</string>
+    <string name="gasto_detalle_id">Número</string>
+    <string name="gasto_detalle_estado">Estado</string>
+    <string name="gasto_detalle_emisor">Emisor</string>
+    <string name="gasto_detalle_fecha_emision">Fecha de emisión</string>
+    <string name="gasto_detalle_base_imponible">Base imponible</string>
+    <string name="gasto_detalle_iva">IVA</string>
+    <string name="gasto_detalle_moneda">Moneda</string>
+    <string name="gasto_detalle_categoria">Categoría</string>
+    <string name="gasto_detalle_cliente">Cliente</string>
+    <string name="gasto_detalle_deducible">Deducible</string>
+    <string name="gasto_detalle_creado_en">Creado</string>
+    <string name="gasto_detalle_si">Sí</string>
+    <string name="gasto_detalle_no">No</string>
+    <string name="gasto_detalle_editar">Editar</string>
+    <string name="gasto_detalle_revisar">Marcar como revisado</string>
+    <string name="gasto_detalle_ya_no_existe">Ese gasto ya no existe.</string>
 </resources>
