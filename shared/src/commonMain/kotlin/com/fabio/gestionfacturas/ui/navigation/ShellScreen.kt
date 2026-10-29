@@ -40,6 +40,7 @@ import com.fabio.gestionfacturas.ui.clientes.ClienteFormScreen
 import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.BotonPrincipal
+import com.fabio.gestionfacturas.ui.gastos.GastoDetalleScreen
 import com.fabio.gestionfacturas.ui.gastos.GastosScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -164,6 +165,10 @@ private fun ContenidoShell(navController: NavHostController) {
         }
         composable<RutaGastos> {
             GastosScreen(alAbrir = { id -> navController.navigate(RutaDetalleGasto(id)) })
+        }
+        composable<RutaDetalleGasto> { entrada ->
+            val ruta = entrada.toRoute<RutaDetalleGasto>()
+            GastoDetalleScreen(idGasto = ruta.id, alVolver = { navController.popBackStack() })
         }
         composable<RutaNuevoCliente> {
             ClienteFormScreen(
