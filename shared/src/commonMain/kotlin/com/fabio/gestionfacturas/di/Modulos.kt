@@ -15,6 +15,7 @@ import com.fabio.gestionfacturas.domain.repository.AuthRepository
 import com.fabio.gestionfacturas.domain.repository.ClienteRepository
 import com.fabio.gestionfacturas.ui.clientes.ClienteFormViewModel
 import com.fabio.gestionfacturas.ui.clientes.ClientesViewModel
+import com.fabio.gestionfacturas.ui.gastos.GastosViewModel
 import com.fabio.gestionfacturas.ui.login.LoginViewModel
 import com.fabio.gestionfacturas.ui.login.RegistroViewModel
 import com.fabio.gestionfacturas.ui.navigation.ShellViewModel
@@ -41,6 +42,7 @@ val moduloUi = module {
     viewModel { RegistroViewModel(get()) }
     viewModel { ShellViewModel(get()) }
     viewModel { ClientesViewModel(get()) }
+    viewModel { GastosViewModel(get()) }
     viewModel { parametros -> ClienteFormViewModel(parametros.getOrNull<Long>(), get()) }
 }
 

@@ -21,7 +21,9 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -38,6 +40,7 @@ import com.fabio.gestionfacturas.ui.clientes.ClienteFormScreen
 import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.BotonPrincipal
+import com.fabio.gestionfacturas.ui.gastos.GastosScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -48,9 +51,18 @@ fun ShellScreen(
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
+    val destino = navController.currentBackStackEntryAsState().value?.destination
+    val enGastos = destino?.hasRoute<RutaGastos>() == true || destino?.hasRoute<RutaDetalleGasto>() == true
+    val enClientes = destino?.hasRoute<RutaClientes>() == true ||
+        destino?.hasRoute<RutaNuevoCliente>() == true ||
+        destino?.hasRoute<RutaEditarCliente>() == true
 
     Row(modifier = Modifier.fillMaxSize()) {
         BarraLateral(
+            enClientes = enClientes,
+            enGastos = enGastos,
+            alIrAClientes = { irA(navController, RutaClientes) },
+            alIrAGastos = { irA(navController, RutaGastos) },
             email = estado.email,
             cerrandoSesion = estado.cerrandoSesion,
             alCerrarSesion = viewModel::onCerrarSesion,
@@ -63,6 +75,10 @@ fun ShellScreen(
 
 @Composable
 private fun BarraLateral(
+    enClientes: Boolean,
+    enGastos: Boolean,
+    alIrAClientes: () -> Unit,
+    alIrAGastos: () -> Unit,
     email: String,
     cerrandoSesion: Boolean,
     alCerrarSesion: () -> Unit,
@@ -77,13 +93,17 @@ private fun BarraLateral(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(12.dp),
             )
-            // Clientes is the only area built so far; its inner routes all belong to it.
+            // Each area owns its inner routes (list, form, detail), so the item stays selected inside them.
             NavigationDrawerItem(
                 label = { Text(stringResource(Res.string.menu_clientes)) },
-                selected = true,
-                onClick = {},
+                selected = enClientes,
+                onClick = alIrAClientes,
             )
-            ElementoPendiente(stringResource(Res.string.menu_gastos))
+            NavigationDrawerItem(
+                label = { Text(stringResource(Res.string.menu_gastos)) },
+                selected = enGastos,
+                onClick = alIrAGastos,
+            )
             ElementoPendiente(stringResource(Res.string.menu_ingresos))
             ElementoPendiente(stringResource(Res.string.menu_dashboard))
             Spacer(Modifier.weight(1f))
@@ -98,6 +118,14 @@ private fun BarraLateral(
                 alPulsar = alCerrarSesion,
             )
         }
+    }
+}
+
+/** Switches area: the back stack returns to the start so areas do not pile up. */
+private fun irA(navController: NavHostController, ruta: Any) {
+    navController.navigate(ruta) {
+        popUpTo(RutaClientes) { inclusive = false }
+        launchSingleTop = true
     }
 }
 
@@ -133,6 +161,9 @@ private fun ContenidoShell(navController: NavHostController) {
                 resultadoFormulario = resultado?.let { ResultadoFormulario.valueOf(it) },
                 alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
             )
+        }
+        composable<RutaGastos> {
+            GastosScreen(alAbrir = { id -> navController.navigate(RutaDetalleGasto(id)) })
         }
         composable<RutaNuevoCliente> {
             ClienteFormScreen(
