@@ -139,4 +139,14 @@
     <string name="gasto_form_conflicto">Este gasto ya no se puede editar en su estado actual.</string>
     <string name="gasto_form_selectores_fallidos">No se pudieron cargar o actualizar los clientes o las categorías.</string>
     <string name="gasto_form_recargar_listas">Recargar listas</string>
+
+    <!-- Revisión de gasto -->
+    <string name="gasto_revisar_titulo">Marcar como revisado</string>
+    <string name="gasto_revisar_texto">¿Confirmas que has revisado los datos de este gasto? Después ya no se podrá revisar de nuevo.</string>
+    <string name="gasto_revisar_confirmar">Marcar como revisado</string>
+    <string name="gasto_revisar_cancelar">Cancelar</string>
+    <string name="gasto_revisar_ok">Gasto marcado como revisado.</string>
+    <string name="gasto_revisar_fallido">No se pudo marcar como revisado.</string>
+    <string name="gasto_revisar_falta_datos">Faltan datos para revisarlo (por ejemplo la fecha o el total). Edita el gasto y vuelve a intentarlo.</string>
+    <string name="gasto_revisar_conflicto">Este gasto ya no se puede revisar en su estado actual.</string>
 </resources>

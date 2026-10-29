@@ -9,6 +9,7 @@ import com.fabio.gestionfacturas.ui.common.comoErrorAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class GastoDetalleViewModel(
@@ -36,21 +37,75 @@ class GastoDetalleViewModel(
         cargar()
     }
 
+    fun onPedirRevisar() {
+        val estado = _uiState.value
+        if (!estado.puedeRevisar || estado.revisando) {
+            return
+        }
+        _uiState.update { it.copy(confirmandoRevision = true) }
+    }
+
+    fun onCancelarRevisar() {
+        if (_uiState.value.revisando) {
+            return
+        }
+        _uiState.update { it.copy(confirmandoRevision = false) }
+    }
+
+    fun onConfirmarRevisar() {
+        val estado = _uiState.value
+        if (!estado.confirmandoRevision || estado.revisando) {
+            return
+        }
+        _uiState.update { it.copy(revisando = true) }
+        viewModelScope.launch {
+            gastos.revisar(idGasto).fold(
+                onSuccess = {
+                    _uiState.update {
+                        it.copy(
+                            revisando = false,
+                            confirmandoRevision = false,
+                            mensaje = MensajeGastoDetalle.Revisado,
+                            huboCambios = true,
+                        )
+                    }
+                    cargar()
+                },
+                onFailure = { fallo ->
+                    val error = fallo.comoErrorAuth()
+                    _uiState.update { it.copy(revisando = false, confirmandoRevision = false) }
+                    if (error == ErrorAuth.NoEncontrado || error is ErrorAuth.NoEncontradoConDetalle) {
+                        _uiState.update { it.copy(carga = CargaGastoDetalle.NoEncontrado) }
+                    } else {
+                        _uiState.update { it.copy(mensaje = MensajeGastoDetalle.RevisionFallida(error)) }
+                    }
+                },
+            )
+        }
+    }
+
+    fun onMensajeConsumido() {
+        _uiState.update { it.copy(mensaje = null) }
+    }
+
+    fun onCambiosNotificados() {
+        _uiState.update { it.copy(huboCambios = false) }
+    }
+
     private fun cargar() {
-        _uiState.value = GastoDetalleUiState(CargaGastoDetalle.Cargando)
+        _uiState.update { it.copy(carga = CargaGastoDetalle.Cargando) }
         viewModelScope.launch {
             gastos.obtener(idGasto).fold(
                 onSuccess = { gasto ->
-                    _uiState.value = GastoDetalleUiState(
-                        CargaGastoDetalle.Contenido(gasto, nombreDeCategoria(gasto.categoriaId)),
-                    )
+                    val nombre = nombreDeCategoria(gasto.categoriaId)
+                    _uiState.update { it.copy(carga = CargaGastoDetalle.Contenido(gasto, nombre)) }
                 },
                 onFailure = { fallo ->
                     val carga = when (val error = fallo.comoErrorAuth()) {
                         ErrorAuth.NoEncontrado, is ErrorAuth.NoEncontradoConDetalle -> CargaGastoDetalle.NoEncontrado
                         else -> CargaGastoDetalle.Error(error)
                     }
-                    _uiState.value = GastoDetalleUiState(carga)
+                    _uiState.update { it.copy(carga = carga) }
                 },
             )
         }

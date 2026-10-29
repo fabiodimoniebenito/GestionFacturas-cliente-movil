@@ -20,6 +20,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -199,5 +200,164 @@ class GastoDetalleViewModelTest {
 
         assertFalse(estado.puedeEditar)
         assertFalse(estado.puedeRevisar)
+    }
+
+    // ---- review ------------------------------------------------------------------------------
+
+    private fun viewModelConBorrador(): GastoDetalleViewModel {
+        gastos.resultadoObtener = Result.success(completo)
+        return crearViewModel()
+    }
+
+    @Test
+    fun pedirRevisarAbreLaConfirmacionSinLlamarAlBackend() {
+        val viewModel = viewModelConBorrador()
+
+        viewModel.onPedirRevisar()
+
+        assertTrue(viewModel.uiState.value.confirmandoRevision)
+        assertTrue(gastos.revisados.isEmpty())
+    }
+
+    @Test
+    fun noSePuedePedirRevisarUnGastoYaRevisado() {
+        gastos.resultadoObtener = Result.success(completo.copy(estado = EstadoGasto.REVISADA))
+        val viewModel = crearViewModel()
+
+        viewModel.onPedirRevisar()
+
+        assertFalse(viewModel.uiState.value.confirmandoRevision)
+    }
+
+    @Test
+    fun cancelarCierraLaConfirmacion() {
+        val viewModel = viewModelConBorrador()
+        viewModel.onPedirRevisar()
+
+        viewModel.onCancelarRevisar()
+
+        assertFalse(viewModel.uiState.value.confirmandoRevision)
+        assertTrue(gastos.revisados.isEmpty())
+    }
+
+    @Test
+    fun confirmarRevisaRecargaElGastoYAvisaDeLosCambios() {
+        val viewModel = viewModelConBorrador()
+        gastos.resultadoRevisar = Result.success(completo.copy(estado = EstadoGasto.REVISADA))
+        gastos.resultadoObtener = Result.success(completo.copy(estado = EstadoGasto.REVISADA))
+        viewModel.onPedirRevisar()
+
+        viewModel.onConfirmarRevisar()
+
+        val estado = viewModel.uiState.value
+        assertEquals(listOf(5L), gastos.revisados)
+        assertEquals(MensajeGastoDetalle.Revisado, estado.mensaje)
+        assertTrue(estado.huboCambios)
+        assertFalse(estado.confirmandoRevision)
+        assertFalse(estado.revisando)
+        assertEquals(EstadoGasto.REVISADA, (estado.carga as CargaGastoDetalle.Contenido).gasto.estado)
+        assertFalse(estado.puedeRevisar)
+
+        viewModel.onCambiosNotificados()
+        assertFalse(viewModel.uiState.value.huboCambios)
+    }
+
+    @Test
+    fun mientrasSeRevisaLosBotonesEstanBloqueadosYUnSegundoConfirmarSeIgnora() {
+        val viewModel = viewModelConBorrador()
+        val puerta = CompletableDeferred<Unit>()
+        gastos.puertaRevisar = puerta
+        gastos.resultadoRevisar = Result.success(completo)
+        viewModel.onPedirRevisar()
+
+        viewModel.onConfirmarRevisar()
+        viewModel.onConfirmarRevisar()
+
+        assertTrue(viewModel.uiState.value.revisando)
+        assertFalse(viewModel.uiState.value.puedeRevisar)
+        assertFalse(viewModel.uiState.value.puedeEditar)
+        assertEquals(1, gastos.revisados.size)
+        viewModel.onCancelarRevisar()
+        assertTrue(viewModel.uiState.value.confirmandoRevision)
+        puerta.complete(Unit)
+    }
+
+    @Test
+    fun un400AlRevisarMuestraLoQueFalta() {
+        val viewModel = viewModelConBorrador()
+        val campos = mapOf("error" to "Falta la fecha de emisión")
+        gastos.resultadoRevisar = Result.failure(ErrorAuth.Validacion(campos))
+        viewModel.onPedirRevisar()
+
+        viewModel.onConfirmarRevisar()
+
+        assertEquals(
+            MensajeGastoDetalle.RevisionFallida(ErrorAuth.Validacion(campos)),
+            viewModel.uiState.value.mensaje,
+        )
+        assertFalse(viewModel.uiState.value.huboCambios)
+        assertFalse(viewModel.uiState.value.confirmandoRevision)
+        assertTrue(viewModel.uiState.value.carga is CargaGastoDetalle.Contenido)
+    }
+
+    @Test
+    fun un409AlRevisarSeExponeComoConflictoDeEstado() {
+        val viewModel = viewModelConBorrador()
+        val error = ErrorAuth.ConflictoConDetalle("El gasto ya está revisado")
+        gastos.resultadoRevisar = Result.failure(error)
+        viewModel.onPedirRevisar()
+
+        viewModel.onConfirmarRevisar()
+
+        assertEquals(MensajeGastoDetalle.RevisionFallida(error), viewModel.uiState.value.mensaje)
+    }
+
+    @Test
+    fun un404AlRevisarPasaAlEstadoNoEncontrado() {
+        val viewModel = viewModelConBorrador()
+        gastos.resultadoRevisar = Result.failure(ErrorAuth.NoEncontradoConDetalle("Gasto no encontrado"))
+        viewModel.onPedirRevisar()
+
+        viewModel.onConfirmarRevisar()
+
+        assertEquals(CargaGastoDetalle.NoEncontrado, viewModel.uiState.value.carga)
+        assertNull(viewModel.uiState.value.mensaje)
+    }
+
+    @Test
+    fun otroErrorAlRevisarSeExpone() {
+        val viewModel = viewModelConBorrador()
+        gastos.resultadoRevisar = Result.failure(ErrorAuth.ServidorInaccesible)
+        viewModel.onPedirRevisar()
+
+        viewModel.onConfirmarRevisar()
+
+        assertEquals(
+            MensajeGastoDetalle.RevisionFallida(ErrorAuth.ServidorInaccesible),
+            viewModel.uiState.value.mensaje,
+        )
+    }
+
+    @Test
+    fun consumirElMensajeLoBorra() {
+        val viewModel = viewModelConBorrador()
+        gastos.resultadoRevisar = Result.failure(ErrorAuth.Inesperado)
+        viewModel.onPedirRevisar()
+        viewModel.onConfirmarRevisar()
+
+        viewModel.onMensajeConsumido()
+
+        assertNull(viewModel.uiState.value.mensaje)
+    }
+
+    @Test
+    fun recargarTrasEditarVuelveAPedirElGasto() {
+        val viewModel = viewModelConBorrador()
+        gastos.resultadoObtener = Result.success(completo.copy(emisor = "Nuevo"))
+
+        viewModel.onRecargar()
+
+        assertEquals(listOf(5L, 5L), gastos.obtenidos)
+        assertEquals("Nuevo", (viewModel.uiState.value.carga as CargaGastoDetalle.Contenido).gasto.emisor)
     }
 }
