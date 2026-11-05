@@ -136,7 +136,9 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   │                area with its own nested NavHost) + ShellViewModel (email, logout)
 │   ├── login/ clientes/ gastos/ ingresos/ dashboard/   (Screen + ViewModel + UiState each;
 │   │                clientes/ has the list and the create/edit form; gastos/ has the list, the
-│   │                read-only detail (with the review action) and the create/edit form)
+│   │                read-only detail (with the review action) and the create/edit form;
+│   │                ingresos/ has the list (client-side filter chips), the detail with the cobro
+│   │                actions and a create-only form)
 │   └── common/      shared composables: Estados (loading / empty / error + retry), BarraTitulo
 │                    (title + explicit Volver), Formulario (form container, fields, buttons),
 │                    MensajesError (the single place that maps errors to texts)
@@ -273,8 +275,8 @@ logout, session restore on restart and wrong credentials confirmed working by th
 (`./gradlew :desktopApp:run`; mind the login rate limit of 10/min). NOT yet verified against the
 real backend: backend down (server unreachable message) and the token refresh.
 The **clientes vertical slice is DONE** (code, unit tests, builds; not yet run against the real
-backend): domain, data, the logged-in shell (sidebar with Clientes, Gastos and disabled Ingresos /
-Dashboard placeholders, email and logout), the list (loading / empty / error / content, refresh,
+backend): domain, data, the logged-in shell (sidebar with Clientes, Gastos, Ingresos and a disabled
+Dashboard placeholder, email and logout), the list (loading / empty / error / content, refresh,
 deactivate with confirmation), and one create/edit form (NIF editable only on create; required
 fields checked on the client, everything else shown per field from the backend's 400 map; 404 on
 edit returns to the list with a message). The list also shows deactivated clientes (tagged
@@ -289,7 +291,21 @@ confirmation (enabled for BORRADOR / PROCESADA only). Invoice digitization (`/di
 built. `GastoResponse` has no `total`, so the list shows base imponible and IVA, and the edit form
 cannot prefill the total: the user types it again. Unit tests cover the list, detail and form
 ViewModels with fake repositories, and the repositories with MockEngine.
-Planned slice order after that: ingresos/cobros -> dashboard.
+The **ingresos vertical slice is DONE** (code, unit tests, builds; not yet run against the real
+backend): domain (`Ingreso`, `EstadoCobro` with a `DESCONOCIDO` fallback for unknown values),
+data (`IngresoApi`, DTOs with `Importe`), list with Todos / Pendientes / Cobrados chips applied
+CLIENT-SIDE on `estadoCobro` (the list endpoint has no filter), read-only detail with "Registrar
+cobro" (dialog with a `yyyy-MM-dd` date defaulting to today; PENDIENTE only) and "Revertir cobro"
+(with confirmation; COBRADA only), and a create-only form (required cliente selector with ACTIVE
+clientes, with a shortcut to create one when there are none; `total` required; `moneda` defaults to
+EUR; no automatic calculation of base / IVA / total). There is NO edit of ingresos: the backend has
+no endpoint for it (known limitation of this version). `IngresoResponse` only carries `clienteId`,
+so the cliente NAME is resolved in the client from `ClienteRepository.listar()` (list and detail,
+best effort); a cliente missing from that list (e.g. deactivated) shows a neutral placeholder. A 409
+on a cobro operation shows the backend's message next to the actions; a 404 returns to the list
+with a message. Unit tests cover the ViewModels with fake repositories and the repository / DTOs
+with MockEngine.
+Planned slice order after that: dashboard.
 
 ## Pending / deferred
 - KNOWN ISSUE (clientes): creating a cliente whose NIF already exists returns 409, and the backend

@@ -1,8 +1,7 @@
 # GestionFacturas — Cliente (Android + Desktop)
 
 > **Proyecto en desarrollo.** Ya están hechos el login y el registro (con renovación
-> automática del token), la gestión de clientes y la de gastos; el resto de áreas (ingresos,
-> dashboard) aún no.
+> automática del token), la gestión de clientes, la de gastos y la de ingresos; el dashboard aún no.
 > Este README describe el diseño acordado y evoluciona con el código.
 
 Cliente de **GestionFacturas**, una aplicación para que **freelances y autónomos** lleven
@@ -118,7 +117,10 @@ conservando los ceros finales (`121.00`).
   de probar a mano contra el backend real.
 - [x] Gastos (listado, detalle, alta, edición y revisión). Pendiente de probar a mano contra el
   backend real. Falta la digitalización de facturas (subida de archivo).
-- [ ] Ingresos y cobros
+- [x] Ingresos y cobros (listado con filtro Todos / Pendientes / Cobrados aplicado en el cliente,
+  detalle, alta, registrar y revertir cobro). Los ingresos no se pueden editar en esta versión
+  porque el backend no tiene ese endpoint. El nombre del cliente se resuelve en el cliente a
+  partir de la lista de clientes. Pendiente de probar a mano contra el backend real.
 - [ ] Dashboard (resumen, rentabilidad por cliente, pendientes de cobro)
 - [ ] Adaptación del diseño a móvil
 
