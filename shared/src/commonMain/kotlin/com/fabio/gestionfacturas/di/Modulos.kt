@@ -8,7 +8,9 @@ import com.fabio.gestionfacturas.data.remote.urlBaseApi
 import com.fabio.gestionfacturas.data.repository.AuthRepositoryImpl
 import com.fabio.gestionfacturas.data.repository.CategoriaRepositoryImpl
 import com.fabio.gestionfacturas.data.repository.GastoRepositoryImpl
+import com.fabio.gestionfacturas.data.repository.IngresoRepositoryImpl
 import com.fabio.gestionfacturas.domain.repository.CategoriaRepository
+import com.fabio.gestionfacturas.domain.repository.IngresoRepository
 import com.fabio.gestionfacturas.domain.repository.GastoRepository
 import com.fabio.gestionfacturas.data.repository.ClienteRepositoryImpl
 import com.fabio.gestionfacturas.domain.repository.AuthRepository
@@ -37,6 +39,7 @@ val moduloDatos = module {
     single<ClienteRepository> { ClienteRepositoryImpl(api = get<ApiClient>().clienteApi) }
     single<GastoRepository> { GastoRepositoryImpl(api = get<ApiClient>().gastoApi) }
     single<CategoriaRepository> { CategoriaRepositoryImpl(api = get<ApiClient>().categoriaApi) }
+    single<IngresoRepository> { IngresoRepositoryImpl(api = get<ApiClient>().ingresoApi) }
 }
 
 val moduloUi = module {

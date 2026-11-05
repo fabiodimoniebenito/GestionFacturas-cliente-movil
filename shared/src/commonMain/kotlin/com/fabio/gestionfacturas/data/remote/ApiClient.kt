@@ -65,6 +65,7 @@ class ApiClient(
     val clienteApi: ClienteApi = ClienteApi(authenticated)
     val gastoApi: GastoApi = GastoApi(authenticated)
     val categoriaApi: CategoriaApi = CategoriaApi(authenticated)
+    val ingresoApi: IngresoApi = IngresoApi(authenticated)
 
     /** Drops the access/refresh tokens Ktor's Bearer plugin has cached, so old credentials are not sent again. */
     fun limpiarTokensEnCache() {
