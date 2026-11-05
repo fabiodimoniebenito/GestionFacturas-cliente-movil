@@ -43,6 +43,8 @@ import com.fabio.gestionfacturas.ui.common.BotonPrincipal
 import com.fabio.gestionfacturas.ui.gastos.GastoDetalleScreen
 import com.fabio.gestionfacturas.ui.gastos.GastoFormScreen
 import com.fabio.gestionfacturas.ui.gastos.GastosScreen
+import com.fabio.gestionfacturas.ui.ingresos.IngresoDetalleScreen
+import com.fabio.gestionfacturas.ui.ingresos.IngresosScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -55,6 +57,7 @@ fun ShellScreen(
     val navController = rememberNavController()
     val destino = navController.currentBackStackEntryAsState().value?.destination
     val enGastos = destino?.hasRoute<RutaGastos>() == true || destino?.hasRoute<RutaDetalleGasto>() == true
+    val enIngresos = destino?.hasRoute<RutaIngresos>() == true || destino?.hasRoute<RutaDetalleIngreso>() == true
     val enClientes = destino?.hasRoute<RutaClientes>() == true ||
         destino?.hasRoute<RutaNuevoCliente>() == true ||
         destino?.hasRoute<RutaEditarCliente>() == true
@@ -63,8 +66,10 @@ fun ShellScreen(
         BarraLateral(
             enClientes = enClientes,
             enGastos = enGastos,
+            enIngresos = enIngresos,
             alIrAClientes = { irA(navController, RutaClientes) },
             alIrAGastos = { irA(navController, RutaGastos) },
+            alIrAIngresos = { irA(navController, RutaIngresos) },
             email = estado.email,
             cerrandoSesion = estado.cerrandoSesion,
             alCerrarSesion = viewModel::onCerrarSesion,
@@ -79,8 +84,10 @@ fun ShellScreen(
 private fun BarraLateral(
     enClientes: Boolean,
     enGastos: Boolean,
+    enIngresos: Boolean,
     alIrAClientes: () -> Unit,
     alIrAGastos: () -> Unit,
+    alIrAIngresos: () -> Unit,
     email: String,
     cerrandoSesion: Boolean,
     alCerrarSesion: () -> Unit,
@@ -106,7 +113,11 @@ private fun BarraLateral(
                 selected = enGastos,
                 onClick = alIrAGastos,
             )
-            ElementoPendiente(stringResource(Res.string.menu_ingresos))
+            NavigationDrawerItem(
+                label = { Text(stringResource(Res.string.menu_ingresos)) },
+                selected = enIngresos,
+                onClick = alIrAIngresos,
+            )
             ElementoPendiente(stringResource(Res.string.menu_dashboard))
             Spacer(Modifier.weight(1f))
             Text(
@@ -194,6 +205,30 @@ private fun ContenidoShell(navController: NavHostController) {
                 // The list below must refresh after a save or a review made from here.
                 alHuboCambios = { avisarALaLista(navController, ResultadoFormulario.GUARDADO) },
                 // The gasto is gone: back to the list, which explains it.
+                alYaNoExiste = {
+                    avisarALaLista(navController, ResultadoFormulario.NO_ENCONTRADO)
+                    navController.popBackStack()
+                },
+            )
+        }
+        composable<RutaIngresos> { entrada ->
+            val resultado by entrada.savedStateHandle
+                .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
+                .collectAsStateWithLifecycle()
+            IngresosScreen(
+                alAbrir = { id -> navController.navigate(RutaDetalleIngreso(id)) },
+                resultadoDetalle = resultado?.let { ResultadoFormulario.valueOf(it) },
+                alConsumirResultadoDetalle = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+            )
+        }
+        composable<RutaDetalleIngreso> { entrada ->
+            val ruta = entrada.toRoute<RutaDetalleIngreso>()
+            IngresoDetalleScreen(
+                idIngreso = ruta.id,
+                alVolver = { navController.popBackStack() },
+                // The list below must refresh after a cobro made from here.
+                alHuboCambios = { avisarALaLista(navController, ResultadoFormulario.GUARDADO) },
+                // The ingreso is gone: back to the list, which explains it.
                 alYaNoExiste = {
                     avisarALaLista(navController, ResultadoFormulario.NO_ENCONTRADO)
                     navController.popBackStack()
