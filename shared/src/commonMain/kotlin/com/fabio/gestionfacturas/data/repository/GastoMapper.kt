@@ -32,7 +32,7 @@ internal fun GastoResponse.aModelo(): Gasto = Gasto(
 )
 
 /** `creadoEn` may or may not carry a zone/offset; the zone is dropped, the local date-time kept. */
-private fun fechaHoraSinZona(texto: String): LocalDateTime {
+internal fun fechaHoraSinZona(texto: String): LocalDateTime {
     val t = texto.indexOf('T')
     var fin = texto.length
     if (t >= 0) {

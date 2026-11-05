@@ -149,4 +149,77 @@
     <string name="gasto_revisar_fallido">No se pudo marcar como revisado.</string>
     <string name="gasto_revisar_falta_datos">Faltan datos para revisarlo (por ejemplo la fecha o el total). Edita el gasto y vuelve a intentarlo.</string>
     <string name="gasto_revisar_conflicto">Este gasto ya no se puede revisar en su estado actual.</string>
+
+    <!-- Ingresos -->
+    <string name="ingresos_titulo">Ingresos</string>
+    <string name="ingresos_actualizar">Actualizar</string>
+    <string name="ingresos_vacio">Todavía no tienes ingresos.</string>
+    <string name="ingresos_vacio_filtro">No hay ingresos con este filtro.</string>
+    <string name="ingresos_actualizar_fallido">No se pudo actualizar la lista.</string>
+    <string name="ingresos_ya_no_existe">Ese ingreso ya no existe. Se ha actualizado la lista.</string>
+    <string name="ingresos_filtro_todos">Todos</string>
+    <string name="ingresos_filtro_pendientes">Pendientes</string>
+    <string name="ingresos_filtro_cobrados">Cobrados</string>
+    <string name="ingresos_sin_concepto">Sin concepto</string>
+    <string name="ingresos_cliente_desconocido">Cliente no disponible</string>
+    <string name="ingresos_sin_cliente">Sin cliente</string>
+    <string name="ingresos_total">Total</string>
+    <string name="ingresos_sin_dato">—</string>
+    <string name="ingreso_estado_pendiente">Pendiente</string>
+    <string name="ingreso_estado_cobrada">Cobrado</string>
+    <string name="ingreso_estado_desconocido">Desconocido</string>
+
+    <!-- Detalle de ingreso -->
+    <string name="ingreso_detalle_titulo">Detalle del ingreso</string>
+    <string name="ingreso_detalle_id">Número</string>
+    <string name="ingreso_detalle_estado">Estado de cobro</string>
+    <string name="ingreso_detalle_concepto">Concepto</string>
+    <string name="ingreso_detalle_cliente">Cliente</string>
+    <string name="ingreso_detalle_fecha_emision">Fecha de emisión</string>
+    <string name="ingreso_detalle_fecha_cobro">Fecha de cobro</string>
+    <string name="ingreso_detalle_base_imponible">Base imponible</string>
+    <string name="ingreso_detalle_iva">IVA</string>
+    <string name="ingreso_detalle_total">Total</string>
+    <string name="ingreso_detalle_moneda">Moneda</string>
+    <string name="ingreso_detalle_creado_en">Creado</string>
+    <string name="ingreso_detalle_registrar_cobro">Registrar cobro</string>
+    <string name="ingreso_detalle_revertir_cobro">Revertir cobro</string>
+    <string name="ingreso_detalle_ya_no_existe">Ese ingreso ya no existe.</string>
+
+    <!-- Cobro -->
+    <string name="cobro_registrar_titulo">Registrar cobro</string>
+    <string name="cobro_registrar_fecha">Fecha de cobro (AAAA-MM-DD)</string>
+    <string name="cobro_registrar_confirmar">Registrar</string>
+    <string name="cobro_cancelar">Cancelar</string>
+    <string name="cobro_error_fecha_invalida">Fecha no válida: usa el formato AAAA-MM-DD</string>
+    <string name="cobro_registrado_ok">Cobro registrado.</string>
+    <string name="cobro_revertir_titulo">Revertir cobro</string>
+    <string name="cobro_revertir_texto">El ingreso volverá a estar pendiente de cobro. ¿Continuar?</string>
+    <string name="cobro_revertir_confirmar">Revertir</string>
+    <string name="cobro_revertido_ok">Cobro revertido.</string>
+    <string name="cobro_fallido">No se pudo completar la operación.</string>
+    <string name="cobro_conflicto">El servidor no permite esta operación sobre el ingreso.</string>
+
+    <!-- Formulario de ingreso -->
+    <string name="ingresos_nuevo">Nuevo ingreso</string>
+    <string name="ingreso_form_titulo">Nuevo ingreso</string>
+    <string name="ingreso_form_concepto">Concepto</string>
+    <string name="ingreso_form_fecha_emision">Fecha de emisión (AAAA-MM-DD)</string>
+    <string name="ingreso_form_base_imponible">Base imponible</string>
+    <string name="ingreso_form_iva">IVA</string>
+    <string name="ingreso_form_total">Total *</string>
+    <string name="ingreso_form_moneda">Moneda</string>
+    <string name="ingreso_form_cliente">Cliente *</string>
+    <string name="ingreso_form_elegir_cliente">Elige un cliente</string>
+    <string name="ingreso_form_guardar">Guardar</string>
+    <string name="ingreso_form_cancelar">Cancelar</string>
+    <string name="ingreso_form_error_total_vacio">Introduce el total</string>
+    <string name="ingreso_form_error_importe_invalido">Importe no válido: usa números con hasta 2 decimales</string>
+    <string name="ingreso_form_error_fecha_invalida">Fecha no válida: usa el formato AAAA-MM-DD</string>
+    <string name="ingreso_form_error_cliente_vacio">Elige un cliente</string>
+    <string name="ingreso_form_sin_clientes">Para crear un ingreso necesitas al menos un cliente activo. Crea uno primero.</string>
+    <string name="ingreso_form_crear_cliente">Crear cliente</string>
+    <string name="ingreso_form_clientes_fallidos">No se pudieron cargar los clientes.</string>
+    <string name="ingreso_form_recargar_clientes">Recargar clientes</string>
+    <string name="ingreso_form_cargando_clientes">Cargando clientes…</string>
 </resources>
