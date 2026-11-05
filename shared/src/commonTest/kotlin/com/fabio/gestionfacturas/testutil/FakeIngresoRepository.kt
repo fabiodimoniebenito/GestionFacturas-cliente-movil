@@ -33,7 +33,10 @@ class FakeIngresoRepository : IngresoRepository {
     var puertaListar: CompletableDeferred<Unit>? = null
     var puertaObtener: CompletableDeferred<Unit>? = null
 
+    var puertaCrear: CompletableDeferred<Unit>? = null
+
     var llamadasListar = 0
+    val creados = mutableListOf<NuevoIngreso>()
     val obtenidos = mutableListOf<Long>()
     val cobrosRegistrados = mutableListOf<Pair<Long, LocalDate?>>()
     val cobrosRevertidos = mutableListOf<Long>()
@@ -50,7 +53,11 @@ class FakeIngresoRepository : IngresoRepository {
         return resultadoObtener
     }
 
-    override suspend fun crear(nuevo: NuevoIngreso): Result<Ingreso> = resultadoCrear
+    override suspend fun crear(nuevo: NuevoIngreso): Result<Ingreso> {
+        creados.add(nuevo)
+        puertaCrear?.await()
+        return resultadoCrear
+    }
 
     override suspend fun registrarCobro(id: Long, fechaCobro: LocalDate?): Result<Ingreso> {
         cobrosRegistrados.add(id to fechaCobro)
