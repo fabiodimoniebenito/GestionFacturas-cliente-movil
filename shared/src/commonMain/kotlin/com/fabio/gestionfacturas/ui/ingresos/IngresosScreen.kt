@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -37,6 +38,7 @@ import com.fabio.gestionfacturas.resources.ingresos_cliente_desconocido
 import com.fabio.gestionfacturas.resources.ingresos_filtro_cobrados
 import com.fabio.gestionfacturas.resources.ingresos_filtro_pendientes
 import com.fabio.gestionfacturas.resources.ingresos_filtro_todos
+import com.fabio.gestionfacturas.resources.ingresos_nuevo
 import com.fabio.gestionfacturas.resources.ingresos_sin_cliente
 import com.fabio.gestionfacturas.resources.ingresos_sin_concepto
 import com.fabio.gestionfacturas.resources.ingresos_sin_dato
@@ -59,6 +61,7 @@ private val AnchoMaximo = 900.dp
 
 @Composable
 fun IngresosScreen(
+    alNuevo: () -> Unit,
     alAbrir: (Long) -> Unit,
     resultadoDetalle: ResultadoFormulario? = null,
     alConsumirResultadoDetalle: () -> Unit = {},
@@ -74,6 +77,7 @@ fun IngresosScreen(
     }
     IngresosContent(
         estado = estado,
+        alNuevo = alNuevo,
         alAbrir = alAbrir,
         alRefrescar = viewModel::onRefrescar,
         alCambiarFiltro = viewModel::onFiltroCambiado,
@@ -84,6 +88,7 @@ fun IngresosScreen(
 @Composable
 fun IngresosContent(
     estado: IngresosUiState,
+    alNuevo: () -> Unit,
     alAbrir: (Long) -> Unit,
     alRefrescar: () -> Unit,
     alCambiarFiltro: (FiltroIngresos) -> Unit,
@@ -116,6 +121,7 @@ fun IngresosContent(
             ) {
                 Cabecera(
                     habilitado = estado.carga !is CargaIngresos.Cargando && !estado.refrescando,
+                    alNuevo = alNuevo,
                     alRefrescar = alRefrescar,
                 )
                 if (estado.refrescando) {
@@ -123,7 +129,11 @@ fun IngresosContent(
                 }
                 when (val carga = estado.carga) {
                     CargaIngresos.Cargando -> EstadoCargando()
-                    CargaIngresos.Vacio -> EstadoVacio(mensaje = stringResource(Res.string.ingresos_vacio))
+                    CargaIngresos.Vacio -> EstadoVacio(
+                        mensaje = stringResource(Res.string.ingresos_vacio),
+                        textoAccion = stringResource(Res.string.ingresos_nuevo),
+                        alPulsarAccion = alNuevo,
+                    )
                     is CargaIngresos.Error -> EstadoError(mensaje = carga.error.mensaje(), alReintentar = alRefrescar)
                     is CargaIngresos.Contenido -> {
                         Filtros(filtro = estado.filtro, alCambiar = alCambiarFiltro)
@@ -141,7 +151,7 @@ fun IngresosContent(
 }
 
 @Composable
-private fun Cabecera(habilitado: Boolean, alRefrescar: () -> Unit) {
+private fun Cabecera(habilitado: Boolean, alNuevo: () -> Unit, alRefrescar: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -155,6 +165,7 @@ private fun Cabecera(habilitado: Boolean, alRefrescar: () -> Unit) {
         OutlinedButton(onClick = alRefrescar, enabled = habilitado) {
             Text(stringResource(Res.string.ingresos_actualizar))
         }
+        Button(onClick = alNuevo) { Text(stringResource(Res.string.ingresos_nuevo)) }
     }
 }
 

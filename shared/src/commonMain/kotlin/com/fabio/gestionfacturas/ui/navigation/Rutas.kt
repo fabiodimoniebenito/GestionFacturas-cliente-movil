@@ -40,4 +40,7 @@ data class RutaEditarGasto(val id: Long)
 data object RutaIngresos
 
 @Serializable
+data object RutaNuevoIngreso
+
+@Serializable
 data class RutaDetalleIngreso(val id: Long)

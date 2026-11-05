@@ -44,6 +44,7 @@ import com.fabio.gestionfacturas.ui.gastos.GastoDetalleScreen
 import com.fabio.gestionfacturas.ui.gastos.GastoFormScreen
 import com.fabio.gestionfacturas.ui.gastos.GastosScreen
 import com.fabio.gestionfacturas.ui.ingresos.IngresoDetalleScreen
+import com.fabio.gestionfacturas.ui.ingresos.IngresoFormScreen
 import com.fabio.gestionfacturas.ui.ingresos.IngresosScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -57,7 +58,9 @@ fun ShellScreen(
     val navController = rememberNavController()
     val destino = navController.currentBackStackEntryAsState().value?.destination
     val enGastos = destino?.hasRoute<RutaGastos>() == true || destino?.hasRoute<RutaDetalleGasto>() == true
-    val enIngresos = destino?.hasRoute<RutaIngresos>() == true || destino?.hasRoute<RutaDetalleIngreso>() == true
+    val enIngresos = destino?.hasRoute<RutaIngresos>() == true ||
+        destino?.hasRoute<RutaNuevoIngreso>() == true ||
+        destino?.hasRoute<RutaDetalleIngreso>() == true
     val enClientes = destino?.hasRoute<RutaClientes>() == true ||
         destino?.hasRoute<RutaNuevoCliente>() == true ||
         destino?.hasRoute<RutaEditarCliente>() == true
@@ -216,9 +219,29 @@ private fun ContenidoShell(navController: NavHostController) {
                 .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
                 .collectAsStateWithLifecycle()
             IngresosScreen(
+                alNuevo = { navController.navigate(RutaNuevoIngreso) },
                 alAbrir = { id -> navController.navigate(RutaDetalleIngreso(id)) },
                 resultadoDetalle = resultado?.let { ResultadoFormulario.valueOf(it) },
                 alConsumirResultadoDetalle = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+            )
+        }
+        composable<RutaNuevoIngreso> { entrada ->
+            // Coming back from creating a cliente (the shortcut of the empty selector) leaves a result here.
+            val resultado by entrada.savedStateHandle
+                .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
+                .collectAsStateWithLifecycle()
+            IngresoFormScreen(
+                alVolver = { navController.popBackStack() },
+                alCrearCliente = { navController.navigate(RutaNuevoCliente) },
+                alCrear = { id ->
+                    // The list below must refresh; then the form is replaced by the detail of the new ingreso.
+                    avisarALaLista(navController, ResultadoFormulario.GUARDADO)
+                    navController.navigate(RutaDetalleIngreso(id)) {
+                        popUpTo<RutaNuevoIngreso> { inclusive = true }
+                    }
+                },
+                clienteCreado = resultado == ResultadoFormulario.GUARDADO.name,
+                alConsumirClienteCreado = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
             )
         }
         composable<RutaDetalleIngreso> { entrada ->

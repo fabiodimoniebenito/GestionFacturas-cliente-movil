@@ -199,4 +199,27 @@
     <string name="cobro_revertido_ok">Cobro revertido.</string>
     <string name="cobro_fallido">No se pudo completar la operación.</string>
     <string name="cobro_conflicto">El servidor no permite esta operación sobre el ingreso.</string>
+
+    <!-- Formulario de ingreso -->
+    <string name="ingresos_nuevo">Nuevo ingreso</string>
+    <string name="ingreso_form_titulo">Nuevo ingreso</string>
+    <string name="ingreso_form_concepto">Concepto</string>
+    <string name="ingreso_form_fecha_emision">Fecha de emisión (AAAA-MM-DD)</string>
+    <string name="ingreso_form_base_imponible">Base imponible</string>
+    <string name="ingreso_form_iva">IVA</string>
+    <string name="ingreso_form_total">Total *</string>
+    <string name="ingreso_form_moneda">Moneda</string>
+    <string name="ingreso_form_cliente">Cliente *</string>
+    <string name="ingreso_form_elegir_cliente">Elige un cliente</string>
+    <string name="ingreso_form_guardar">Guardar</string>
+    <string name="ingreso_form_cancelar">Cancelar</string>
+    <string name="ingreso_form_error_total_vacio">Introduce el total</string>
+    <string name="ingreso_form_error_importe_invalido">Importe no válido: usa números con hasta 2 decimales</string>
+    <string name="ingreso_form_error_fecha_invalida">Fecha no válida: usa el formato AAAA-MM-DD</string>
+    <string name="ingreso_form_error_cliente_vacio">Elige un cliente</string>
+    <string name="ingreso_form_sin_clientes">Para crear un ingreso necesitas al menos un cliente activo. Crea uno primero.</string>
+    <string name="ingreso_form_crear_cliente">Crear cliente</string>
+    <string name="ingreso_form_clientes_fallidos">No se pudieron cargar los clientes.</string>
+    <string name="ingreso_form_recargar_clientes">Recargar clientes</string>
+    <string name="ingreso_form_cargando_clientes">Cargando clientes…</string>
 </resources>
