@@ -19,14 +19,19 @@ class TemaViewModelTest {
     }
 
     @Test
-    fun cambiarTemaRecorreSistemaClaroOscuro() {
+    fun elegirTemaGuardaOscuroOClaro() {
         val viewModel = TemaViewModel(TemaFalso(PreferenciaTema.SISTEMA))
-        val vistos = buildList {
-            repeat(3) {
-                viewModel.onCambiarTema()
-                add(viewModel.preferencia.value)
-            }
-        }
-        assertEquals(listOf(PreferenciaTema.CLARO, PreferenciaTema.OSCURO, PreferenciaTema.SISTEMA), vistos)
+        viewModel.onElegirTema(oscuro = true)
+        assertEquals(PreferenciaTema.OSCURO, viewModel.preferencia.value)
+        viewModel.onElegirTema(oscuro = false)
+        assertEquals(PreferenciaTema.CLARO, viewModel.preferencia.value)
+    }
+
+    @Test
+    fun sistemaSigueElTemaDelSistemaOperativo() {
+        assertEquals(true, PreferenciaTema.SISTEMA.esOscuro(sistemaOscuro = true))
+        assertEquals(false, PreferenciaTema.SISTEMA.esOscuro(sistemaOscuro = false))
+        assertEquals(false, PreferenciaTema.CLARO.esOscuro(sistemaOscuro = true))
+        assertEquals(true, PreferenciaTema.OSCURO.esOscuro(sistemaOscuro = false))
     }
 }

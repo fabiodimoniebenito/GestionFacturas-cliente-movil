@@ -11,13 +11,8 @@ class TemaViewModel(
 
     val preferencia: StateFlow<PreferenciaTema> = repositorio.preferencia
 
-    /** Sistema -> Claro -> Oscuro -> Sistema. */
-    fun onCambiarTema() {
-        val siguiente = when (repositorio.preferencia.value) {
-            PreferenciaTema.SISTEMA -> PreferenciaTema.CLARO
-            PreferenciaTema.CLARO -> PreferenciaTema.OSCURO
-            PreferenciaTema.OSCURO -> PreferenciaTema.SISTEMA
-        }
-        repositorio.cambiar(siguiente)
+    /** The user picks light or dark explicitly; "follow the system" only exists until the first choice. */
+    fun onElegirTema(oscuro: Boolean) {
+        repositorio.cambiar(if (oscuro) PreferenciaTema.OSCURO else PreferenciaTema.CLARO)
     }
 }
