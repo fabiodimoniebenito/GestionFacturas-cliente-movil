@@ -2,7 +2,9 @@ package com.fabio.gestionfacturas.domain.model
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ImporteTest {
 
@@ -38,6 +40,18 @@ class ImporteTest {
         assertNull(Importe.de(",5"))
         assertNull(Importe.de("-5"))
         assertNull(Importe.de("1e3"))
+    }
+
+    @Test
+    fun esNegativoMiraSoloElSigno() {
+        assertTrue(Importe("-181.50").esNegativo)
+        assertFalse(Importe("181.50").esNegativo)
+        assertFalse(Importe("0.00").esNegativo)
+    }
+
+    @Test
+    fun mostrarConservaElSignoMenos() {
+        assertEquals("-181,50", Importe("-181.50").mostrar())
     }
 
     @Test
