@@ -13,7 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,6 +35,8 @@ import com.fabio.gestionfacturas.resources.menu_clientes
 import com.fabio.gestionfacturas.resources.menu_dashboard
 import com.fabio.gestionfacturas.resources.menu_gastos
 import com.fabio.gestionfacturas.resources.menu_ingresos
+import com.fabio.gestionfacturas.resources.menu_tema_a_claro
+import com.fabio.gestionfacturas.resources.menu_tema_a_oscuro
 import com.fabio.gestionfacturas.ui.clientes.ClienteFormScreen
 import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
@@ -50,8 +55,11 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ShellScreen(
     viewModel: ShellViewModel = koinViewModel(),
+    temaViewModel: TemaViewModel = koinViewModel(),
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
+    val tema by temaViewModel.preferencia.collectAsStateWithLifecycle()
+    val oscuro = tema.esOscuro(isSystemInDarkTheme())
     val navController = rememberNavController()
     val destino = navController.currentBackStackEntryAsState().value?.destination
     val enDashboard = destino?.hasRoute<RutaDashboard>() == true
@@ -73,6 +81,8 @@ fun ShellScreen(
             alIrAClientes = { irA(navController, RutaClientes) },
             alIrAGastos = { irA(navController, RutaGastos) },
             alIrAIngresos = { irA(navController, RutaIngresos) },
+            oscuro = oscuro,
+            alCambiarTema = { temaViewModel.onElegirTema(!oscuro) },
             email = estado.email,
             cerrandoSesion = estado.cerrandoSesion,
             alCerrarSesion = viewModel::onCerrarSesion,
@@ -93,6 +103,8 @@ private fun BarraLateral(
     alIrAClientes: () -> Unit,
     alIrAGastos: () -> Unit,
     alIrAIngresos: () -> Unit,
+    oscuro: Boolean,
+    alCambiarTema: () -> Unit,
     email: String,
     cerrandoSesion: Boolean,
     alCerrarSesion: () -> Unit,
@@ -134,6 +146,15 @@ private fun BarraLateral(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(horizontal = 12.dp),
             )
+            IconButton(onClick = alCambiarTema) {
+                // The icon shows the current mode; the description says what pressing it does.
+                Icon(
+                    imageVector = if (oscuro) IconoLuna else IconoSol,
+                    contentDescription = stringResource(
+                        if (oscuro) Res.string.menu_tema_a_claro else Res.string.menu_tema_a_oscuro,
+                    ),
+                )
+            }
             BotonPrincipal(
                 texto = stringResource(Res.string.menu_cerrar_sesion),
                 cargando = cerrandoSesion,

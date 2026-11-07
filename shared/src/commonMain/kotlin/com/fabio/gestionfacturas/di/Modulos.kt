@@ -12,6 +12,9 @@ import com.fabio.gestionfacturas.data.repository.GastoRepositoryImpl
 import com.fabio.gestionfacturas.data.repository.IngresoRepositoryImpl
 import com.fabio.gestionfacturas.domain.repository.CategoriaRepository
 import com.fabio.gestionfacturas.domain.repository.DashboardRepository
+import com.fabio.gestionfacturas.domain.repository.TemaRepository
+import com.fabio.gestionfacturas.data.repository.TemaRepositoryImpl
+import com.fabio.gestionfacturas.ui.navigation.TemaViewModel
 import com.fabio.gestionfacturas.domain.repository.IngresoRepository
 import com.fabio.gestionfacturas.domain.repository.GastoRepository
 import com.fabio.gestionfacturas.data.repository.ClienteRepositoryImpl
@@ -46,6 +49,7 @@ val moduloDatos = module {
     single<GastoRepository> { GastoRepositoryImpl(api = get<ApiClient>().gastoApi) }
     single<CategoriaRepository> { CategoriaRepositoryImpl(api = get<ApiClient>().categoriaApi) }
     single<IngresoRepository> { IngresoRepositoryImpl(api = get<ApiClient>().ingresoApi) }
+    single<TemaRepository> { TemaRepositoryImpl(get()) }
     single<DashboardRepository> { DashboardRepositoryImpl(api = get<ApiClient>().dashboardApi) }
 }
 
@@ -53,6 +57,7 @@ val moduloUi = module {
     viewModel { LoginViewModel(get()) }
     viewModel { RegistroViewModel(get()) }
     viewModel { ShellViewModel(get()) }
+    viewModel { TemaViewModel(get()) }
     viewModel { DashboardViewModel(get(), get()) }
     viewModel { ClientesViewModel(get()) }
     viewModel { GastosViewModel(get()) }
