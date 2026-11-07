@@ -1,7 +1,8 @@
 # GestionFacturas — Cliente (Android + Desktop)
 
 > **Proyecto en desarrollo.** Ya están hechos el login y el registro (con renovación
-> automática del token), la gestión de clientes, la de gastos, la de ingresos y el dashboard.
+> automática del token), la gestión de clientes, la de gastos, la de ingresos, el dashboard y el
+> modo oscuro.
 > Este README describe el diseño acordado y evoluciona con el código.
 
 Cliente de **GestionFacturas**, una aplicación para que **freelances y autónomos** lleven
@@ -36,7 +37,7 @@ iOS queda fuera del alcance por no disponer de Mac para compilarlo.
 | Asincronía | kotlinx.coroutines |
 | Fechas | kotlinx-datetime |
 | Inyección de dependencias | Koin |
-| Almacenamiento local | Multiplatform Settings (solo la sesión: tokens, id y email) |
+| Almacenamiento local | Multiplatform Settings (la sesión: tokens, id y email; y la preferencia de tema) |
 | Navegación | Navigation Compose (oficial, multiplataforma; versión 2.10.0-rc01, candidata a estable) |
 | Logging | Kermit |
 | Build | Gradle (Kotlin DSL) |
@@ -129,6 +130,9 @@ un beneficio negativo (`-181.50`) se conserva tal cual y se muestra en rojo; la 
   cliente), resumen, rentabilidad por cliente (en el orden del backend) y pendientes de cobro, cada
   sección con su propia carga y error. El nombre del cliente se resuelve en el cliente. Pendiente
   de probar a mano contra el backend real.
+- [x] Modo oscuro: un icono en el menú lateral (sol en modo claro, luna en modo oscuro) alterna
+  entre tema claro y oscuro. La primera vez se sigue el tema del sistema operativo; al pulsar el
+  icono se guarda la elección y se conserva al reiniciar.
 - [ ] Adaptación del diseño a móvil
 
 Se construye por **rebanadas verticales**: cada área se completa de punta a punta (red,
