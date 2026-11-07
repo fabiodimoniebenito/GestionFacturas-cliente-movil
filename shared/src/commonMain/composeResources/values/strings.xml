@@ -72,6 +72,10 @@
     <string name="dashboard_beneficio_caja_ayuda">Lo cobrado menos los gastos.</string>
     <string name="dashboard_beneficio_facturado">Beneficio facturado</string>
     <string name="dashboard_beneficio_facturado_ayuda">Lo facturado menos los gastos, aunque aún no esté cobrado.</string>
+    <string name="dashboard_rentabilidad_titulo">Rentabilidad por cliente</string>
+    <string name="dashboard_rentabilidad_vacio">Sin datos en este periodo</string>
+    <string name="dashboard_sin_cliente">Gastos generales (sin cliente)</string>
+    <string name="dashboard_sin_cliente_ayuda">Importes que no están asignados a ningún cliente.</string>
     <string name="dashboard_pendientes_titulo">Pendientes de cobro</string>
     <string name="dashboard_pendientes_total">Total pendiente</string>
     <string name="dashboard_pendientes_vacio">No hay cobros pendientes</string>

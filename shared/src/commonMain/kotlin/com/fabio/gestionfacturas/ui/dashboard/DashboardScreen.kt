@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import com.fabio.gestionfacturas.domain.model.Importe
+import com.fabio.gestionfacturas.domain.model.RentabilidadCliente
 import com.fabio.gestionfacturas.domain.model.ResumenPeriodo
 import com.fabio.gestionfacturas.resources.Res
 import com.fabio.gestionfacturas.resources.dashboard_actualizar
@@ -55,7 +56,11 @@ import com.fabio.gestionfacturas.resources.dashboard_periodo_mes
 import com.fabio.gestionfacturas.resources.dashboard_periodo_personalizado
 import com.fabio.gestionfacturas.resources.dashboard_periodo_trimestre
 import com.fabio.gestionfacturas.resources.dashboard_rango
+import com.fabio.gestionfacturas.resources.dashboard_rentabilidad_titulo
+import com.fabio.gestionfacturas.resources.dashboard_rentabilidad_vacio
 import com.fabio.gestionfacturas.resources.dashboard_resumen_titulo
+import com.fabio.gestionfacturas.resources.dashboard_sin_cliente
+import com.fabio.gestionfacturas.resources.dashboard_sin_cliente_ayuda
 import com.fabio.gestionfacturas.resources.dashboard_titulo
 import com.fabio.gestionfacturas.resources.estado_reintentar
 import com.fabio.gestionfacturas.resources.ingresos_cliente_desconocido
@@ -93,6 +98,7 @@ fun DashboardScreen(
         alAplicar = viewModel::onAplicarPersonalizado,
         alCambiarModo = viewModel::onModoCambiado,
         alReintentarResumen = viewModel::onReintentarResumen,
+        alReintentarRentabilidad = viewModel::onReintentarRentabilidad,
         alReintentarPendientes = viewModel::onReintentarPendientes,
     )
 }
@@ -108,6 +114,7 @@ fun DashboardContent(
     alAplicar: () -> Unit,
     alCambiarModo: (ModoImporte) -> Unit,
     alReintentarResumen: () -> Unit,
+    alReintentarRentabilidad: () -> Unit,
     alReintentarPendientes: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -123,6 +130,7 @@ fun DashboardContent(
             SelectorPeriodo(estado, alElegirPreset, alCambiarDesde, alCambiarHasta, alAplicar)
             SelectorModo(estado.modo, alCambiarModo)
             SeccionResumen(estado, alReintentarResumen)
+            SeccionRentabilidad(estado.rentabilidad, estado.modo, alReintentarRentabilidad)
             SeccionPendientes(estado.pendientes, alAbrirIngreso, alReintentarPendientes)
         }
     }
@@ -304,6 +312,78 @@ private fun TarjetaCifra(titulo: String, importe: Importe, modifier: Modifier = 
                 )
             }
         }
+    }
+}
+
+// ---- rentabilidad ----------------------------------------------------------------------------
+
+@Composable
+private fun SeccionRentabilidad(carga: CargaRentabilidad, modo: ModoImporte, alReintentar: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(stringResource(Res.string.dashboard_rentabilidad_titulo), style = MaterialTheme.typography.titleLarge)
+        when (carga) {
+            CargaRentabilidad.Cargando -> SeccionCargando()
+            CargaRentabilidad.Vacio -> Text(
+                text = stringResource(Res.string.dashboard_rentabilidad_vacio),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            is CargaRentabilidad.Error -> SeccionError(carga.error.mensaje(), alReintentar)
+            // Backend order, not clickable; no sorting or comparing of amounts here.
+            is CargaRentabilidad.Contenido -> carga.entradas.forEach { TarjetaRentabilidad(it, modo) }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaRentabilidad(entrada: RentabilidadCliente, modo: ModoImporte) {
+    val cifras = entrada.resumen.cifras(modo)
+    val sinCliente = entrada.clienteId == null
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = when {
+                    sinCliente -> stringResource(Res.string.dashboard_sin_cliente)
+                    entrada.clienteNombre != null -> entrada.clienteNombre
+                    else -> stringResource(Res.string.ingresos_cliente_desconocido)
+                },
+                style = MaterialTheme.typography.titleMedium,
+            )
+            if (sinCliente) {
+                Text(
+                    text = stringResource(Res.string.dashboard_sin_cliente_ayuda),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                CifraEnFila(stringResource(Res.string.dashboard_facturado), cifras.facturado, Modifier.weight(1f))
+                CifraEnFila(stringResource(Res.string.dashboard_cobrado), cifras.cobrado, Modifier.weight(1f))
+                CifraEnFila(stringResource(Res.string.dashboard_gastos), cifras.gastos, Modifier.weight(1f))
+                CifraEnFila(stringResource(Res.string.dashboard_beneficio_caja), cifras.beneficioCaja, Modifier.weight(1f))
+                CifraEnFila(
+                    stringResource(Res.string.dashboard_beneficio_facturado),
+                    cifras.beneficioFacturado,
+                    Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+/** A labelled figure inside a rentabilidad card; a negative one uses the error color. */
+@Composable
+private fun CifraEnFila(titulo: String, importe: Importe, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = titulo,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = textoEuros(importe),
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (importe.esNegativo) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
