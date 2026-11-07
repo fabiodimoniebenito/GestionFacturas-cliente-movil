@@ -41,7 +41,10 @@ class FakeDashboardRepository : DashboardRepository {
     var puertaResumen: CompletableDeferred<Unit>? = null
     var puertaPendientes: CompletableDeferred<Unit>? = null
 
+    var puertaRentabilidad: CompletableDeferred<Unit>? = null
+
     val llamadasResumen = mutableListOf<Pair<LocalDate, LocalDate>>()
+    val llamadasRentabilidad = mutableListOf<Pair<LocalDate, LocalDate>>()
     var llamadasPendientes = 0
 
     override suspend fun resumen(desde: LocalDate, hasta: LocalDate): Result<ResumenPeriodo> {
@@ -50,8 +53,11 @@ class FakeDashboardRepository : DashboardRepository {
         return resultadoResumen
     }
 
-    override suspend fun rentabilidad(desde: LocalDate, hasta: LocalDate): Result<List<RentabilidadCliente>> =
-        resultadoRentabilidad
+    override suspend fun rentabilidad(desde: LocalDate, hasta: LocalDate): Result<List<RentabilidadCliente>> {
+        llamadasRentabilidad.add(desde to hasta)
+        puertaRentabilidad?.await()
+        return resultadoRentabilidad
+    }
 
     override suspend fun pendientesCobro(): Result<PendientesCobro> {
         llamadasPendientes++

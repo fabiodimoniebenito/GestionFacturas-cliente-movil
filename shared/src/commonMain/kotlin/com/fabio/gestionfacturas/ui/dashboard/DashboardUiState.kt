@@ -3,6 +3,7 @@ package com.fabio.gestionfacturas.ui.dashboard
 import com.fabio.gestionfacturas.domain.model.ErrorAuth
 import com.fabio.gestionfacturas.domain.model.Importe
 import com.fabio.gestionfacturas.domain.model.IngresoPendiente
+import com.fabio.gestionfacturas.domain.model.RentabilidadCliente
 import com.fabio.gestionfacturas.domain.model.ResumenPeriodo
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -67,6 +68,17 @@ sealed interface CargaResumen {
     data class Error(val error: ErrorAuth) : CargaResumen
 }
 
+/**
+ * Entries in the backend's order. [RentabilidadCliente.clienteNombre] is null for the "sin cliente"
+ * entry (null `clienteId`) and for a cliente missing from the clientes list.
+ */
+sealed interface CargaRentabilidad {
+    data object Cargando : CargaRentabilidad
+    data object Vacio : CargaRentabilidad
+    data class Contenido(val entradas: List<RentabilidadCliente>) : CargaRentabilidad
+    data class Error(val error: ErrorAuth) : CargaRentabilidad
+}
+
 /** [nombreCliente] is null when the ingreso has no cliente or the cliente is not in the loaded list. */
 data class FilaPendiente(val ingreso: IngresoPendiente, val nombreCliente: String?)
 
@@ -87,5 +99,6 @@ data class DashboardUiState(
     val errorPersonalizado: ErrorPeriodo? = null,
     val modo: ModoImporte = ModoImporte.CON_IVA,
     val resumen: CargaResumen = CargaResumen.Cargando,
+    val rentabilidad: CargaRentabilidad = CargaRentabilidad.Cargando,
     val pendientes: CargaPendientes = CargaPendientes.Cargando,
 )

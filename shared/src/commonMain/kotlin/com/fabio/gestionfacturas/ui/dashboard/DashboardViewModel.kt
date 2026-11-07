@@ -3,6 +3,7 @@ package com.fabio.gestionfacturas.ui.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fabio.gestionfacturas.domain.model.PendientesCobro
+import com.fabio.gestionfacturas.domain.model.RentabilidadCliente
 import com.fabio.gestionfacturas.domain.repository.ClienteRepository
 import com.fabio.gestionfacturas.domain.repository.DashboardRepository
 import com.fabio.gestionfacturas.ui.common.comoErrorAuth
@@ -31,9 +32,10 @@ class DashboardViewModel(
 
     private var trabajoResumen: Job? = null
     private var trabajoPendientes: Job? = null
+    private var trabajoRentabilidad: Job? = null
 
     init {
-        cargarResumen(conservarContenido = false)
+        cargarPeriodo(conservarContenido = false)
         cargarPendientes(conservarContenido = false)
     }
 
@@ -68,7 +70,7 @@ class DashboardViewModel(
             return
         }
         _uiState.update { it.copy(preset = preset, periodo = periodo, errorPersonalizado = null) }
-        cargarResumen(conservarContenido = false)
+        cargarPeriodo(conservarContenido = false)
     }
 
     fun onDesdeCambiado(texto: String) {
@@ -98,7 +100,7 @@ class DashboardViewModel(
             return
         }
         _uiState.update { it.copy(periodo = Periodo(desde, hasta), errorPersonalizado = null) }
-        cargarResumen(conservarContenido = false)
+        cargarPeriodo(conservarContenido = false)
     }
 
     /** Only changes which fields are shown: no request. */
@@ -109,12 +111,16 @@ class DashboardViewModel(
     // ---- reloading ---------------------------------------------------------------------------
 
     fun onRefrescar() {
-        cargarResumen(conservarContenido = true)
+        cargarPeriodo(conservarContenido = true)
         cargarPendientes(conservarContenido = true)
     }
 
     fun onReintentarResumen() {
         cargarResumen(conservarContenido = false)
+    }
+
+    fun onReintentarRentabilidad() {
+        cargarRentabilidad(conservarContenido = false)
     }
 
     fun onReintentarPendientes() {
@@ -127,6 +133,12 @@ class DashboardViewModel(
     }
 
     // ---- loading -----------------------------------------------------------------------------
+
+    /** The two sections that depend on the period; each loads and fails on its own. */
+    private fun cargarPeriodo(conservarContenido: Boolean) {
+        cargarResumen(conservarContenido)
+        cargarRentabilidad(conservarContenido)
+    }
 
     /**
      * With [conservarContenido] the figures on screen stay until the answer arrives; otherwise the
@@ -142,6 +154,22 @@ class DashboardViewModel(
             dashboard.resumen(periodo.desde, periodo.hasta).fold(
                 onSuccess = { resumen -> _uiState.update { it.copy(resumen = CargaResumen.Contenido(resumen)) } },
                 onFailure = { fallo -> _uiState.update { it.copy(resumen = CargaResumen.Error(fallo.comoErrorAuth())) } },
+            )
+        }
+    }
+
+    private fun cargarRentabilidad(conservarContenido: Boolean) {
+        val periodo = _uiState.value.periodo
+        trabajoRentabilidad?.cancel()
+        trabajoRentabilidad = viewModelScope.launch {
+            val actual = _uiState.value.rentabilidad
+            val hayContenido = actual is CargaRentabilidad.Contenido || actual is CargaRentabilidad.Vacio
+            if (!conservarContenido || !hayContenido) {
+                _uiState.update { it.copy(rentabilidad = CargaRentabilidad.Cargando) }
+            }
+            dashboard.rentabilidad(periodo.desde, periodo.hasta).fold(
+                onSuccess = { entradas -> _uiState.update { it.copy(rentabilidad = conNombres(entradas)) } },
+                onFailure = { fallo -> _uiState.update { it.copy(rentabilidad = CargaRentabilidad.Error(fallo.comoErrorAuth())) } },
             )
         }
     }
@@ -169,6 +197,17 @@ class DashboardViewModel(
         val nombres = clientes.listar().getOrNull().orEmpty().associate { it.id to it.nombre }
         val filas = pendientes.ingresos.map { FilaPendiente(it, it.clienteId?.let { id -> nombres[id] }) }
         return CargaPendientes.Contenido(pendientes.total, filas)
+    }
+
+    /** Keeps the backend order. The API has no name, so it is filled in from the clientes list (best effort). */
+    private suspend fun conNombres(entradas: List<RentabilidadCliente>): CargaRentabilidad {
+        if (entradas.isEmpty()) {
+            return CargaRentabilidad.Vacio
+        }
+        val nombres = clientes.listar().getOrNull().orEmpty().associate { it.id to it.nombre }
+        return CargaRentabilidad.Contenido(
+            entradas.map { entrada -> entrada.copy(clienteNombre = entrada.clienteId?.let { id -> nombres[id] }) },
+        )
     }
 
     private fun parsearFecha(texto: String): LocalDate? =
