@@ -16,9 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -35,11 +32,11 @@ import com.fabio.gestionfacturas.resources.menu_clientes
 import com.fabio.gestionfacturas.resources.menu_dashboard
 import com.fabio.gestionfacturas.resources.menu_gastos
 import com.fabio.gestionfacturas.resources.menu_ingresos
-import com.fabio.gestionfacturas.resources.menu_proximamente
 import com.fabio.gestionfacturas.ui.clientes.ClienteFormScreen
 import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.common.BotonPrincipal
+import com.fabio.gestionfacturas.ui.dashboard.DashboardScreen
 import com.fabio.gestionfacturas.ui.gastos.GastoDetalleScreen
 import com.fabio.gestionfacturas.ui.gastos.GastoFormScreen
 import com.fabio.gestionfacturas.ui.gastos.GastosScreen
@@ -57,6 +54,7 @@ fun ShellScreen(
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     val destino = navController.currentBackStackEntryAsState().value?.destination
+    val enDashboard = destino?.hasRoute<RutaDashboard>() == true
     val enGastos = destino?.hasRoute<RutaGastos>() == true || destino?.hasRoute<RutaDetalleGasto>() == true
     val enIngresos = destino?.hasRoute<RutaIngresos>() == true ||
         destino?.hasRoute<RutaNuevoIngreso>() == true ||
@@ -67,9 +65,11 @@ fun ShellScreen(
 
     Row(modifier = Modifier.fillMaxSize()) {
         BarraLateral(
+            enDashboard = enDashboard,
             enClientes = enClientes,
             enGastos = enGastos,
             enIngresos = enIngresos,
+            alIrAlDashboard = { irA(navController, RutaDashboard) },
             alIrAClientes = { irA(navController, RutaClientes) },
             alIrAGastos = { irA(navController, RutaGastos) },
             alIrAIngresos = { irA(navController, RutaIngresos) },
@@ -85,9 +85,11 @@ fun ShellScreen(
 
 @Composable
 private fun BarraLateral(
+    enDashboard: Boolean,
     enClientes: Boolean,
     enGastos: Boolean,
     enIngresos: Boolean,
+    alIrAlDashboard: () -> Unit,
     alIrAClientes: () -> Unit,
     alIrAGastos: () -> Unit,
     alIrAIngresos: () -> Unit,
@@ -107,6 +109,11 @@ private fun BarraLateral(
             )
             // Each area owns its inner routes (list, form, detail), so the item stays selected inside them.
             NavigationDrawerItem(
+                label = { Text(stringResource(Res.string.menu_dashboard)) },
+                selected = enDashboard,
+                onClick = alIrAlDashboard,
+            )
+            NavigationDrawerItem(
                 label = { Text(stringResource(Res.string.menu_clientes)) },
                 selected = enClientes,
                 onClick = alIrAClientes,
@@ -121,7 +128,6 @@ private fun BarraLateral(
                 selected = enIngresos,
                 onClick = alIrAIngresos,
             )
-            ElementoPendiente(stringResource(Res.string.menu_dashboard))
             Spacer(Modifier.weight(1f))
             Text(
                 text = email,
@@ -140,20 +146,9 @@ private fun BarraLateral(
 /** Switches area: the back stack returns to the start so areas do not pile up. */
 private fun irA(navController: NavHostController, ruta: Any) {
     navController.navigate(ruta) {
-        popUpTo(RutaClientes) { inclusive = false }
+        popUpTo(RutaDashboard) { inclusive = false }
         launchSingleTop = true
     }
-}
-
-/** An area that does not exist yet: visible but not usable. */
-@Composable
-private fun ElementoPendiente(nombre: String) {
-    NavigationDrawerItem(
-        label = { Text(nombre + " (" + stringResource(Res.string.menu_proximamente) + ")") },
-        selected = false,
-        onClick = {},
-        modifier = Modifier.alpha(0.38f).semantics { disabled() },
-    )
 }
 
 /** Key under which the form leaves its result for the list (read once, then cleared). */
@@ -171,7 +166,18 @@ private fun ContenidoShell(navController: NavHostController) {
         navController.popBackStack()
     }
 
-    NavHost(navController = navController, startDestination = RutaClientes) {
+    NavHost(navController = navController, startDestination = RutaDashboard) {
+        composable<RutaDashboard> { entrada ->
+            // A cobro registered or reverted in the detail leaves a result here: the figures are stale.
+            val resultado by entrada.savedStateHandle
+                .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
+                .collectAsStateWithLifecycle()
+            DashboardScreen(
+                alAbrirIngreso = { id -> navController.navigate(RutaDetalleIngreso(id)) },
+                volvioDelDetalle = resultado != null,
+                alConsumirVueltaDelDetalle = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+            )
+        }
         composable<RutaClientes> { entrada ->
             val resultado by entrada.savedStateHandle
                 .getStateFlow<String?>(CLAVE_RESULTADO_FORMULARIO, null)
