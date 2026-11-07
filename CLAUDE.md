@@ -61,8 +61,8 @@ Platform-specific implementations (expect/actual) go in `shared/src/androidMain`
   `ktor-client-engine-defaults` artifact; not adopted yet.)
 - kotlinx.serialization, kotlinx.coroutines, kotlinx-datetime 0.8.0 (`LocalDate` / `LocalDateTime`; no `java.time` in commonMain)
 - Koin 4.2.2 (core, compose, compose-viewmodel) — modules in `di/`, started by `initKoin()`
-- Multiplatform Settings 1.3.0 (stores the session only: access token, refresh token, user id
-  and email; no offline cache for now). Its last release is from Nov 2024; it compiles and builds
+- Multiplatform Settings 1.3.0 (stores the session: access token, refresh token, user id and
+  email; plus the theme preference under `ui.tema`; no offline cache for now). Its last release is from Nov 2024; it compiles and builds
   with Kotlin 2.4.20, but has not been run yet (tests use an in-memory fake, and Android's no-arg
   auto-initialization is unverified at runtime); if it ever conflicts, switch to AndroidX
   DataStore (multiplatform).
@@ -112,7 +112,9 @@ ui  ->  domain  <-  data
 - Composables stay as stateless as possible (state hoisting). No logic or network calls in
   composables.
 - Network calls are `suspend` functions launched from the ViewModel scope. Never block the UI.
-- ViewModels get dependencies from Koin.
+- ViewModels get dependencies from Koin. Every ViewModel MUST be registered in `moduloUi`
+  (`di/Modulos.kt`): the unit tests build ViewModels by hand with fakes, so a missing registration
+  only fails at runtime, when `koinViewModel()` composes (this happened with the dashboard).
 
 ## Package structure
 
@@ -133,7 +135,7 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   └── usecase/     only for multi-source orchestration (e.g. LogoutUseCase)
 ├── ui/
 │   ├── navigation/  routes + outer graph (Login, Registro, Shell) + ShellScreen (sidebar + content
-│   │                area with its own nested NavHost) + ShellViewModel (email, logout)
+│   │                area with its own nested NavHost) + ShellViewModel (email, logout) + TemaViewModel (light/dark)
 │   ├── login/ clientes/ gastos/ ingresos/ dashboard/   (Screen + ViewModel + UiState each;
 │   │                clientes/ has the list and the create/edit form; gastos/ has the list, the
 │   │                read-only detail (with the review action) and the create/edit form;
@@ -326,6 +328,14 @@ when the detail reports a change). The resumen and rentabilidad follow the perio
 not. `RentabilidadClienteResponse` has NO client name, so names are resolved in the client from
 `ClienteRepository.listar()` (best effort, neutral placeholder if missing), like the ingresos.
 Unit tests cover the repository / DTOs with MockEngine and the ViewModel with a fake repository.
+The **dark mode is DONE** (code, unit tests, builds; not yet run on screen): `PreferenciaTema`
+(`SISTEMA` / `CLARO` / `OSCURO`) in the domain, `TemaRepository` implemented over Settings
+(`TemaRepositoryImpl`, key `ui.tema`; a missing or unknown value is `SISTEMA`), `TemaViewModel`
+and an `IconButton` in the shell sidebar that toggles ONLY between light and dark (sun icon when
+light, moon when dark; `SISTEMA` exists only until the first choice and follows the OS via
+`isSystemInDarkTheme()`). `App` applies `darkColorScheme()` / `lightColorScheme()`; no colors are
+hardcoded in the screens. The sun and moon are `ImageVector`s drawn in `ui/navigation/IconosTema.kt`
+because `material-icons-extended` is not a dependency.
 All planned slices are done; what remains is in "Pending / deferred".
 
 ## Pending / deferred
