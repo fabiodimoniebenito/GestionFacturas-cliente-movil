@@ -6,14 +6,18 @@ import kotlin.jvm.JvmInline
  * A money amount kept as TEXT, with a dot as decimal separator (e.g. "121.00"). The client never
  * does arithmetic on amounts (the backend computes totals), so there is no numeric type here.
  *
- * User input goes through [de], which validates and normalizes. The constructor is internal for the
- * data layer, which wraps whatever literal the backend sent without altering it.
+ * User input goes through [de], which validates and normalizes (non-negative only). The constructor
+ * is internal for the data layer, which wraps whatever literal the backend sent without altering it,
+ * so an amount read from the API may be negative (e.g. a loss: "-181.50").
  */
 @JvmInline
 value class Importe internal constructor(val valor: String) {
 
-    /** The amount for display: comma as decimal separator ("121,00"). Strings only. */
+    /** The amount for display: comma as decimal separator ("121,00" / "-181,50"). Strings only. */
     fun mostrar(): String = valor.replace('.', ',')
+
+    /** True if the literal starts with a minus sign. A "-0.00" literal counts as negative: no arithmetic here. */
+    val esNegativo: Boolean get() = valor.startsWith("-")
 
     override fun toString(): String = valor
 

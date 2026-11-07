@@ -138,7 +138,8 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   │                clientes/ has the list and the create/edit form; gastos/ has the list, the
 │   │                read-only detail (with the review action) and the create/edit form;
 │   │                ingresos/ has the list (client-side filter chips), the detail with the cobro
-│   │                actions and a create-only form)
+│   │                actions and a create-only form; dashboard/ is one screen with the period
+│   │                selector, amount mode toggle and three independent sections)
 │   └── common/      shared composables: Estados (loading / empty / error + retry), BarraTitulo
 │                    (title + explicit Volver), Formulario (form container, fields, buttons),
 │                    MensajesError (the single place that maps errors to texts)
@@ -227,7 +228,10 @@ Amounts are TEXT in the client, with NO arithmetic (the backend computes totals 
 (digits, at most 2 decimals, comma or dot) and normalizes to a dot; `mostrar()` gives the comma
 display, using string operations only. `data/remote/dto/ImporteSerializer` reads the JSON number
 as its literal text (`121.00` keeps its zeros) and writes it back as a JSON NUMBER, not a string.
-Never use `Double`/`Float` for money.
+Amounts READ from the API are never validated (the internal constructor wraps the literal), so a
+negative beneficio such as `-181.50` keeps its text, `mostrar()` gives `-181,50` and `esNegativo`
+(string check on the leading minus, no arithmetic) drives the error color. `Importe.de` stays
+strictly non-negative: it is only for form input. Never use `Double`/`Float` for money.
 
 ## Code conventions
 - Domain terms in Spanish (Gasto, Ingreso, Cliente, ResumenPeriodo...); technical suffixes
@@ -275,8 +279,8 @@ logout, session restore on restart and wrong credentials confirmed working by th
 (`./gradlew :desktopApp:run`; mind the login rate limit of 10/min). NOT yet verified against the
 real backend: backend down (server unreachable message) and the token refresh.
 The **clientes vertical slice is DONE** (code, unit tests, builds; not yet run against the real
-backend): domain, data, the logged-in shell (sidebar with Clientes, Gastos, Ingresos and a disabled
-Dashboard placeholder, email and logout), the list (loading / empty / error / content, refresh,
+backend): domain, data, the logged-in shell (sidebar with Dashboard, Clientes, Gastos and Ingresos,
+email and logout), the list (loading / empty / error / content, refresh,
 deactivate with confirmation), and one create/edit form (NIF editable only on create; required
 fields checked on the client, everything else shown per field from the backend's 400 map; 404 on
 edit returns to the list with a message). The list also shows deactivated clientes (tagged
@@ -305,7 +309,24 @@ best effort); a cliente missing from that list (e.g. deactivated) shows a neutra
 on a cobro operation shows the backend's message next to the actions; a 404 returns to the list
 with a message. Unit tests cover the ViewModels with fake repositories and the repository / DTOs
 with MockEngine.
-Planned slice order after that: dashboard.
+The **dashboard vertical slice is DONE** (code, unit tests, builds; not yet run against the real
+backend): it is the first sidebar entry and the shell's start destination (so the screen after
+login). Domain `ResumenPeriodo` (ten `Importe` figures), `RentabilidadCliente`, `PendientesCobro`
+and `DashboardRepository`; data `DashboardApi` on the authenticated client. The period selector has
+the presets "Este mes", "Trimestre actual" (default) and "Este año" (the whole calendar month /
+quarter / year, computed with kotlinx-datetime from an injectable "today") plus "Personalizado" (two
+`yyyy-MM-dd` fields and "Aplicar"; the range is validated on the client, `desde <= hasta`, and
+nothing is requested while typing). The amount mode toggle "Con IVA" / "Sin IVA" only SELECTS the
+`*Total` or `*Base` fields of the backend response (no arithmetic, no request). Three sections load
+independently, each with its own loading / error-with-retry / content states: resumen (five cards;
+a negative beneficio is shown in the error color), rentabilidad por cliente (backend order, never
+sorted or compared on the client; the entry with null `clienteId` is shown as "Gastos generales (sin
+cliente)") and pendientes de cobro (tapping an item opens the ingreso detail; the dashboard reloads
+when the detail reports a change). The resumen and rentabilidad follow the period; pendientes does
+not. `RentabilidadClienteResponse` has NO client name, so names are resolved in the client from
+`ClienteRepository.listar()` (best effort, neutral placeholder if missing), like the ingresos.
+Unit tests cover the repository / DTOs with MockEngine and the ViewModel with a fake repository.
+All planned slices are done; what remains is in "Pending / deferred".
 
 ## Pending / deferred
 - KNOWN ISSUE (clientes): creating a cliente whose NIF already exists returns 409, and the backend

@@ -14,7 +14,10 @@ data object RutaRegistro
 @Serializable
 data object RutaShell
 
-// Inner graph: the content area of the shell.
+// Inner graph: the content area of the shell. The dashboard is its start destination.
+@Serializable
+data object RutaDashboard
+
 @Serializable
 data object RutaClientes
 

@@ -1,7 +1,7 @@
 # GestionFacturas — Cliente (Android + Desktop)
 
 > **Proyecto en desarrollo.** Ya están hechos el login y el registro (con renovación
-> automática del token), la gestión de clientes, la de gastos y la de ingresos; el dashboard aún no.
+> automática del token), la gestión de clientes, la de gastos, la de ingresos y el dashboard.
 > Este README describe el diseño acordado y evoluciona con el código.
 
 Cliente de **GestionFacturas**, una aplicación para que **freelances y autónomos** lleven
@@ -103,7 +103,9 @@ El código específico de plataforma (expect/actual) va en `shared/src/androidMa
 importes se guardan como **texto** (`Importe`, en `domain/model`), sin ninguna operación
 aritmética en el cliente: el backend calcula los totales. `Importe` valida lo que escribe el
 usuario (hasta 2 decimales, coma o punto) y la capa de datos lo lee y lo escribe como número JSON,
-conservando los ceros finales (`121.00`).
+conservando los ceros finales (`121.00`). Los importes que llegan de la API no se validan, así que
+un beneficio negativo (`-181.50`) se conserva tal cual y se muestra en rojo; la validación estricta
+(sin signo) es solo para lo que escribe el usuario.
 
 ## Estado actual
 
@@ -121,7 +123,12 @@ conservando los ceros finales (`121.00`).
   detalle, alta, registrar y revertir cobro). Los ingresos no se pueden editar en esta versión
   porque el backend no tiene ese endpoint. El nombre del cliente se resuelve en el cliente a
   partir de la lista de clientes. Pendiente de probar a mano contra el backend real.
-- [ ] Dashboard (resumen, rentabilidad por cliente, pendientes de cobro)
+- [x] Dashboard (primera entrada del menú y pantalla de inicio tras el login): selector de periodo
+  (Este mes, Trimestre actual por defecto, Este año o un rango personalizado `aaaa-mm-dd`),
+  interruptor Con IVA / Sin IVA (solo elige qué cifras del backend se muestran, sin cálculos en el
+  cliente), resumen, rentabilidad por cliente (en el orden del backend) y pendientes de cobro, cada
+  sección con su propia carga y error. El nombre del cliente se resuelve en el cliente. Pendiente
+  de probar a mano contra el backend real.
 - [ ] Adaptación del diseño a móvil
 
 Se construye por **rebanadas verticales**: cada área se completa de punta a punta (red,

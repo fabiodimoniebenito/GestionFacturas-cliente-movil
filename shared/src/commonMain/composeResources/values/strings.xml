@@ -44,8 +44,41 @@
     <string name="menu_gastos">Gastos</string>
     <string name="menu_ingresos">Ingresos</string>
     <string name="menu_dashboard">Dashboard</string>
-    <string name="menu_proximamente">próximamente</string>
     <string name="menu_cerrar_sesion">Cerrar sesión</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_titulo">Dashboard</string>
+    <string name="dashboard_actualizar">Actualizar</string>
+    <string name="dashboard_periodo">Periodo</string>
+    <string name="dashboard_periodo_mes">Este mes</string>
+    <string name="dashboard_periodo_trimestre">Trimestre actual</string>
+    <string name="dashboard_periodo_anio">Este año</string>
+    <string name="dashboard_periodo_personalizado">Personalizado</string>
+    <string name="dashboard_rango">Del %1$s al %2$s</string>
+    <string name="dashboard_desde">Desde (aaaa-mm-dd)</string>
+    <string name="dashboard_hasta">Hasta (aaaa-mm-dd)</string>
+    <string name="dashboard_aplicar">Aplicar</string>
+    <string name="dashboard_error_desde">La fecha de inicio no es válida. Usa el formato aaaa-mm-dd.</string>
+    <string name="dashboard_error_hasta">La fecha de fin no es válida. Usa el formato aaaa-mm-dd.</string>
+    <string name="dashboard_error_rango">La fecha de inicio no puede ser posterior a la de fin.</string>
+    <string name="dashboard_modo">Importes</string>
+    <string name="dashboard_modo_con_iva">Con IVA</string>
+    <string name="dashboard_modo_sin_iva">Sin IVA</string>
+    <string name="dashboard_resumen_titulo">Resumen del periodo</string>
+    <string name="dashboard_facturado">Facturado</string>
+    <string name="dashboard_cobrado">Cobrado</string>
+    <string name="dashboard_gastos">Gastos</string>
+    <string name="dashboard_beneficio_caja">Beneficio de caja</string>
+    <string name="dashboard_beneficio_caja_ayuda">Lo cobrado menos los gastos.</string>
+    <string name="dashboard_beneficio_facturado">Beneficio facturado</string>
+    <string name="dashboard_beneficio_facturado_ayuda">Lo facturado menos los gastos, aunque aún no esté cobrado.</string>
+    <string name="dashboard_rentabilidad_titulo">Rentabilidad por cliente</string>
+    <string name="dashboard_rentabilidad_vacio">Sin datos en este periodo</string>
+    <string name="dashboard_sin_cliente">Gastos generales (sin cliente)</string>
+    <string name="dashboard_sin_cliente_ayuda">Importes que no están asignados a ningún cliente.</string>
+    <string name="dashboard_pendientes_titulo">Pendientes de cobro</string>
+    <string name="dashboard_pendientes_total">Total pendiente</string>
+    <string name="dashboard_pendientes_vacio">No hay cobros pendientes</string>
 
     <!-- Clientes -->
     <string name="clientes_titulo">Clientes</string>
