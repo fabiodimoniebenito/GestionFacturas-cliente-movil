@@ -6,6 +6,9 @@ import com.fabio.gestionfacturas.domain.model.PendientesCobro
 import com.fabio.gestionfacturas.domain.model.RentabilidadCliente
 import com.fabio.gestionfacturas.domain.repository.ClienteRepository
 import com.fabio.gestionfacturas.domain.repository.DashboardRepository
+import com.fabio.gestionfacturas.domain.repository.ExportRepository
+import com.fabio.gestionfacturas.domain.repository.FileSaver
+import com.fabio.gestionfacturas.domain.repository.ResultadoGuardado
 import com.fabio.gestionfacturas.ui.common.comoErrorAuth
 import com.fabio.gestionfacturas.ui.ingresos.fechaDeHoy
 import kotlinx.coroutines.Job
@@ -24,6 +27,8 @@ import kotlinx.datetime.LocalDate
 class DashboardViewModel(
     private val dashboard: DashboardRepository,
     private val clientes: ClienteRepository,
+    private val exportacion: ExportRepository,
+    private val archivos: FileSaver,
     private val hoy: () -> LocalDate = ::fechaDeHoy,
 ) : ViewModel() {
 
@@ -33,6 +38,7 @@ class DashboardViewModel(
     private var trabajoResumen: Job? = null
     private var trabajoPendientes: Job? = null
     private var trabajoRentabilidad: Job? = null
+    private var trabajoExportacion: Job? = null
 
     init {
         cargarPeriodo(conservarContenido = false)
@@ -69,7 +75,7 @@ class DashboardViewModel(
             }
             return
         }
-        _uiState.update { it.copy(preset = preset, periodo = periodo, errorPersonalizado = null) }
+        _uiState.update { it.copy(preset = preset, periodo = periodo, errorPersonalizado = null, mensajeExportacion = null) }
         cargarPeriodo(conservarContenido = false)
     }
 
@@ -99,7 +105,7 @@ class DashboardViewModel(
             _uiState.update { it.copy(errorPersonalizado = error) }
             return
         }
-        _uiState.update { it.copy(periodo = Periodo(desde, hasta), errorPersonalizado = null) }
+        _uiState.update { it.copy(periodo = Periodo(desde, hasta), errorPersonalizado = null, mensajeExportacion = null) }
         cargarPeriodo(conservarContenido = false)
     }
 
@@ -130,6 +136,34 @@ class DashboardViewModel(
     /** The detail registered or reverted a cobro (or the ingreso vanished): both sections are stale. */
     fun onVolverDelDetalle() {
         onRefrescar()
+    }
+
+    // ---- export ------------------------------------------------------------------------------
+
+    /**
+     * Exports the APPLIED period (never the unapplied custom fields). Ignored while another export
+     * runs or while the custom range is invalid. Cancelling the save dialog shows nothing.
+     */
+    fun onExportar() {
+        val estado = _uiState.value
+        if (!estado.puedeExportar) {
+            return
+        }
+        val periodo = estado.periodo
+        _uiState.update { it.copy(exportando = true, mensajeExportacion = null) }
+        trabajoExportacion = viewModelScope.launch {
+            val mensaje = exportacion.exportarExcel(periodo.desde, periodo.hasta).fold(
+                onSuccess = { archivo ->
+                    when (val resultado = archivos.guardar(archivo.nombre, archivo.mime, archivo.bytes)) {
+                        is ResultadoGuardado.Guardado -> MensajeExportacion.Guardado(resultado.destino)
+                        ResultadoGuardado.Cancelado -> null
+                        is ResultadoGuardado.Error -> MensajeExportacion.FalloAlGuardar(resultado.mensaje)
+                    }
+                },
+                onFailure = { fallo -> MensajeExportacion.Fallo(fallo.comoErrorAuth()) },
+            )
+            _uiState.update { it.copy(exportando = false, mensajeExportacion = mensaje) }
+        }
     }
 
     // ---- loading -----------------------------------------------------------------------------

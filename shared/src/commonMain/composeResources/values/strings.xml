@@ -50,6 +50,10 @@
 
     <!-- Dashboard -->
     <string name="dashboard_titulo">Dashboard</string>
+    <string name="dashboard_exportar">Exportar a Excel</string>
+    <string name="dashboard_exportar_en_curso">Exportando…</string>
+    <string name="dashboard_exportar_ayuda">El archivo siempre incluye las cifras con IVA (Total) y sin IVA (Base), sea cual sea la opción Con IVA / Sin IVA elegida.</string>
+    <string name="dashboard_exportar_guardado">Archivo guardado en %1$s</string>
     <string name="dashboard_actualizar">Actualizar</string>
     <string name="dashboard_periodo">Periodo</string>
     <string name="dashboard_periodo_mes">Este mes</string>

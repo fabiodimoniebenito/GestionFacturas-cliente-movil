@@ -89,6 +89,15 @@ sealed interface CargaPendientes {
     data class Error(val error: ErrorAuth) : CargaPendientes
 }
 
+/** What the last export attempt produced; the screen shows it until the next export or period change. */
+sealed interface MensajeExportacion {
+    data class Guardado(val destino: String) : MensajeExportacion
+    data class Fallo(val error: ErrorAuth) : MensajeExportacion
+
+    /** [texto] comes from the FileSaver and is already user-facing. */
+    data class FalloAlGuardar(val texto: String) : MensajeExportacion
+}
+
 data class DashboardUiState(
     val preset: PresetPeriodo,
     /** The range the resumen was last requested for. */
@@ -101,4 +110,10 @@ data class DashboardUiState(
     val resumen: CargaResumen = CargaResumen.Cargando,
     val rentabilidad: CargaRentabilidad = CargaRentabilidad.Cargando,
     val pendientes: CargaPendientes = CargaPendientes.Cargando,
-)
+    val exportando: Boolean = false,
+    val mensajeExportacion: MensajeExportacion? = null,
+) {
+    /** The export uses the APPLIED [periodo]; it is blocked while exporting or while the custom range is invalid. */
+    val puedeExportar: Boolean
+        get() = !exportando && errorPersonalizado == null
+}
