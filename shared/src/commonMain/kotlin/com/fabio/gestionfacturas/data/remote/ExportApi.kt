@@ -3,6 +3,7 @@ package com.fabio.gestionfacturas.data.remote
 import com.fabio.gestionfacturas.domain.model.ArchivoExportado
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.timeout
+import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsBytes
@@ -19,6 +20,8 @@ class ExportApi(private val client: HttpClient) {
             client.get("/api/exportacion/excel") {
                 parameter("desde", desde.toString())
                 parameter("hasta", hasta.toString())
+                // The endpoint only produces xlsx; the JSON plugin would otherwise send Accept: application/json (406).
+                accept(ContentType.parse(MIME_XLSX))
                 // Building the workbook can take longer than a JSON call: longer timeout for this call only.
                 timeout {
                     requestTimeoutMillis = TIMEOUT_EXPORTACION_MS

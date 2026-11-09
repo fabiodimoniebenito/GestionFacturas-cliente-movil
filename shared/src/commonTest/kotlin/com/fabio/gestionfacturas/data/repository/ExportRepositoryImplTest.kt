@@ -103,6 +103,16 @@ class ExportRepositoryImplTest {
     }
 
     @Test
+    fun pideExplicitamenteElTipoXlsxPorqueElBackendDevuelve406ConAcceptJson() = runTest {
+        val repo = exportacion { respond(content = binario, status = HttpStatusCode.OK) }
+
+        repo.exportarExcel(desde, hasta)
+
+        // The JSON plugin may append application/json; the backend only needs xlsx to be acceptable (and first).
+        assertEquals(MIME_XLSX, peticiones.single().headers.getAll(HttpHeaders.Accept)?.first())
+    }
+
+    @Test
     fun un400SeMapeaAValidacionConElMensajeDelServidor() = runTest {
         val repo = exportacion { respondJson("""{"error":"La fecha 'desde' no puede ser posterior a 'hasta'"}""", HttpStatusCode.BadRequest) }
 
