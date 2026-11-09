@@ -127,7 +127,7 @@ Layers at the top, feature areas only inside `ui/`:
 shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 ├── data/
 │   ├── remote/      ApiClient (Ktor), @Serializable DTOs, one service per resource
-│   ├── local/       token storage (Multiplatform Settings)
+│   ├── local/       token storage (Multiplatform Settings); expect fun crearFileSaver() (actuals in jvmMain / androidMain)
 │   └── repository/  implementations of the domain interfaces + mappers
 ├── domain/
 │   ├── model/       data classes (Gasto, Ingreso, Cliente, ResumenPeriodo...)
@@ -336,6 +336,14 @@ light, moon when dark; `SISTEMA` exists only until the first choice and follows 
 `isSystemInDarkTheme()`). `App` applies `darkColorScheme()` / `lightColorScheme()`; no colors are
 hardcoded in the screens. The sun and moon are `ImageVector`s drawn in `ui/navigation/IconosTema.kt`
 because `material-icons-extended` is not a dependency.
+The **dashboard export is DONE** (code, unit tests, builds; not yet run against the real backend): an
+"Exportar a Excel" button next to the period controls calls `GET /api/exportacion/excel` with the APPLIED
+period (`ExportApi` on the authenticated client, bytes read as `ByteArray`, 120 s timeout for that call only,
+file name from `Content-Disposition` with a fallback built from the range). The domain has
+`ExportRepository` and the generic `FileSaver` (`Guardado` / `Cancelado` / `Error`). Desktop saves with a native
+AWT `FileDialog` proposing the name in Downloads or Documents (write on `Dispatchers.IO`); the Android actual is a
+STUB that returns an Error (see Pending). The button is disabled while exporting or while the custom range is
+invalid; a caption says the file always has Total and Base figures. Cancel shows no message.
 All planned slices are done; what remains is in "Pending / deferred".
 
 ## Pending / deferred
@@ -348,6 +356,8 @@ All planned slices are done; what remains is in "Pending / deferred".
   in `ui/navigation/` so a later switch stays contained.
 - Secure token storage.
 - Mobile layout adaptation (bottom navigation) after the desktop version works.
+- Android `FileSaver`: the actual in `androidMain` only returns an Error. Finish it with the Storage Access
+  Framework (`CreateDocument`, needs an Activity result launcher) in the Android phase.
 - Invoice digitization upload (`POST /api/gastos/digitalizar`): file picker on desktop, camera/gallery
   on Android (expect/actual).
 - Gastos: the backend does not return `total` in `GastoResponse` (open item in the API contract), and

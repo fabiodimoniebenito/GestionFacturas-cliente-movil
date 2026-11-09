@@ -130,6 +130,9 @@ un beneficio negativo (`-181.50`) se conserva tal cual y se muestra en rojo; la 
   cliente), resumen, rentabilidad por cliente (en el orden del backend) y pendientes de cobro, cada
   sección con su propia carga y error. El nombre del cliente se resuelve en el cliente. Pendiente
   de probar a mano contra el backend real.
+- [x] Exportar a Excel desde el dashboard: botón junto al selector de periodo que descarga el `.xlsx`
+  del periodo aplicado (siempre incluye cifras con y sin IVA). En escritorio abre el diálogo nativo
+  de guardado; en Android el guardado está pendiente. Pendiente de probar a mano contra el backend real.
 - [x] Modo oscuro: un icono en el menú lateral (sol en modo claro, luna en modo oscuro) alterna
   entre tema claro y oscuro. La primera vez se sigue el tema del sistema operativo; al pulsar el
   icono se guarda la elección y se conserva al reiniciar.
