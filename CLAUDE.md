@@ -169,7 +169,7 @@ It lives in `expect fun urlBaseApi()` (`data/remote/UrlBase.kt`), with the actua
   `POST /{id}/cobro` registers, `DELETE /{id}/cobro` reverts), `/api/clientes` (GET list,
   POST; `GET|PUT|DELETE /{id}`, DELETE = deactivate), `/api/categorias` (GET list),
   `/api/dashboard/resumen?desde&hasta`, `/api/dashboard/rentabilidad-clientes?desde&hasta`,
-  `/api/dashboard/pendientes-cobro`.
+  `/api/dashboard/pendientes-cobro`, `/api/exportacion/excel?desde&hasta` (binary .xlsx, see the contract).
 - Gastos also have `PUT /{id}` (edit; the only way to set a gasto's category and `deducible`) and
   `POST /{id}/revisar`.
 - NOT in the API (as of the 2026-10-27 audit): delete of gastos, edit of ingresos, a pending
