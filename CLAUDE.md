@@ -337,7 +337,9 @@ light, moon when dark; `SISTEMA` exists only until the first choice and follows 
 `isSystemInDarkTheme()`). `App` applies `darkColorScheme()` / `lightColorScheme()`; no colors are
 hardcoded in the screens. The sun and moon are `ImageVector`s drawn in `ui/navigation/IconosTema.kt`
 because `material-icons-extended` is not a dependency.
-The **dashboard export is DONE** (code, unit tests, builds; not yet run against the real backend): an
+The **dashboard export is DONE** (code, unit tests, builds; VERIFIED by the owner on Desktop against the real
+backend: download and native save dialog work; the 400 for `desde > hasta` is still unverified because the UI
+validates the range first): an
 "Exportar a Excel" button next to the period controls calls `GET /api/exportacion/excel` with the APPLIED
 period (`ExportApi` on the authenticated client, bytes read as `ByteArray`, 120 s timeout for that call only,
 file name from `Content-Disposition` with a fallback built from the range). The domain has
@@ -345,6 +347,12 @@ file name from `Content-Disposition` with a fallback built from the range). The 
 AWT `FileDialog` proposing the name in Downloads or Documents (write on `Dispatchers.IO`); the Android actual is a
 STUB that returns an Error (see Pending). The button is disabled while exporting or while the custom range is
 invalid; a caption says the file always has Total and Base figures. Cancel shows no message.
+LESSON: the endpoint declares `produces = XLSX`, and the JSON ContentNegotiation plugin sends
+`Accept: application/json` by default, so the backend answered 406 (`HttpMediaTypeNotAcceptableException`,
+which the client showed as a generic error). Any binary endpoint must set `accept(...)` explicitly, as
+`ExportApi` does (`ExportRepositoryImplTest` checks it).
+Desktop screens that scroll show a visible scrollbar (`ui/common/BarraDesplazamiento`; `ColumnaConBarra` and
+`ListaConBarra` wrap the common cases); it is a no-op on Android. Not checked on screen yet.
 All planned slices are done; what remains is in "Pending / deferred".
 
 ## Pending / deferred

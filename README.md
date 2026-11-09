@@ -4,6 +4,7 @@
 > automática del token), la gestión de clientes, la de gastos, la de ingresos, el dashboard y el
 > modo oscuro.
 > Este README describe el diseño acordado y evoluciona con el código.
+> Si solo quieres saber cómo se usa la aplicación, lee la [guía de uso](GUIA_DE_USO.md).
 
 Cliente de **GestionFacturas**, una aplicación para que **freelances y autónomos** lleven
 el control de su actividad económica: registran **gastos**, **ingresos** y **clientes**, y
@@ -114,6 +115,7 @@ un beneficio negativo (`-181.50`) se conserva tal cual y se muestra en rojo; la 
 - [x] Dependencias base (Ktor, kotlinx.serialization, Multiplatform Settings, Koin, Kermit,
   Navigation Compose)
 - [x] Contrato de la API documentado (`docs/api-contract.md`)
+- [x] Guía de uso para el usuario (`GUIA_DE_USO.md`)
 - [x] Login y registro (red, almacenamiento de tokens, renovación automática, sesión,
   pantallas y tests unitarios). Pendiente de probar a mano contra el backend real.
 - [x] Clientes (estructura con menú lateral, listado, alta, edición y desactivación). Pendiente
@@ -132,7 +134,7 @@ un beneficio negativo (`-181.50`) se conserva tal cual y se muestra en rojo; la 
   de probar a mano contra el backend real.
 - [x] Exportar a Excel desde el dashboard: botón junto al selector de periodo que descarga el `.xlsx`
   del periodo aplicado (siempre incluye cifras con y sin IVA). En escritorio abre el diálogo nativo
-  de guardado; en Android el guardado está pendiente. Pendiente de probar a mano contra el backend real.
+  de guardado; en Android el guardado está pendiente. Probado a mano en escritorio contra el backend real.
 - [x] Modo oscuro: un icono en el menú lateral (sol en modo claro, luna en modo oscuro) alterna
   entre tema claro y oscuro. La primera vez se sigue el tema del sistema operativo; al pulsar el
   icono se guarda la elección y se conserva al reiniciar.
