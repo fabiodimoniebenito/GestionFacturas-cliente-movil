@@ -44,6 +44,7 @@ import com.fabio.gestionfacturas.resources.gastos_sin_emisor
 import com.fabio.gestionfacturas.resources.gastos_titulo
 import com.fabio.gestionfacturas.resources.gastos_vacio
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
+import com.fabio.gestionfacturas.ui.common.ListaConBarra
 import com.fabio.gestionfacturas.ui.common.EstadoCargando
 import com.fabio.gestionfacturas.ui.common.EstadoError
 import com.fabio.gestionfacturas.ui.common.EstadoVacio
@@ -156,7 +157,7 @@ private fun Cabecera(habilitado: Boolean, alNuevo: () -> Unit, alRefrescar: () -
 
 @Composable
 private fun ListaGastos(gastos: List<Gasto>, alAbrir: (Long) -> Unit) {
-    LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    ListaConBarra(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(gastos, key = { it.id }) { gasto -> FilaGasto(gasto = gasto, alAbrir = alAbrir) }
     }
 }

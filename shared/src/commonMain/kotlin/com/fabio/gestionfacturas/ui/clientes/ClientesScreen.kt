@@ -50,6 +50,7 @@ import com.fabio.gestionfacturas.resources.clientes_vacio
 import com.fabio.gestionfacturas.resources.clientes_ya_no_existe
 import com.fabio.gestionfacturas.resources.clientes_desactivar_fallido
 import com.fabio.gestionfacturas.resources.clientes_actualizar_fallido
+import com.fabio.gestionfacturas.ui.common.ListaConBarra
 import com.fabio.gestionfacturas.ui.common.EstadoCargando
 import com.fabio.gestionfacturas.ui.common.EstadoError
 import com.fabio.gestionfacturas.ui.common.EstadoVacio
@@ -195,8 +196,7 @@ private fun ListaClientes(
     alEditar: (Long) -> Unit,
     alDesactivar: (Cliente) -> Unit,
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+    ListaConBarra(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(clientes, key = { it.id }) { cliente ->

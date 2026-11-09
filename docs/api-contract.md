@@ -117,6 +117,7 @@ Auth legend: **P\*** = public per backend convention (not verified from the Open
 | GET | `/api/dashboard/resumen` | B | – | `desde` date (required), `hasta` date (required) | `ResumenPeriodoResponse` |
 | GET | `/api/dashboard/rentabilidad-clientes` | B | – | `desde` date (required), `hasta` date (required) | `RentabilidadClienteResponse[]` |
 | GET | `/api/dashboard/pendientes-cobro` | B | – | – | `PendientesCobroResponse` |
+| GET | `/api/exportacion/excel` | B | – | `desde` date (required), `hasta` date (required) | binary `.xlsx` (see below) |
 
 There are no other paths. In particular there is no `DELETE` on `/api/gastos/{id}` and no
 `PUT`/`DELETE` on `/api/ingresos/{id}`.
@@ -330,6 +331,7 @@ Status is judged only from the paths and schemas above.
 | Dashboard resumen | AVAILABLE | `GET /api/dashboard/resumen?desde&hasta` (both required) |
 | Dashboard rentabilidad-clientes | AVAILABLE | `GET /api/dashboard/rentabilidad-clientes?desde&hasta`; only `clienteId` (no client name) |
 | Dashboard pendientes-cobro | AVAILABLE | `GET /api/dashboard/pendientes-cobro` |
+| Export to Excel | AVAILABLE | `GET /api/exportacion/excel?desde&hasta` (both required, `yyyy-MM-dd`). 200 with `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, binary body and `Content-Disposition: attachment; filename="gestionfacturas_<desde>_<hasta>.xlsx"`. The file always carries Total and Base figures. Read from the backend source (`ExportacionController`, `ExportarPeriodoService`), NOT from `/v3/api-docs`: `docs/openapi.json` predates it. `desde > hasta` makes the service throw `IllegalArgumentException`; the resulting status/body is UNVERIFIED (expected 400 `{"error": ...}`) |
 | Digitalizar factura (multipart) | AVAILABLE | `POST /api/gastos/digitalizar`, part `archivo`; returns a `GastoResponse` (whether it is persisted or only a preview is UNCLEAR) |
 
 Other things noticed:

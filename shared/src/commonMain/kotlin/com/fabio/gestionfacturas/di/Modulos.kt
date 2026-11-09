@@ -3,7 +3,11 @@ package com.fabio.gestionfacturas.di
 import com.fabio.gestionfacturas.data.local.EstadoSesion
 import com.fabio.gestionfacturas.data.local.SettingsTokenStorage
 import com.fabio.gestionfacturas.data.local.TokenStorage
+import com.fabio.gestionfacturas.data.local.crearFileSaver
 import com.fabio.gestionfacturas.data.remote.ApiClient
+import com.fabio.gestionfacturas.data.repository.ExportRepositoryImpl
+import com.fabio.gestionfacturas.domain.repository.ExportRepository
+import com.fabio.gestionfacturas.domain.repository.FileSaver
 import com.fabio.gestionfacturas.data.remote.urlBaseApi
 import com.fabio.gestionfacturas.data.repository.AuthRepositoryImpl
 import com.fabio.gestionfacturas.data.repository.CategoriaRepositoryImpl
@@ -51,6 +55,8 @@ val moduloDatos = module {
     single<IngresoRepository> { IngresoRepositoryImpl(api = get<ApiClient>().ingresoApi) }
     single<TemaRepository> { TemaRepositoryImpl(get()) }
     single<DashboardRepository> { DashboardRepositoryImpl(api = get<ApiClient>().dashboardApi) }
+    single<ExportRepository> { ExportRepositoryImpl(api = get<ApiClient>().exportApi) }
+    single<FileSaver> { crearFileSaver() }
 }
 
 val moduloUi = module {
@@ -58,7 +64,7 @@ val moduloUi = module {
     viewModel { RegistroViewModel(get()) }
     viewModel { ShellViewModel(get()) }
     viewModel { TemaViewModel(get()) }
-    viewModel { DashboardViewModel(get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get()) }
     viewModel { ClientesViewModel(get()) }
     viewModel { GastosViewModel(get()) }
     viewModel { parametros -> GastoFormViewModel(parametros.getOrNull<Long>(), get(), get(), get()) }

@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,6 +40,10 @@ import com.fabio.gestionfacturas.resources.dashboard_beneficio_facturado
 import com.fabio.gestionfacturas.resources.dashboard_beneficio_facturado_ayuda
 import com.fabio.gestionfacturas.resources.dashboard_cobrado
 import com.fabio.gestionfacturas.resources.dashboard_desde
+import com.fabio.gestionfacturas.resources.dashboard_exportar
+import com.fabio.gestionfacturas.resources.dashboard_exportar_ayuda
+import com.fabio.gestionfacturas.resources.dashboard_exportar_en_curso
+import com.fabio.gestionfacturas.resources.dashboard_exportar_guardado
 import com.fabio.gestionfacturas.resources.dashboard_error_desde
 import com.fabio.gestionfacturas.resources.dashboard_error_hasta
 import com.fabio.gestionfacturas.resources.dashboard_error_rango
@@ -67,6 +73,8 @@ import com.fabio.gestionfacturas.resources.ingresos_cliente_desconocido
 import com.fabio.gestionfacturas.resources.ingresos_sin_cliente
 import com.fabio.gestionfacturas.resources.ingresos_sin_concepto
 import com.fabio.gestionfacturas.resources.ingresos_sin_dato
+import com.fabio.gestionfacturas.ui.common.BarraDesplazamiento
+import com.fabio.gestionfacturas.ui.common.detalleDelServidor
 import com.fabio.gestionfacturas.ui.common.mensaje
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -100,6 +108,7 @@ fun DashboardScreen(
         alReintentarResumen = viewModel::onReintentarResumen,
         alReintentarRentabilidad = viewModel::onReintentarRentabilidad,
         alReintentarPendientes = viewModel::onReintentarPendientes,
+        alExportar = viewModel::onExportar,
     )
 }
 
@@ -116,23 +125,27 @@ fun DashboardContent(
     alReintentarResumen: () -> Unit,
     alReintentarRentabilidad: () -> Unit,
     alReintentarPendientes: () -> Unit,
+    alExportar: () -> Unit = {},
 ) {
+    val desplazamiento = rememberScrollState()
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(
             modifier = Modifier
                 .widthIn(max = AnchoMaximo)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(desplazamiento)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Cabecera(alRefrescar)
             SelectorPeriodo(estado, alElegirPreset, alCambiarDesde, alCambiarHasta, alAplicar)
+            Exportacion(estado, alExportar)
             SelectorModo(estado.modo, alCambiarModo)
             SeccionResumen(estado, alReintentarResumen)
             SeccionRentabilidad(estado.rentabilidad, estado.modo, alReintentarRentabilidad)
             SeccionPendientes(estado.pendientes, alAbrirIngreso, alReintentarPendientes)
         }
+        BarraDesplazamiento(desplazamiento, Modifier.align(Alignment.CenterEnd).fillMaxHeight())
     }
 }
 
@@ -215,6 +228,51 @@ private fun SelectorPeriodo(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+@Composable
+private fun Exportacion(estado: DashboardUiState, alExportar: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            OutlinedButton(onClick = alExportar, enabled = estado.puedeExportar) {
+                Text(stringResource(Res.string.dashboard_exportar))
+            }
+            if (estado.exportando) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                Text(
+                    text = stringResource(Res.string.dashboard_exportar_en_curso),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+        Text(
+            text = stringResource(Res.string.dashboard_exportar_ayuda),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        when (val mensaje = estado.mensajeExportacion) {
+            null -> Unit
+            is MensajeExportacion.Guardado -> Text(
+                text = stringResource(Res.string.dashboard_exportar_guardado, mensaje.destino),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            is MensajeExportacion.FalloAlGuardar -> Text(
+                text = mensaje.texto,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            is MensajeExportacion.Fallo -> {
+                Text(
+                    text = mensaje.error.mensaje(),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                mensaje.error.detalleDelServidor()?.let { detalle ->
+                    Text(text = detalle, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
     }
 }
 

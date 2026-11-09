@@ -127,7 +127,7 @@ Layers at the top, feature areas only inside `ui/`:
 shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 ├── data/
 │   ├── remote/      ApiClient (Ktor), @Serializable DTOs, one service per resource
-│   ├── local/       token storage (Multiplatform Settings)
+│   ├── local/       token storage (Multiplatform Settings); expect fun crearFileSaver() (actuals in jvmMain / androidMain)
 │   └── repository/  implementations of the domain interfaces + mappers
 ├── domain/
 │   ├── model/       data classes (Gasto, Ingreso, Cliente, ResumenPeriodo...)
@@ -144,7 +144,8 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   │                selector, amount mode toggle and three independent sections)
 │   └── common/      shared composables: Estados (loading / empty / error + retry), BarraTitulo
 │                    (title + explicit Volver), Formulario (form container, fields, buttons),
-│                    MensajesError (the single place that maps errors to texts)
+│                    MensajesError (the single place that maps errors to texts), BarraDesplazamiento
+│                    (Desktop scrollbar; expect/actual, no-op on Android)
 └── di/              Koin modules
 shared/src/androidMain , shared/src/jvmMain   platform-specific code only (expect/actual):
                      base URL, Settings factory, file picker later
@@ -169,7 +170,7 @@ It lives in `expect fun urlBaseApi()` (`data/remote/UrlBase.kt`), with the actua
   `POST /{id}/cobro` registers, `DELETE /{id}/cobro` reverts), `/api/clientes` (GET list,
   POST; `GET|PUT|DELETE /{id}`, DELETE = deactivate), `/api/categorias` (GET list),
   `/api/dashboard/resumen?desde&hasta`, `/api/dashboard/rentabilidad-clientes?desde&hasta`,
-  `/api/dashboard/pendientes-cobro`.
+  `/api/dashboard/pendientes-cobro`, `/api/exportacion/excel?desde&hasta` (binary .xlsx, see the contract).
 - Gastos also have `PUT /{id}` (edit; the only way to set a gasto's category and `deducible`) and
   `POST /{id}/revisar`.
 - NOT in the API (as of the 2026-10-27 audit): delete of gastos, edit of ingresos, a pending
@@ -336,6 +337,22 @@ light, moon when dark; `SISTEMA` exists only until the first choice and follows 
 `isSystemInDarkTheme()`). `App` applies `darkColorScheme()` / `lightColorScheme()`; no colors are
 hardcoded in the screens. The sun and moon are `ImageVector`s drawn in `ui/navigation/IconosTema.kt`
 because `material-icons-extended` is not a dependency.
+The **dashboard export is DONE** (code, unit tests, builds; VERIFIED by the owner on Desktop against the real
+backend: download and native save dialog work; the 400 for `desde > hasta` is still unverified because the UI
+validates the range first): an
+"Exportar a Excel" button next to the period controls calls `GET /api/exportacion/excel` with the APPLIED
+period (`ExportApi` on the authenticated client, bytes read as `ByteArray`, 120 s timeout for that call only,
+file name from `Content-Disposition` with a fallback built from the range). The domain has
+`ExportRepository` and the generic `FileSaver` (`Guardado` / `Cancelado` / `Error`). Desktop saves with a native
+AWT `FileDialog` proposing the name in Downloads or Documents (write on `Dispatchers.IO`); the Android actual is a
+STUB that returns an Error (see Pending). The button is disabled while exporting or while the custom range is
+invalid; a caption says the file always has Total and Base figures. Cancel shows no message.
+LESSON: the endpoint declares `produces = XLSX`, and the JSON ContentNegotiation plugin sends
+`Accept: application/json` by default, so the backend answered 406 (`HttpMediaTypeNotAcceptableException`,
+which the client showed as a generic error). Any binary endpoint must set `accept(...)` explicitly, as
+`ExportApi` does (`ExportRepositoryImplTest` checks it).
+Desktop screens that scroll show a visible scrollbar (`ui/common/BarraDesplazamiento`; `ColumnaConBarra` and
+`ListaConBarra` wrap the common cases); it is a no-op on Android. Not checked on screen yet.
 All planned slices are done; what remains is in "Pending / deferred".
 
 ## Pending / deferred
@@ -348,6 +365,8 @@ All planned slices are done; what remains is in "Pending / deferred".
   in `ui/navigation/` so a later switch stays contained.
 - Secure token storage.
 - Mobile layout adaptation (bottom navigation) after the desktop version works.
+- Android `FileSaver`: the actual in `androidMain` only returns an Error. Finish it with the Storage Access
+  Framework (`CreateDocument`, needs an Activity result launcher) in the Android phase.
 - Invoice digitization upload (`POST /api/gastos/digitalizar`): file picker on desktop, camera/gallery
   on Android (expect/actual).
 - Gastos: the backend does not return `total` in `GastoResponse` (open item in the API contract), and

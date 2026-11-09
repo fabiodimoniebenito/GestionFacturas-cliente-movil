@@ -7,7 +7,10 @@ import com.fabio.gestionfacturas.domain.model.PendientesCobro
 import com.fabio.gestionfacturas.domain.model.RentabilidadCliente
 import com.fabio.gestionfacturas.domain.model.ResumenPeriodo
 import com.fabio.gestionfacturas.testutil.FakeClienteRepository
+import com.fabio.gestionfacturas.domain.repository.ResultadoGuardado
 import com.fabio.gestionfacturas.testutil.FakeDashboardRepository
+import com.fabio.gestionfacturas.testutil.FakeExportRepository
+import com.fabio.gestionfacturas.testutil.FakeFileSaver
 import com.fabio.gestionfacturas.testutil.pendienteVacio
 import com.fabio.gestionfacturas.testutil.resumenDistinto
 import kotlinx.coroutines.CompletableDeferred
@@ -22,13 +25,18 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertContentEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DashboardViewModelTest {
 
     private val dashboard = FakeDashboardRepository()
     private val clientes = FakeClienteRepository()
+    private val exportacion = FakeExportRepository()
+    private val archivos = FakeFileSaver()
 
     @BeforeTest
     fun preparar() {
@@ -41,7 +49,7 @@ class DashboardViewModelTest {
     }
 
     private fun crearViewModel(hoy: LocalDate = LocalDate(2026, 11, 7)) =
-        DashboardViewModel(dashboard, clientes) { hoy }
+        DashboardViewModel(dashboard, clientes, exportacion, archivos) { hoy }
 
     private fun cliente(id: Long, nombre: String) =
         Cliente(id = id, nombre = nombre, nif = "N$id", email = null, telefono = null, activo = true)
@@ -542,5 +550,140 @@ class DashboardViewModelTest {
         viewModel.onVolverDelDetalle()
 
         assertEquals(CargaResumen.Error(ErrorAuth.ServidorInaccesible), viewModel.uiState.value.resumen)
+    }
+
+    // ---- export ------------------------------------------------------------------------------
+
+    @Test
+    fun exportarUsaElPeriodoAplicadoYGuardaElArchivo() {
+        val viewModel = crearViewModel(LocalDate(2026, 11, 7))
+
+        viewModel.onExportar()
+
+        assertEquals(listOf(rango(LocalDate(2026, 10, 1), LocalDate(2026, 12, 31))), exportacion.llamadas)
+        assertEquals("informe.xlsx", archivos.guardados.single().first)
+        assertEquals("application/test", archivos.guardados.single().second)
+        assertContentEquals(byteArrayOf(1, 2, 3), archivos.guardados.single().third)
+        val estado = viewModel.uiState.value
+        assertFalse(estado.exportando)
+        assertEquals(MensajeExportacion.Guardado("/tmp/informe.xlsx"), estado.mensajeExportacion)
+    }
+
+    @Test
+    fun exportarIgnoraLosCamposPersonalizadosSinAplicar() {
+        val viewModel = crearViewModel(LocalDate(2026, 11, 7))
+        viewModel.onPresetSeleccionado(PresetPeriodo.PERSONALIZADO)
+        viewModel.onDesdeCambiado("2026-02-01")
+        viewModel.onHastaCambiado("2026-02-28")
+
+        viewModel.onExportar()
+
+        assertEquals(listOf(rango(LocalDate(2026, 10, 1), LocalDate(2026, 12, 31))), exportacion.llamadas)
+    }
+
+    @Test
+    fun exportarUsaElRangoPersonalizadoUnaVezAplicado() {
+        val viewModel = crearViewModel()
+        viewModel.onPresetSeleccionado(PresetPeriodo.PERSONALIZADO)
+        viewModel.onDesdeCambiado("2026-02-01")
+        viewModel.onHastaCambiado("2026-02-28")
+        viewModel.onAplicarPersonalizado()
+
+        viewModel.onExportar()
+
+        assertEquals(listOf(rango(LocalDate(2026, 2, 1), LocalDate(2026, 2, 28))), exportacion.llamadas)
+    }
+
+    @Test
+    fun cancelarElGuardadoNoMuestraNingunMensaje() {
+        archivos.resultado = ResultadoGuardado.Cancelado
+        val viewModel = crearViewModel()
+
+        viewModel.onExportar()
+
+        assertEquals(1, archivos.guardados.size)
+        assertNull(viewModel.uiState.value.mensajeExportacion)
+        assertFalse(viewModel.uiState.value.exportando)
+    }
+
+    @Test
+    fun unErrorDeGuardadoMuestraSuTexto() {
+        archivos.resultado = ResultadoGuardado.Error("No se pudo guardar")
+        val viewModel = crearViewModel()
+
+        viewModel.onExportar()
+
+        assertEquals(MensajeExportacion.FalloAlGuardar("No se pudo guardar"), viewModel.uiState.value.mensajeExportacion)
+    }
+
+    @Test
+    fun unFalloDeLaRedSeMuestraTipadoYNoSeGuardaNada() {
+        exportacion.resultado = Result.failure(ErrorAuth.DemasiadasPeticiones(30))
+        val viewModel = crearViewModel()
+
+        viewModel.onExportar()
+
+        assertEquals(
+            MensajeExportacion.Fallo(ErrorAuth.DemasiadasPeticiones(30)),
+            viewModel.uiState.value.mensajeExportacion,
+        )
+        assertTrue(archivos.guardados.isEmpty())
+        assertFalse(viewModel.uiState.value.exportando)
+    }
+
+    @Test
+    fun sinConexionSeDistingueDeOtrosErrores() {
+        exportacion.resultado = Result.failure(ErrorAuth.ServidorInaccesible)
+        val viewModel = crearViewModel()
+
+        viewModel.onExportar()
+
+        assertEquals(MensajeExportacion.Fallo(ErrorAuth.ServidorInaccesible), viewModel.uiState.value.mensajeExportacion)
+    }
+
+    @Test
+    fun unRangoPersonalizadoInvalidoBloqueaLaExportacion() {
+        val viewModel = crearViewModel()
+        viewModel.onPresetSeleccionado(PresetPeriodo.PERSONALIZADO)
+        viewModel.onDesdeCambiado("2026-03-01")
+        viewModel.onHastaCambiado("2026-02-01")
+        viewModel.onAplicarPersonalizado()
+
+        assertFalse(viewModel.uiState.value.puedeExportar)
+        viewModel.onExportar()
+
+        assertTrue(exportacion.llamadas.isEmpty())
+        assertTrue(archivos.guardados.isEmpty())
+    }
+
+    @Test
+    fun mientrasExportaElBotonQuedaBloqueadoYNoSeLanzaOtraExportacion() {
+        val puerta = CompletableDeferred<Unit>()
+        exportacion.puerta = puerta
+        val viewModel = crearViewModel()
+        assertTrue(viewModel.uiState.value.puedeExportar)
+
+        viewModel.onExportar()
+        viewModel.onExportar()
+
+        assertTrue(viewModel.uiState.value.exportando)
+        assertFalse(viewModel.uiState.value.puedeExportar)
+        assertEquals(1, exportacion.llamadas.size)
+
+        puerta.complete(Unit)
+
+        assertFalse(viewModel.uiState.value.exportando)
+        assertTrue(viewModel.uiState.value.puedeExportar)
+    }
+
+    @Test
+    fun cambiarDePeriodoLimpiaElMensajeDeExportacion() {
+        val viewModel = crearViewModel()
+        viewModel.onExportar()
+        assertEquals(MensajeExportacion.Guardado("/tmp/informe.xlsx"), viewModel.uiState.value.mensajeExportacion)
+
+        viewModel.onPresetSeleccionado(PresetPeriodo.ESTE_ANIO)
+
+        assertNull(viewModel.uiState.value.mensajeExportacion)
     }
 }
