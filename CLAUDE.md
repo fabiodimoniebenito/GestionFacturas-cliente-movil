@@ -144,7 +144,8 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   │                selector, amount mode toggle and three independent sections)
 │   └── common/      shared composables: Estados (loading / empty / error + retry), BarraTitulo
 │                    (title + explicit Volver), Formulario (form container, fields, buttons),
-│                    MensajesError (the single place that maps errors to texts)
+│                    MensajesError (the single place that maps errors to texts), BarraDesplazamiento
+│                    (Desktop scrollbar; expect/actual, no-op on Android)
 └── di/              Koin modules
 shared/src/androidMain , shared/src/jvmMain   platform-specific code only (expect/actual):
                      base URL, Settings factory, file picker later

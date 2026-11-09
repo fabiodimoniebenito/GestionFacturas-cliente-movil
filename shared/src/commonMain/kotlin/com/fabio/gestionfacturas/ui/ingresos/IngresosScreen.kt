@@ -48,6 +48,7 @@ import com.fabio.gestionfacturas.resources.ingresos_vacio
 import com.fabio.gestionfacturas.resources.ingresos_vacio_filtro
 import com.fabio.gestionfacturas.resources.ingresos_ya_no_existe
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
+import com.fabio.gestionfacturas.ui.common.ListaConBarra
 import com.fabio.gestionfacturas.ui.common.EstadoCargando
 import com.fabio.gestionfacturas.ui.common.EstadoError
 import com.fabio.gestionfacturas.ui.common.EstadoVacio
@@ -191,7 +192,7 @@ private fun FiltroIngresos.texto(): String = when (this) {
 
 @Composable
 private fun ListaIngresos(filas: List<FilaIngreso>, alAbrir: (Long) -> Unit) {
-    LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    ListaConBarra(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(filas, key = { it.ingreso.id }) { fila -> FilaIngresoCard(fila = fila, alAbrir = alAbrir) }
     }
 }

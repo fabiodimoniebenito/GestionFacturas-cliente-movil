@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,6 +45,7 @@ fun ContenedorFormulario(
     alEnviar: () -> Unit,
     contenido: @Composable ColumnScope.() -> Unit,
 ) {
+    val desplazamiento = rememberScrollState()
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.Center,
@@ -52,7 +54,7 @@ fun ContenedorFormulario(
             modifier = Modifier
                 .widthIn(max = ANCHO_MAXIMO_FORMULARIO)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(desplazamiento)
                 .onPreviewKeyEvent { evento ->
                     val esEnter = evento.key == Key.Enter || evento.key == Key.NumPadEnter
                     if (esEnter && evento.type == KeyEventType.KeyDown) {
@@ -65,6 +67,7 @@ fun ContenedorFormulario(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             content = contenido,
         )
+        BarraDesplazamiento(desplazamiento, Modifier.align(Alignment.CenterEnd).fillMaxHeight())
     }
 }
 

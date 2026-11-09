@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -72,6 +73,7 @@ import com.fabio.gestionfacturas.resources.ingresos_cliente_desconocido
 import com.fabio.gestionfacturas.resources.ingresos_sin_cliente
 import com.fabio.gestionfacturas.resources.ingresos_sin_concepto
 import com.fabio.gestionfacturas.resources.ingresos_sin_dato
+import com.fabio.gestionfacturas.ui.common.BarraDesplazamiento
 import com.fabio.gestionfacturas.ui.common.detalleDelServidor
 import com.fabio.gestionfacturas.ui.common.mensaje
 import org.jetbrains.compose.resources.stringResource
@@ -125,12 +127,13 @@ fun DashboardContent(
     alReintentarPendientes: () -> Unit,
     alExportar: () -> Unit = {},
 ) {
+    val desplazamiento = rememberScrollState()
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(
             modifier = Modifier
                 .widthIn(max = AnchoMaximo)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(desplazamiento)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
@@ -142,6 +145,7 @@ fun DashboardContent(
             SeccionRentabilidad(estado.rentabilidad, estado.modo, alReintentarRentabilidad)
             SeccionPendientes(estado.pendientes, alAbrirIngreso, alReintentarPendientes)
         }
+        BarraDesplazamiento(desplazamiento, Modifier.align(Alignment.CenterEnd).fillMaxHeight())
     }
 }
 

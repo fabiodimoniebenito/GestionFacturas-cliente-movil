@@ -63,6 +63,7 @@ import com.fabio.gestionfacturas.resources.ingreso_detalle_ya_no_existe
 import com.fabio.gestionfacturas.resources.ingresos_cliente_desconocido
 import com.fabio.gestionfacturas.resources.ingresos_sin_cliente
 import com.fabio.gestionfacturas.resources.ingresos_sin_dato
+import com.fabio.gestionfacturas.ui.common.ColumnaConBarra
 import com.fabio.gestionfacturas.ui.common.BarraTitulo
 import com.fabio.gestionfacturas.ui.common.EstadoCargando
 import com.fabio.gestionfacturas.ui.common.EstadoError
@@ -266,8 +267,7 @@ private fun Contenido(
         ingreso.clienteId == null -> stringResource(Res.string.ingresos_sin_cliente)
         else -> stringResource(Res.string.ingresos_cliente_desconocido)
     }
-    Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+    ColumnaConBarra(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

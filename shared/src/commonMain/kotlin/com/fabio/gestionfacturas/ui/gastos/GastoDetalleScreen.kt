@@ -59,6 +59,7 @@ import com.fabio.gestionfacturas.resources.gasto_revisar_texto
 import com.fabio.gestionfacturas.resources.gasto_revisar_titulo
 import com.fabio.gestionfacturas.resources.gastos_sin_dato
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
+import com.fabio.gestionfacturas.ui.common.ColumnaConBarra
 import com.fabio.gestionfacturas.ui.common.BarraTitulo
 import com.fabio.gestionfacturas.ui.common.EstadoCargando
 import com.fabio.gestionfacturas.ui.common.EstadoError
@@ -219,8 +220,7 @@ private fun Contenido(
     val sinDato = stringResource(Res.string.gastos_sin_dato)
     val si = stringResource(Res.string.gasto_detalle_si)
     val no = stringResource(Res.string.gasto_detalle_no)
-    Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+    ColumnaConBarra(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
