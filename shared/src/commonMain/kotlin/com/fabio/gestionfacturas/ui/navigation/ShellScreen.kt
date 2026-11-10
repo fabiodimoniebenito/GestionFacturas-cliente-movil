@@ -5,13 +5,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.PermanentDrawerSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,7 +44,6 @@ import com.fabio.gestionfacturas.resources.menu_tema_a_oscuro
 import com.fabio.gestionfacturas.ui.clientes.ClienteFormScreen
 import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
-import com.fabio.gestionfacturas.ui.common.BotonPrincipal
 import com.fabio.gestionfacturas.ui.dashboard.DashboardScreen
 import com.fabio.gestionfacturas.ui.gastos.DigitalizarScreen
 import com.fabio.gestionfacturas.ui.gastos.GastoDetalleScreen
@@ -52,7 +55,7 @@ import com.fabio.gestionfacturas.ui.ingresos.IngresosScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-/** Logged-in layout: left sidebar plus a content area that hosts its own navigation. */
+/** Logged-in layout: top bar plus a content area that hosts its own navigation. */
 @Composable
 fun ShellScreen(
     viewModel: ShellViewModel = koinViewModel(),
@@ -73,8 +76,8 @@ fun ShellScreen(
         destino?.hasRoute<RutaNuevoCliente>() == true ||
         destino?.hasRoute<RutaEditarCliente>() == true
 
-    Row(modifier = Modifier.fillMaxSize()) {
-        BarraLateral(
+    Column(modifier = Modifier.fillMaxSize()) {
+        BarraSuperior(
             enDashboard = enDashboard,
             enClientes = enClientes,
             enGastos = enGastos,
@@ -89,14 +92,15 @@ fun ShellScreen(
             cerrandoSesion = estado.cerrandoSesion,
             alCerrarSesion = viewModel::onCerrarSesion,
         )
-        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             ContenidoShell(navController)
         }
     }
 }
 
+/** Top bar of the logged-in layout: app name, the four areas as pills, then theme toggle and session. */
 @Composable
-private fun BarraLateral(
+private fun BarraSuperior(
     enDashboard: Boolean,
     enClientes: Boolean,
     enGastos: Boolean,
@@ -111,58 +115,58 @@ private fun BarraLateral(
     cerrandoSesion: Boolean,
     alCerrarSesion: () -> Unit,
 ) {
-    PermanentDrawerSheet(modifier = Modifier.width(240.dp)) {
-        Column(
-            modifier = Modifier.fillMaxHeight().padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.menu_app_titulo),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(12.dp),
-            )
-            // Each area owns its inner routes (list, form, detail), so the item stays selected inside them.
-            NavigationDrawerItem(
-                label = { Text(stringResource(Res.string.menu_dashboard)) },
-                selected = enDashboard,
-                onClick = alIrAlDashboard,
-            )
-            NavigationDrawerItem(
-                label = { Text(stringResource(Res.string.menu_clientes)) },
-                selected = enClientes,
-                onClick = alIrAClientes,
-            )
-            NavigationDrawerItem(
-                label = { Text(stringResource(Res.string.menu_gastos)) },
-                selected = enGastos,
-                onClick = alIrAGastos,
-            )
-            NavigationDrawerItem(
-                label = { Text(stringResource(Res.string.menu_ingresos)) },
-                selected = enIngresos,
-                onClick = alIrAIngresos,
-            )
-            Spacer(Modifier.weight(1f))
-            Text(
-                text = email,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 12.dp),
-            )
-            IconButton(onClick = alCambiarTema) {
-                // The icon shows the current mode; the description says what pressing it does.
-                Icon(
-                    imageVector = if (oscuro) IconoLuna else IconoSol,
-                    contentDescription = stringResource(
-                        if (oscuro) Res.string.menu_tema_a_claro else Res.string.menu_tema_a_oscuro,
-                    ),
-                )
-            }
-            BotonPrincipal(
-                texto = stringResource(Res.string.menu_cerrar_sesion),
-                cargando = cerrandoSesion,
-                alPulsar = alCerrarSesion,
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(Res.string.menu_app_titulo),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        // Each area owns its inner routes (list, form, detail), so its pill stays selected inside them.
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            PildoraNavegacion(stringResource(Res.string.menu_dashboard), enDashboard, alIrAlDashboard)
+            PildoraNavegacion(stringResource(Res.string.menu_clientes), enClientes, alIrAClientes)
+            PildoraNavegacion(stringResource(Res.string.menu_gastos), enGastos, alIrAGastos)
+            PildoraNavegacion(stringResource(Res.string.menu_ingresos), enIngresos, alIrAIngresos)
+        }
+        Spacer(Modifier.weight(1f))
+        Text(
+            text = email,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        IconButton(onClick = alCambiarTema) {
+            // The icon shows the current mode; the description says what pressing it does.
+            Icon(
+                imageVector = if (oscuro) IconoLuna else IconoSol,
+                contentDescription = stringResource(
+                    if (oscuro) Res.string.menu_tema_a_claro else Res.string.menu_tema_a_oscuro,
+                ),
             )
         }
+        TextButton(onClick = alCerrarSesion, enabled = !cerrandoSesion) {
+            Text(stringResource(Res.string.menu_cerrar_sesion))
+        }
+    }
+}
+
+@Composable
+private fun PildoraNavegacion(texto: String, seleccionada: Boolean, alPulsar: () -> Unit) {
+    val colores = MaterialTheme.colorScheme
+    Surface(
+        onClick = alPulsar,
+        shape = CircleShape,
+        color = if (seleccionada) colores.surfaceVariant else Color.Transparent,
+        contentColor = if (seleccionada) colores.onSurface else colores.onSurfaceVariant,
+        modifier = Modifier.semantics { selected = seleccionada },
+    ) {
+        Text(
+            text = texto,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+        )
     }
 }
 

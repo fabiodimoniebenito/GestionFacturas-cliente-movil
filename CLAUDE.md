@@ -134,7 +134,7 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   ├── repository/  repository interfaces
 │   └── usecase/     only for multi-source orchestration (e.g. LogoutUseCase)
 ├── ui/
-│   ├── navigation/  routes + outer graph (Login, Registro, Shell) + ShellScreen (sidebar + content
+│   ├── navigation/  routes + outer graph (Login, Registro, Shell) + ShellScreen (top bar + content
 │   │                area with its own nested NavHost) + ShellViewModel (email, logout) + TemaViewModel (light/dark)
 │   ├── login/ clientes/ gastos/ ingresos/ dashboard/   (Screen + ViewModel + UiState each;
 │   │                clientes/ has the list and the create/edit form; gastos/ has the list, the
@@ -142,6 +142,7 @@ shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 │   │                ingresos/ has the list (client-side filter chips), the detail with the cobro
 │   │                actions and a create-only form; dashboard/ is one screen with the period
 │   │                selector, amount mode toggle and three independent sections)
+│   ├── theme/       Tema.kt: TemaGestionFacturas (color schemes, Onest typography, shapes)
 │   └── common/      shared composables: Estados (loading / empty / error + retry), BarraTitulo
 │                    (title + explicit Volver), Formulario (form container, fields, buttons),
 │                    MensajesError (the single place that maps errors to texts), BarraDesplazamiento
@@ -213,7 +214,7 @@ Implemented flow (all in `data/`):
   numeric `Retry-After` seconds if present), 400 validation (field -> message map; a plain
   `{"error": ...}` body is kept under the key `error`), 409 email already registered, I/O or
   timeout = server unreachable, anything else unexpected.
-- Navigation starts on the Shell (sidebar + content area) if a session exists, else Login; when
+- Navigation starts on the Shell (top bar + content area) if a session exists, else Login; when
   `sesionActiva` turns false it returns to Login clearing the back stack, from any screen.
 - KNOWN: Multiplatform Settings does NOT encrypt. Acceptable for this portfolio project;
   secure storage (Android Keystore, etc.) is a pending item.
@@ -282,7 +283,7 @@ logout, session restore on restart and wrong credentials confirmed working by th
 (`./gradlew :desktopApp:run`; mind the login rate limit of 10/min). NOT yet verified against the
 real backend: backend down (server unreachable message) and the token refresh.
 The **clientes vertical slice is DONE** (code, unit tests, builds; not yet run against the real
-backend): domain, data, the logged-in shell (sidebar with Dashboard, Clientes, Gastos and Ingresos,
+backend): domain, data, the logged-in shell (top bar with Dashboard, Clientes, Gastos and Ingresos,
 email and logout), the list (loading / empty / error / content, refresh,
 deactivate with confirmation), and one create/edit form (NIF editable only on create; required
 fields checked on the client, everything else shown per field from the backend's 400 map; 404 on
@@ -330,7 +331,7 @@ on a cobro operation shows the backend's message next to the actions; a 404 retu
 with a message. Unit tests cover the ViewModels with fake repositories and the repository / DTOs
 with MockEngine.
 The **dashboard vertical slice is DONE** (code, unit tests, builds; not yet run against the real
-backend): it is the first sidebar entry and the shell's start destination (so the screen after
+backend): it is the first entry of the top bar and the shell's start destination (so the screen after
 login). Domain `ResumenPeriodo` (ten `Importe` figures), `RentabilidadCliente`, `PendientesCobro`
 and `DashboardRepository`; data `DashboardApi` on the authenticated client. The period selector has
 the presets "Este mes", "Trimestre actual" (default) and "Este año" (the whole calendar month /
@@ -349,11 +350,22 @@ Unit tests cover the repository / DTOs with MockEngine and the ViewModel with a 
 The **dark mode is DONE** (code, unit tests, builds; not yet run on screen): `PreferenciaTema`
 (`SISTEMA` / `CLARO` / `OSCURO`) in the domain, `TemaRepository` implemented over Settings
 (`TemaRepositoryImpl`, key `ui.tema`; a missing or unknown value is `SISTEMA`), `TemaViewModel`
-and an `IconButton` in the shell sidebar that toggles ONLY between light and dark (sun icon when
+and an `IconButton` in the shell top bar that toggles ONLY between light and dark (sun icon when
 light, moon when dark; `SISTEMA` exists only until the first choice and follows the OS via
-`isSystemInDarkTheme()`). `App` applies `darkColorScheme()` / `lightColorScheme()`; no colors are
+`isSystemInDarkTheme()`). `App` applies `TemaGestionFacturas(oscuro)` (see the identity paragraph below); no colors are
 hardcoded in the screens. The sun and moon are `ImageVector`s drawn in `ui/navigation/IconosTema.kt`
 because `material-icons-extended` is not a dependency.
+The **"negro y champán" identity is DONE** (code, builds, unit tests unchanged; NOT yet seen on screen): ported from
+`concept-designs/12-negro-champan`. `ui/theme/Tema.kt` defines `TemaGestionFacturas`: a dark scheme (near-black
+surfaces, off-white text, ONE muted champagne accent for what is active and the main action, a dim amber
+`tertiaryContainer` for BORRADOR rows and the review banner, soft red for errors and negative amounts), a light
+scheme DERIVED from it (the concept only exists in dark; same hue, accent darkened for contrast), Onest
+typography and rounder shapes. Onest is a variable font bundled as a Compose resource
+(`composeResources/font/onest.ttf`, SIL OFL license next to it; no new dependency); weights 300/400/500/600 are
+chosen with `FontVariation.weight`. UNVERIFIED: that Desktop honours the variable weight axis (if not, all text
+renders at the default weight). The shell now has a top bar with the four areas as pills instead of the left
+sidebar, and the dashboard summary is a statement-style list (beneficio de caja first, large and light) instead
+of five cards. The concept's "Hola, Ana" greeting is NOT built: the app only knows the email, not a name.
 The **dashboard export is DONE** (code, unit tests, builds; VERIFIED by the owner on Desktop against the real
 backend: download and native save dialog work; the 400 for `desde > hasta` is still unverified because the UI
 validates the range first): an
