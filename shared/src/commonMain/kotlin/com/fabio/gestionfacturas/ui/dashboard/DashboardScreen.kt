@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -330,46 +331,55 @@ private fun SeccionResumen(estado: DashboardUiState, alReintentar: () -> Unit) {
 @Composable
 private fun CifrasDelResumen(resumen: ResumenPeriodo, modo: ModoImporte) {
     val cifras = resumen.cifras(modo)
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-        TarjetaCifra(stringResource(Res.string.dashboard_facturado), cifras.facturado, Modifier.weight(1f))
-        TarjetaCifra(stringResource(Res.string.dashboard_cobrado), cifras.cobrado, Modifier.weight(1f))
-        TarjetaCifra(stringResource(Res.string.dashboard_gastos), cifras.gastos, Modifier.weight(1f))
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-        TarjetaCifra(
+    // A statement-style list instead of five cards: the beneficio de caja leads, the rest follows quietly.
+    Column(modifier = Modifier.fillMaxWidth()) {
+        FilaCifra(
             titulo = stringResource(Res.string.dashboard_beneficio_caja),
             importe = cifras.beneficioCaja,
-            modifier = Modifier.weight(1f),
             ayuda = stringResource(Res.string.dashboard_beneficio_caja_ayuda),
+            destacada = true,
         )
-        TarjetaCifra(
+        FilaCifra(stringResource(Res.string.dashboard_facturado), cifras.facturado)
+        FilaCifra(stringResource(Res.string.dashboard_cobrado), cifras.cobrado)
+        FilaCifra(stringResource(Res.string.dashboard_gastos), cifras.gastos)
+        FilaCifra(
             titulo = stringResource(Res.string.dashboard_beneficio_facturado),
             importe = cifras.beneficioFacturado,
-            modifier = Modifier.weight(1f),
             ayuda = stringResource(Res.string.dashboard_beneficio_facturado_ayuda),
         )
     }
 }
 
-/** A negative figure uses the error color; [ayuda] is the short caption of the beneficio cards. */
+/** A negative figure uses the error color; [ayuda] is the short caption under the beneficio rows. */
 @Composable
-private fun TarjetaCifra(titulo: String, importe: Importe, modifier: Modifier = Modifier, ayuda: String? = null) {
-    Card(modifier = modifier, colors = CardDefaults.cardColors()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(titulo, style = MaterialTheme.typography.titleSmall)
+private fun FilaCifra(titulo: String, importe: Importe, ayuda: String? = null, destacada: Boolean = false) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = titulo,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (destacada) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (ayuda != null) {
+                    Text(
+                        text = ayuda,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+            }
             Text(
                 text = textoEuros(importe),
-                style = MaterialTheme.typography.headlineSmall,
+                style = if (destacada) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge,
                 color = if (importe.esNegativo) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             )
-            if (ayuda != null) {
-                Text(
-                    text = ayuda,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
 
