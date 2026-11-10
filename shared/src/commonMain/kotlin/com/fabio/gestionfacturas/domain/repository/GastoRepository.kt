@@ -1,5 +1,6 @@
 package com.fabio.gestionfacturas.domain.repository
 
+import com.fabio.gestionfacturas.domain.model.ArchivoSeleccionado
 import com.fabio.gestionfacturas.domain.model.DatosGasto
 import com.fabio.gestionfacturas.domain.model.Gasto
 import com.fabio.gestionfacturas.domain.model.NuevoGasto
@@ -7,7 +8,8 @@ import com.fabio.gestionfacturas.domain.model.NuevoGasto
 /**
  * Failures are [com.fabio.gestionfacturas.domain.model.ErrorAuth]: 400 = Validacion (field map),
  * 404 = NoEncontradoConDetalle (the gasto, the category or the cliente), 409 on editar/revisar =
- * ConflictoConDetalle (state conflict).
+ * ConflictoConDetalle (state conflict). [digitalizar]: 400 = Validacion, 413 = ArchivoDemasiadoGrande,
+ * 422 = NoSePudoLeer, 429 = DemasiadasPeticiones, no network = ServidorInaccesible.
  */
 interface GastoRepository {
     suspend fun listar(): Result<List<Gasto>>
@@ -15,4 +17,7 @@ interface GastoRepository {
     suspend fun crear(nuevo: NuevoGasto): Result<Gasto>
     suspend fun editar(id: Long, datos: DatosGasto): Result<Gasto>
     suspend fun revisar(id: Long): Result<Gasto>
+
+    /** Uploads an image; the backend runs the OCR, persists the gasto as BORRADOR and returns it. */
+    suspend fun digitalizar(archivo: ArchivoSeleccionado): Result<Gasto>
 }

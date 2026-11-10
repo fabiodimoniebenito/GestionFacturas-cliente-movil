@@ -121,7 +121,9 @@ un beneficio negativo (`-181.50`) se conserva tal cual y se muestra en rojo; la 
 - [x] Clientes (estructura con menú lateral, listado, alta, edición y desactivación). Pendiente
   de probar a mano contra el backend real.
 - [x] Gastos (listado, detalle, alta, edición y revisión). Pendiente de probar a mano contra el
-  backend real. Falta la digitalización de facturas (subida de archivo).
+  backend real. La digitalización de facturas (subir una imagen JPG o PNG de hasta 10 MB, se crea un borrador que
+  hay que revisar) está hecha en escritorio; en Android el selector de archivos está pendiente. No se puede ver
+  la factura original dentro de la app porque la API no ofrece cómo descargarla.
 - [x] Ingresos y cobros (listado con filtro Todos / Pendientes / Cobrados aplicado en el cliente,
   detalle, alta, registrar y revertir cobro). Los ingresos no se pueden editar en esta versión
   porque el backend no tiene ese endpoint. El nombre del cliente se resuelve en el cliente a
