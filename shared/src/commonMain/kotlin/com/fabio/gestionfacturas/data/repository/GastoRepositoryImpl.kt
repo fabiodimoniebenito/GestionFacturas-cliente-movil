@@ -1,6 +1,7 @@
 package com.fabio.gestionfacturas.data.repository
 
 import com.fabio.gestionfacturas.data.remote.GastoApi
+import com.fabio.gestionfacturas.domain.model.ArchivoSeleccionado
 import com.fabio.gestionfacturas.domain.model.DatosGasto
 import com.fabio.gestionfacturas.domain.model.Gasto
 import com.fabio.gestionfacturas.domain.model.NuevoGasto
@@ -22,4 +23,7 @@ class GastoRepositoryImpl(private val api: GastoApi) : GastoRepository {
 
     override suspend fun revisar(id: Long): Result<Gasto> =
         resultadoDe { api.revisar(id).aModelo() }
+
+    override suspend fun digitalizar(archivo: ArchivoSeleccionado): Result<Gasto> =
+        resultadoDe { api.digitalizar(archivo).aModelo() }
 }
