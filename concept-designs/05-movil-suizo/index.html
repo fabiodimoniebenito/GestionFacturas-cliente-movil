@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · concepto móvil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+/* Concepto 05: versión móvil (la adaptación con barra inferior está pendiente en el proyecto).
+   Estilo suizo: un bloque de color plano, tipografía grande y condensada para la cifra clave, nada más. */
+:root {
+  --fondo: #F5F6F8;
+  --hoja: #FFFFFF;
+  --texto: #101319;
+  --suave: #5B6370;
+  --linea: #DCDFE5;
+  --cobalto: #1237F0;
+  --sobre-cobalto: #FFFFFF;
+  --negativo: #D8261F;
+  --aviso: #FFD84A;
+  --sobre-aviso: #3A2D00;
+  --foco: #101319;
+  --mesa: #D9DCE2;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #0F1217; --hoja: #181C23; --texto: #F1F3F7; --suave: #A2A9B6; --linea: #2A303B;
+    --cobalto: #5B78FF; --sobre-cobalto: #060B25; --negativo: #FF7A72; --aviso: #5C4A0A; --sobre-aviso: #FFE9A0;
+    --foco: #F1F3F7; --mesa: #07090C;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--mesa); font-family: "Archivo", system-ui, sans-serif; color: var(--texto); padding: 32px 12px 56px; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.mesa { display: flex; flex-wrap: wrap; gap: 36px; justify-content: center; align-items: flex-start; }
+.rotulo { text-align: center; font-size: .85rem; color: var(--suave); margin-top: 10px; }
+
+.movil { width: 360px; height: 720px; background: var(--fondo); border-radius: 28px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 0 8px #0B0D11, 0 20px 40px rgba(0,0,0,.35); }
+.cuerpo { flex: 1; overflow-y: auto; }
+.bloque { background: var(--cobalto); color: var(--sobre-cobalto); padding: 44px 22px 22px; }
+.bloque .periodo { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 22px; }
+.bloque .periodo button { border: 1.5px solid currentColor; background: none; border-radius: 999px; padding: 4px 12px; font-size: .85rem; white-space: nowrap; }
+.bloque .periodo button[aria-pressed="true"] { background: var(--sobre-cobalto); color: var(--cobalto); border-color: var(--sobre-cobalto); font-weight: 700; }
+.etq { font-size: .95rem; opacity: .9; }
+.gran { font-stretch: 75%; font-weight: 800; font-size: 3.6rem; line-height: 1; letter-spacing: -0.02em; margin: 4px 0 2px; }
+.mini { display: flex; gap: 22px; margin-top: 18px; }
+.mini div { font-size: .85rem; } .mini b { display: block; font-size: 1.15rem; font-weight: 700; }
+.modo { margin-top: 18px; display: flex; gap: 6px; }
+.modo button { border: 0; background: none; padding: 2px 0; margin-right: 12px; opacity: .7; border-bottom: 2px solid transparent; }
+.modo button[aria-pressed="true"] { opacity: 1; border-bottom-color: currentColor; font-weight: 700; }
+
+.seccion { padding: 20px 22px 8px; }
+.seccion h2 { font-size: 1.15rem; font-weight: 800; font-stretch: 85%; margin: 0 0 6px; }
+.item { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--linea); }
+.item small { display: block; color: var(--suave); }
+.neg { color: var(--negativo); }
+.item.revisar { background: var(--aviso); color: var(--sobre-aviso); margin: 0 -22px; padding: 12px 22px; border: 0; }
+
+.nav { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--hoja); border-top: 1px solid var(--linea); padding: 6px 4px 12px; }
+.nav button { border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .72rem; padding: 4px 0; color: var(--suave); }
+.nav button[aria-current="page"] { color: var(--texto); font-weight: 700; }
+.nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }
+.nav .camara { align-self: center; justify-self: center; width: 52px; height: 52px; border-radius: 50%; background: var(--cobalto); color: var(--sobre-cobalto); margin-top: -22px; justify-content: center; box-shadow: 0 0 0 5px var(--hoja); }
+.nav .camara svg { width: 26px; height: 26px; }
+
+/* Pantalla de digitalizar */
+.cab { padding: 44px 22px 8px; } .cab h1 { margin: 6px 0 0; font-size: 2rem; font-weight: 800; font-stretch: 75%; line-height: 1.05; }
+.volver { background: none; border: 0; padding: 0; color: var(--suave); }
+.archivo { margin: 18px 22px; border: 2px solid var(--texto); border-radius: 4px; padding: 16px; }
+.archivo b { display: block; font-size: 1.05rem; } .archivo span { color: var(--suave); }
+.explica { margin: 0 22px; color: var(--suave); }
+.acciones { margin: 22px; display: grid; gap: 10px; }
+.principal { border: 0; border-radius: 4px; background: var(--cobalto); color: var(--sobre-cobalto); padding: 16px; font-weight: 800; font-size: 1.05rem; }
+.sec { border: 2px solid var(--texto); border-radius: 4px; background: none; padding: 13px; font-weight: 700; }
+.nota { max-width: 760px; margin: 28px auto 0; text-align: center; color: var(--suave); font-size: .9rem; }
+</style>
+</head>
+<body>
+<div class="mesa">
+  <div>
+    <div class="movil" aria-label="Dashboard en móvil">
+      <div class="cuerpo">
+        <div class="bloque">
+          <div class="periodo" role="group" aria-label="Periodo">
+            <button aria-pressed="false">Este mes</button><button aria-pressed="true">Trimestre</button><button aria-pressed="false">Este año</button><button aria-pressed="false">Otro</button>
+          </div>
+          <div class="etq">Beneficio de caja</div>
+          <div class="gran" data-con="3.418,50 €" data-sin="2.824,79 €"></div>
+          <div class="etq">lo cobrado menos los gastos</div>
+          <div class="mini">
+            <div>Facturado<b data-con="12.100,00 €" data-sin="10.000,00 €"></b></div>
+            <div>Cobrado<b data-con="7.260,00 €" data-sin="6.000,00 €"></b></div>
+            <div>Gastos<b data-con="3.841,50 €" data-sin="3.175,21 €"></b></div>
+          </div>
+          <div class="modo" role="group" aria-label="Importes">
+            <button id="con" aria-pressed="true">Con IVA</button><button id="sin" aria-pressed="false">Sin IVA</button>
+          </div>
+        </div>
+        <div class="seccion">
+          <h2>Pendientes de cobro</h2>
+          <div class="item"><span>Rediseño de catálogo<small>Estudio Mar y Sol</small></span><b>2.420,00 €</b></div>
+          <div class="item"><span>Mantenimiento web<small>Taller Cobre</small></span><b>1.452,00 €</b></div>
+          <div class="item"><span>Fotografía de producto<small>Estudio Mar y Sol</small></span><b>968,00 €</b></div>
+        </div>
+        <div class="seccion">
+          <h2>Por cliente</h2>
+          <div class="item"><span>Estudio Mar y Sol</span><b>5.445,00 €</b></div>
+          <div class="item"><span>Gastos generales</span><b class="neg">-181,50 €</b></div>
+          <div class="item revisar"><span>Papelería Lola<small style="color:inherit">Pendiente de revisión</small></span><b>100,00 €</b></div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Principal">
+        <button aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Inicio</button>
+        <button><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/></svg>Clientes</button>
+        <button class="camara" aria-label="Digitalizar factura"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+        <button><svg viewBox="0 0 24 24"><path d="M12 3v14M6 11l6 6 6-6M4 21h16"/></svg>Gastos</button>
+        <button><svg viewBox="0 0 24 24"><path d="M12 21V7M6 13l6-6 6 6M4 3h16"/></svg>Ingresos</button>
+      </nav>
+    </div>
+    <p class="rotulo">Dashboard</p>
+  </div>
+
+  <div>
+    <div class="movil" aria-label="Digitalizar factura en móvil">
+      <div class="cuerpo">
+        <div class="cab"><button class="volver">Volver</button><h1>Digitalizar factura</h1></div>
+        <p class="explica">Imagen JPG o PNG de hasta 10 MB. Se leerán los datos y tendrás que revisarlos.</p>
+        <div class="archivo"><b>factura-papeleria.jpg</b><span>2,3 MB</span></div>
+        <div class="acciones">
+          <button class="principal">Subir</button>
+          <button class="sec">Cambiar</button>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Principal">
+        <button><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Inicio</button>
+        <button><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/></svg>Clientes</button>
+        <button class="camara" aria-label="Digitalizar factura"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+        <button aria-current="page"><svg viewBox="0 0 24 24"><path d="M12 3v14M6 11l6 6 6-6M4 21h16"/></svg>Gastos</button>
+        <button><svg viewBox="0 0 24 24"><path d="M12 21V7M6 13l6-6 6 6M4 3h16"/></svg>Ingresos</button>
+      </nav>
+    </div>
+    <p class="rotulo">Digitalizar (archivo seleccionado)</p>
+  </div>
+</div>
+<p class="nota">Concepto 05. El botón central de la barra inferior es la acción más característica de la app: digitalizar una factura con la cámara.</p>
+<script>
+  const valores = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    valores.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+</script>
+</body>
+</html>

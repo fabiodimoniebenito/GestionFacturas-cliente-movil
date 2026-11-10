@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · identidad visual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --papel: #F3F5F8;
+  --hoja: #FFFFFF;
+  --linea: #D5DBE6;
+  --texto: #1C2230;
+  --texto-suave: #55607A;
+  --tinta: #2340A6;
+  --sobre-tinta: #FFFFFF;
+  --tinta-suave: #E1E7FA;
+  --copia: #FBE9A0;
+  --sobre-copia: #4A3B00;
+  --sello: #C4352B;
+  --cobrado: #2E7D5B;
+  --foco: #2340A6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --papel: #151A26; --hoja: #1E2535; --linea: #313A52; --texto: #E8ECF8; --texto-suave: #A3AEC9;
+    --tinta: #AEBDFF; --sobre-tinta: #101535; --tinta-suave: #28325A;
+    --copia: #4A3F12; --sobre-copia: #F6E7A6; --sello: #FF8A7D; --cobrado: #6FD0A2; --foco: #AEBDFF;
+  }
+}
+:root[data-theme="dark"] {
+  --papel: #151A26; --hoja: #1E2535; --linea: #313A52; --texto: #E8ECF8; --texto-suave: #A3AEC9;
+  --tinta: #AEBDFF; --sobre-tinta: #101535; --tinta-suave: #28325A;
+  --copia: #4A3F12; --sobre-copia: #F6E7A6; --sello: #FF8A7D; --cobrado: #6FD0A2; --foco: #AEBDFF;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--papel); color: var(--texto);
+  font-family: "Atkinson Hyperlegible Next", system-ui, sans-serif; font-size: 16px; line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+h1, h2, h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; line-height: 1.15; margin: 0; }
+h1 { font-size: 1.9rem; } h2 { font-size: 1.3rem; } h3 { font-size: 1.05rem; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+.app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+.lateral { background: var(--hoja); border-right: 1px solid var(--linea); padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; }
+.marca { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 1.2rem; padding: 0 12px 20px; }
+.marca span { color: var(--tinta); }
+.nav { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 10px 12px; border-radius: 10px; color: var(--texto-suave); }
+.nav[aria-current="page"] { background: var(--tinta-suave); color: var(--tinta); font-weight: 700; }
+.pie { margin-top: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: .9rem; color: var(--texto-suave); }
+.tema { align-self: flex-start; border: 1px solid var(--linea); background: none; border-radius: 10px; padding: 6px 12px; }
+
+main { padding: 28px clamp(16px, 4vw, 48px) 64px; max-width: 1040px; }
+.cabecera { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.controles { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; align-items: center; }
+.chip { border: 1px solid var(--linea); background: var(--hoja); border-radius: 999px; padding: 6px 14px; }
+.chip[aria-pressed="true"] { background: var(--tinta); border-color: var(--tinta); color: var(--sobre-tinta); }
+.separa { width: 1px; height: 24px; background: var(--linea); margin: 0 6px; }
+.boton { border: 0; border-radius: 10px; padding: 9px 16px; background: var(--tinta); color: var(--sobre-tinta); font-weight: 700; }
+.boton.sec { background: none; border: 1px solid var(--linea); color: var(--texto); font-weight: 400; }
+
+/* Hoja de cuentas: el resumen con la regla de un cuaderno, borde perforado de talón */
+.hoja-cuentas {
+  background: var(--hoja); border: 1px solid var(--linea); border-radius: 4px; position: relative;
+  padding: 8px 28px 20px; margin-bottom: 36px;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 47px, var(--linea) 47px 48px);
+}
+.hoja-cuentas::before, .hoja-cuentas::after {
+  content: ""; position: absolute; left: -1px; right: -1px; height: 10px;
+  background: radial-gradient(circle at 8px 0, var(--papel) 0 4px, transparent 4.5px) 0 0 / 16px 10px repeat-x;
+}
+.hoja-cuentas::before { top: -1px; transform: none; }
+.hoja-cuentas::after { bottom: -1px; transform: scaleY(-1); }
+.linea { display: flex; justify-content: space-between; align-items: baseline; height: 48px; padding-top: 10px; }
+.linea .nombre { color: var(--texto-suave); }
+.linea .importe { font-size: 1.15rem; }
+.resultado { height: 64px; padding-top: 14px; }
+.resultado .nombre { color: var(--texto); font-weight: 700; }
+.resultado .nombre small { display: block; font-weight: 400; color: var(--texto-suave); font-size: .8rem; line-height: 1.1; }
+.resultado .importe { font-family: "Bricolage Grotesque", sans-serif; font-size: 1.9rem; font-weight: 700; }
+.neg { color: var(--sello); }
+
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.seccion h2 { margin-bottom: 12px; }
+.fila { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--linea); }
+.fila:last-child { border-bottom: 1px solid var(--linea); }
+.fila small { display: block; color: var(--texto-suave); }
+
+/* El sello de goma: lo único con un ligero giro */
+.sello {
+  display: inline-block; border: 2px solid currentColor; border-radius: 6px; padding: 1px 10px;
+  font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .85rem; transform: rotate(-3deg);
+  box-shadow: inset 0 0 0 2px var(--hoja), inset 0 0 0 3px currentColor; opacity: .92;
+}
+.sello.pendiente { color: var(--sobre-copia); }
+.sello.cobrada { color: var(--cobrado); }
+.sello.anim { animation: sellar .5s cubic-bezier(.2, .8, .3, 1.3) .25s both; }
+@keyframes sellar { from { transform: rotate(-9deg) scale(1.5); opacity: 0; } to { transform: rotate(-3deg) scale(1); opacity: .92; } }
+@media (prefers-reduced-motion: reduce) { .sello.anim { animation: none; } }
+
+.gasto { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 6px; background: var(--hoja); border: 1px solid var(--linea); margin-bottom: 10px; }
+.gasto.borrador { background: var(--copia); color: var(--sobre-copia); border-color: transparent; }
+.aviso { background: var(--copia); color: var(--sobre-copia); padding: 14px 16px; border-radius: 6px; margin-bottom: 16px; }
+
+.tokens { margin-top: 56px; padding-top: 24px; border-top: 2px solid var(--texto); }
+.muestras { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin: 16px 0 28px; }
+.muestra { border: 1px solid var(--linea); border-radius: 6px; overflow: hidden; background: var(--hoja); font-size: .85rem; }
+.muestra i { display: block; height: 52px; }
+.muestra div { padding: 8px 10px; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: 8px 10px; border-top: 1px solid var(--linea); vertical-align: top; }
+code { font-size: .85em; background: var(--tinta-suave); padding: 1px 5px; border-radius: 4px; }
+
+@media (max-width: 820px) {
+  .app { grid-template-columns: 1fr; }
+  .lateral { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--linea); }
+  .marca { padding: 0 12px 0 0; } .pie { margin: 0 0 0 auto; flex-direction: row; align-items: center; }
+  .dos { grid-template-columns: 1fr; gap: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="lateral" aria-label="Principal">
+    <div class="marca">Gestión<span>Facturas</span></div>
+    <button class="nav" aria-current="page">Dashboard</button>
+    <button class="nav">Clientes</button>
+    <button class="nav">Gastos</button>
+    <button class="nav">Ingresos</button>
+    <div class="pie">
+      <span>ana@example.com</span>
+      <button class="tema" id="tema" aria-label="Cambiar entre tema claro y oscuro">Cambiar tema</button>
+      <button class="boton sec">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="cabecera">
+      <h1>Tu trimestre, de un vistazo</h1>
+      <button class="boton sec">Exportar a Excel</button>
+    </div>
+
+    <div class="controles" role="group" aria-label="Periodo">
+      <button class="chip" aria-pressed="false">Este mes</button>
+      <button class="chip" aria-pressed="true">Trimestre actual</button>
+      <button class="chip" aria-pressed="false">Este año</button>
+      <button class="chip" aria-pressed="false">Personalizado</button>
+      <span class="separa"></span>
+      <div role="group" aria-label="Importes">
+        <button class="chip" id="con" aria-pressed="true">Con IVA</button>
+        <button class="chip" id="sin" aria-pressed="false">Sin IVA</button>
+      </div>
+    </div>
+
+    <section class="hoja-cuentas" aria-label="Resumen del periodo">
+      <div class="linea"><span class="nombre">Facturado</span><span class="importe" data-con="12.100,00 €" data-sin="10.000,00 €"></span></div>
+      <div class="linea"><span class="nombre">Cobrado</span><span class="importe" data-con="7.260,00 €" data-sin="6.000,00 €"></span></div>
+      <div class="linea"><span class="nombre">Gastos</span><span class="importe" data-con="3.841,50 €" data-sin="3.175,21 €"></span></div>
+      <div class="linea resultado"><span class="nombre">Beneficio de caja<small>lo cobrado menos los gastos</small></span><span class="importe" data-con="3.418,50 €" data-sin="2.824,79 €"></span></div>
+      <div class="linea resultado"><span class="nombre">Beneficio facturado<small>lo facturado menos los gastos</small></span><span class="importe" data-con="8.258,50 €" data-sin="6.824,79 €"></span></div>
+    </section>
+
+    <div class="dos">
+      <section class="seccion">
+        <h2>Rentabilidad por cliente</h2>
+        <div class="fila"><span>Estudio Mar y Sol</span><span>5.445,00 €</span></div>
+        <div class="fila"><span>Taller Cobre</span><span>2.904,00 €</span></div>
+        <div class="fila"><span>Gastos generales (sin cliente)</span><span class="neg">-181,50 €</span></div>
+      </section>
+      <section class="seccion">
+        <h2>Pendientes de cobro</h2>
+        <div class="fila"><span>Rediseño de catálogo<small>Estudio Mar y Sol · 2026-10-03</small></span><span>2.420,00 €</span></div>
+        <div class="fila"><span>Mantenimiento web<small>Taller Cobre · 2026-10-21</small></span><span>1.452,00 €</span></div>
+        <div class="fila"><span>Fotografía de producto<small>Estudio Mar y Sol · 2026-11-02</small></span><span>968,00 €</span></div>
+        <div class="fila"><strong>Total pendiente</strong><strong>4.840,00 €</strong></div>
+      </section>
+    </div>
+
+    <section class="seccion" style="margin-top:44px">
+      <h2>Gastos</h2>
+      <p class="aviso">Revisa los datos extraídos antes de marcarlo como revisado</p>
+      <div class="gasto borrador"><div><strong>Papelería Lola</strong><br>2026-10-20 · Base 100,00 € · IVA 21,00 €</div><span class="sello pendiente anim">Pendiente de revisión</span></div>
+      <div class="gasto"><div><strong>Hosting y dominios</strong><br>2026-10-12 · Base 24,79 € · IVA 5,21 €</div><span>Revisado</span></div>
+      <div class="gasto"><div><strong>Factura 2026-014 · Taller Cobre</strong><br>Cobrada el 2026-10-28</div><span class="sello cobrada">Cobrada</span></div>
+    </section>
+
+    <section class="tokens" aria-label="Sistema de diseño">
+      <h2>Sistema de diseño</h2>
+      <p>Una app que se parece a lo que ya usa un autónomo: el talonario, el bolígrafo azul y el sello. Un solo gesto memorable (el sello); todo lo demás es sobrio.</p>
+      <div class="muestras">
+        <div class="muestra"><i style="background:var(--papel)"></i><div><strong>Papel</strong><br><code>background</code></div></div>
+        <div class="muestra"><i style="background:var(--hoja)"></i><div><strong>Hoja</strong><br><code>surface</code></div></div>
+        <div class="muestra"><i style="background:var(--tinta)"></i><div><strong>Tinta</strong><br><code>primary</code></div></div>
+        <div class="muestra"><i style="background:var(--copia)"></i><div><strong>Copia amarilla</strong><br><code>tertiaryContainer</code></div></div>
+        <div class="muestra"><i style="background:var(--sello)"></i><div><strong>Sello rojo</strong><br><code>error</code></div></div>
+        <div class="muestra"><i style="background:var(--cobrado)"></i><div><strong>Verde de sello</strong><br><code>secondary</code></div></div>
+      </div>
+      <table>
+        <tr><th>Rol</th><th>Claro</th><th>Oscuro</th><th>Uso</th></tr>
+        <tr><td><code>background</code></td><td>#F3F5F8</td><td>#151A26</td><td>Fondo de pantalla</td></tr>
+        <tr><td><code>surface</code></td><td>#FFFFFF</td><td>#1E2535</td><td>Hojas, filas, barra lateral</td></tr>
+        <tr><td><code>onSurface</code></td><td>#1C2230</td><td>#E8ECF8</td><td>Texto</td></tr>
+        <tr><td><code>primary</code> / <code>onPrimary</code></td><td>#2340A6 / #FFFFFF</td><td>#AEBDFF / #101535</td><td>Acción principal, selección</td></tr>
+        <tr><td><code>primaryContainer</code></td><td>#E1E7FA</td><td>#28325A</td><td>Elemento activo del menú</td></tr>
+        <tr><td><code>tertiaryContainer</code> / <code>onTertiaryContainer</code></td><td>#FBE9A0 / #4A3B00</td><td>#4A3F12 / #F6E7A6</td><td>Borrador, aviso de revisión</td></tr>
+        <tr><td><code>error</code></td><td>#C4352B</td><td>#FF8A7D</td><td>Importes negativos y errores</td></tr>
+        <tr><td><code>secondary</code></td><td>#2E7D5B</td><td>#6FD0A2</td><td>Estado cobrado</td></tr>
+        <tr><td><code>outlineVariant</code></td><td>#D5DBE6</td><td>#313A52</td><td>Separadores</td></tr>
+      </table>
+      <h3 style="margin-top:28px">Tipografía</h3>
+      <table>
+        <tr><td>Títulos y cifras grandes</td><td>Bricolage Grotesque 700 · 30 / 21 / 17 px</td></tr>
+        <tr><td>Texto, etiquetas e importes</td><td>Atkinson Hyperlegible Next 400 y 700 · 16 px · números tabulares</td></tr>
+        <tr><td>Formas</td><td>4 px en hojas y filas · 10 px en botones · píldora solo en selectores de periodo</td></tr>
+        <tr><td>Movimiento</td><td>Solo el sello al aparecer (una vez); se desactiva con «reducir movimiento»</td></tr>
+      </table>
+    </section>
+  </main>
+</div>
+<script>
+  const importes = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    importes.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+  document.getElementById('tema').onclick = () => {
+    const r = document.documentElement, oscuro = getComputedStyle(r).getPropertyValue('--papel').trim() === '#151A26';
+    r.dataset.theme = oscuro ? 'light' : 'dark';
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · concepto ticket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
+<style>
+/* Concepto 03: la app como el ticket de una caja registradora. Impresión térmica = monocroma:
+   los negativos y lo pendiente se marcan en vídeo inverso, no con color. */
+:root {
+  --mostrador: #2A2E35;
+  --papel: #FCFCFA;
+  --tinta: #23262B;
+  --tinta-suave: #5E636C;
+  --inverso: #23262B;
+  --sobre-inverso: #FCFCFA;
+  --foco: #1B6FD1;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--mostrador); color: var(--tinta); font-family: "Courier Prime", "Courier New", monospace; font-size: 15px; line-height: 1.45; padding: 32px 12px 64px; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+.ticket {
+  position: relative; max-width: 440px; margin: 0 auto 40px; background: var(--papel); padding: 34px 28px 40px;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.35));
+}
+.ticket::before, .ticket::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 12px;
+  background: conic-gradient(from -45deg at 50% 100%, var(--papel) 0 90deg, transparent 90deg) 0 0 / 16px 12px repeat-x;
+}
+.ticket::before { top: -11px; }
+.ticket::after { bottom: -11px; transform: scaleY(-1); }
+
+h1 { font-size: 1.35rem; text-align: center; margin: 0; }
+h2 { font-size: 1rem; margin: 22px 0 6px; }
+.centro { text-align: center; color: var(--tinta-suave); }
+.corte { border: 0; border-top: 2px dashed var(--tinta); margin: 16px 0; }
+nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; margin: 12px 0 0; }
+nav button { background: none; border: 0; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+nav button[aria-current="page"] { font-weight: 700; text-decoration: none; background: var(--inverso); color: var(--sobre-inverso); padding: 4px 8px; }
+
+.opciones { display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: center; }
+.opciones button { background: none; border: 0; padding: 2px 0; }
+.opciones button::before { content: "[ ] "; }
+.opciones button[aria-pressed="true"]::before { content: "[x] "; font-weight: 700; }
+
+.l { display: flex; align-items: baseline; gap: 6px; }
+.l .t { flex: 0 1 auto; }
+.l .p { flex: 1 1 auto; border-bottom: 2px dotted var(--tinta-suave); transform: translateY(-4px); min-width: 12px; }
+.l .v { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+.l small { display: block; color: var(--tinta-suave); font-size: .82rem; }
+.total { font-size: 1.25rem; font-weight: 700; margin: 6px 0; }
+.inv { background: var(--inverso); color: var(--sobre-inverso); padding: 2px 6px; margin: 2px -6px; }
+.inv .p { border-bottom-color: var(--sobre-inverso); }
+.sub { color: var(--tinta-suave); font-size: .85rem; margin: 0 0 4px; }
+
+.pie { text-align: center; margin-top: 8px; }
+.barras { font-family: "Libre Barcode 39 Text", cursive; font-size: 2.6rem; line-height: 1.1; margin: 4px 0 0; }
+.cuenta { text-align: center; font-size: .85rem; color: var(--tinta-suave); margin-top: 20px; }
+.cuenta button { background: none; border: 0; text-decoration: underline; margin: 0 6px; }
+
+.nota { max-width: 440px; margin: 0 auto; color: #C9CED6; font-family: system-ui, sans-serif; font-size: .9rem; }
+.nota code { background: #3A3F48; padding: 1px 5px; border-radius: 3px; }
+.nota a { color: #fff; }
+</style>
+</head>
+<body>
+
+<main class="ticket">
+  <h1>GestionFacturas</h1>
+  <p class="centro">Ana García, autónoma<br>ana@example.com</p>
+  <nav aria-label="Principal">
+    <button aria-current="page">Dashboard</button>
+    <button>Clientes</button>
+    <button>Gastos</button>
+    <button>Ingresos</button>
+  </nav>
+  <hr class="corte">
+
+  <p class="sub">Periodo</p>
+  <div class="opciones" role="group" aria-label="Periodo">
+    <button aria-pressed="false">Este mes</button>
+    <button aria-pressed="true">Trimestre actual</button>
+    <button aria-pressed="false">Este año</button>
+    <button aria-pressed="false">Personalizado</button>
+  </div>
+  <p class="sub" style="margin-top:10px">Importes</p>
+  <div class="opciones" role="group" aria-label="Importes">
+    <button id="con" aria-pressed="true">Con IVA</button>
+    <button id="sin" aria-pressed="false">Sin IVA</button>
+  </div>
+  <hr class="corte">
+
+  <h2>Resumen del trimestre</h2>
+  <div class="l"><span class="t">Facturado</span><span class="p"></span><span class="v" data-con="12.100,00 €" data-sin="10.000,00 €"></span></div>
+  <div class="l"><span class="t">Cobrado</span><span class="p"></span><span class="v" data-con="7.260,00 €" data-sin="6.000,00 €"></span></div>
+  <div class="l"><span class="t">Gastos</span><span class="p"></span><span class="v" data-con="3.841,50 €" data-sin="3.175,21 €"></span></div>
+  <hr class="corte">
+  <div class="l total"><span class="t">Beneficio de caja</span><span class="p"></span><span class="v" data-con="3.418,50 €" data-sin="2.824,79 €"></span></div>
+  <p class="sub">lo cobrado menos los gastos</p>
+  <div class="l total"><span class="t">Beneficio facturado</span><span class="p"></span><span class="v" data-con="8.258,50 €" data-sin="6.824,79 €"></span></div>
+  <p class="sub">lo facturado menos los gastos</p>
+  <hr class="corte">
+
+  <h2>Rentabilidad por cliente</h2>
+  <div class="l"><span class="t">Estudio Mar y Sol</span><span class="p"></span><span class="v">5.445,00 €</span></div>
+  <div class="l"><span class="t">Taller Cobre</span><span class="p"></span><span class="v">2.904,00 €</span></div>
+  <div class="l inv"><span class="t">Gastos generales (sin cliente)</span><span class="p"></span><span class="v">-181,50 €</span></div>
+  <hr class="corte">
+
+  <h2>Pendientes de cobro</h2>
+  <div class="l"><span class="t">Rediseño de catálogo<small>Estudio Mar y Sol, 2026-10-03</small></span><span class="p"></span><span class="v">2.420,00 €</span></div>
+  <div class="l"><span class="t">Mantenimiento web<small>Taller Cobre, 2026-10-21</small></span><span class="p"></span><span class="v">1.452,00 €</span></div>
+  <div class="l"><span class="t">Fotografía de producto<small>Estudio Mar y Sol, 2026-11-02</small></span><span class="p"></span><span class="v">968,00 €</span></div>
+  <div class="l total"><span class="t">Total pendiente</span><span class="p"></span><span class="v">4.840,00 €</span></div>
+  <hr class="corte">
+
+  <h2>Gastos</h2>
+  <div class="l inv"><span class="t">Papelería Lola<small style="color:inherit">2026-10-20, pendiente de revisión</small></span><span class="p"></span><span class="v">100,00 €</span></div>
+  <p class="sub">Revisa los datos extraídos antes de marcarlo como revisado.</p>
+  <div class="l"><span class="t">Hosting y dominios<small>2026-10-12, revisado</small></span><span class="p"></span><span class="v">24,79 €</span></div>
+  <hr class="corte">
+
+  <div class="pie">
+    <p class="centro" style="margin:0">Gracias por mantener tus cuentas al día</p>
+    <p class="barras" aria-hidden="true">*GF-2026-T4*</p>
+  </div>
+  <p class="cuenta"><button id="tema">Cambiar fondo</button><button>Exportar a Excel</button><button>Cerrar sesión</button></p>
+</main>
+
+<p class="nota">Concepto 03. Los avisos usan vídeo inverso (como una impresora térmica) en lugar de color; el tema solo cambia el mostrador, el ticket siempre es papel.</p>
+
+<script>
+  const valores = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    valores.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+  document.getElementById('tema').onclick = () => {
+    const b = document.body; b.style.background = b.style.background ? '' : '#D9D6CF';
+  };
+</script>
+</body>
+</html>

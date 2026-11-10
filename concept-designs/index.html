@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · conceptos de diseño</title>
+<style>
+:root { --fondo: #F4F5F7; --texto: #16181D; --suave: #555C69; --linea: #D6D9E0; --enlace: #1B3FD1; }
+@media (prefers-color-scheme: dark) { :root { --fondo: #14161B; --texto: #ECEEF2; --suave: #A0A6B3; --linea: #2C313B; --enlace: #8FA6FF; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font-family: system-ui, sans-serif; line-height: 1.5; padding: 40px 16px 64px; }
+main { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 1.8rem; margin: 0 0 8px; }
+p { color: var(--suave); margin: 0 0 24px; }
+ol { list-style: none; padding: 0; margin: 0; }
+li { border-top: 1px solid var(--linea); }
+li:last-child { border-bottom: 1px solid var(--linea); }
+a { display: block; padding: 16px 4px; color: inherit; text-decoration: none; }
+a:hover strong, a:focus-visible strong { color: var(--enlace); text-decoration: underline; }
+a:focus-visible { outline: 3px solid var(--enlace); outline-offset: 2px; }
+strong { font-size: 1.1rem; }
+small { display: block; color: var(--suave); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Conceptos de diseño de GestionFacturas</h1>
+  <p>Diez direcciones visuales para la misma información (dashboard, gastos, digitalizar). Cada una se abre por separado.</p>
+  <ol>
+    <li><a href="01-talonario/index.html"><strong>01 Talonario</strong><small>Cercano y humano. Papel de cuaderno, tinta de bolígrafo, copia amarilla y sellos de goma.</small></a></li>
+    <li><a href="02-libro-mayor/index.html"><strong>02 Libro mayor</strong><small>Sobrio e institucional. Estado de resultados con rayas contables, verde botella y cifras en serif.</small></a></li>
+    <li><a href="03-ticket/index.html"><strong>03 Ticket</strong><small>La app como el ticket de una caja. Monocromo, vídeo inverso para avisos y código de barras.</small></a></li>
+    <li><a href="04-archivador/index.html"><strong>04 Archivador</strong><small>Separadores de colores. Cada área (ingresos, gastos, clientes) tiene un color con significado fijo.</small></a></li>
+    <li><a href="05-movil-suizo/index.html"><strong>05 Móvil suizo</strong><small>Versión móvil con barra inferior y cámara central. Un bloque de color y tipografía condensada grande.</small></a></li>
+    <li><a href="06-noche-instrumentos/index.html"><strong>06 Noche, panel de instrumentos</strong><small>Oscuro de origen. Colores por magnitud y cifras grandes en peso ligero.</small></a></li>
+    <li><a href="07-libreta/index.html"><strong>07 Libreta de ahorros</strong><small>Cifras en tinta violeta de matriz de puntos sobre papel azulado, sellos de ventanilla y agujeros de encuadernación.</small></a></li>
+    <li><a href="08-hoja-de-calculo/index.html"><strong>08 Hoja de cálculo</strong><small>Rejilla con cabeceras y barra de fórmulas que explica cada celda; la navegación son pestañas de hoja.</small></a></li>
+    <li><a href="09-tablero-estados/index.html"><strong>09 Tablero por estados</strong><small>Ingresos y gastos en columnas según su estado (pendiente, cobrada, borrador, revisada...).</small></a></li>
+    <li><a href="10-narrativo/index.html"><strong>10 Narrativo</strong><small>El dashboard se lee como una frase, con las cifras subrayadas con marcador; el detalle va debajo.</small></a></li>
+  </ol>
+</main>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · concepto archivador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Concepto 04: separadores de archivador. Cada área tiene su color y ese color significa lo mismo en toda la app:
+   ingresos = verde, gastos = ámbar, dashboard = índigo, clientes = turquesa. */
+:root {
+  --fondo: #EEF0F6;
+  --hoja: #FFFFFF;
+  --texto: #1B2033;
+  --suave: #5A6179;
+  --linea: #D8DCE8;
+  --indigo: #4457D6; --indigo-f: #E5E8FB;
+  --turquesa: #12868A; --turquesa-f: #DDF1F1;
+  --ambar: #B87400; --ambar-f: #FCEFD2;
+  --verde: #2C8A51; --verde-f: #DFF2E6;
+  --negativo: #C42B3D;
+  --foco: #1B3FD1;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #12151F; --hoja: #1B2030; --texto: #E8EBF7; --suave: #A0A8C4; --linea: #2E3550;
+    --indigo: #9AA8FF; --indigo-f: #262D5A; --turquesa: #6CD2D5; --turquesa-f: #15383A;
+    --ambar: #FFC25A; --ambar-f: #43330F; --verde: #7FDCA3; --verde-f: #173825; --negativo: #FF8B99; --foco: #9AA8FF;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font-family: "Schibsted Grotesk", system-ui, sans-serif; font-size: 16px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+h1, h2 { margin: 0; line-height: 1.15; }
+h1 { font-size: 1.8rem; font-weight: 800; } h2 { font-size: 1.1rem; font-weight: 700; }
+
+.carpeta { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+.superior { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+.marca { font-weight: 800; font-size: 1.1rem; }
+.sesion { display: flex; gap: 12px; align-items: center; font-size: .9rem; color: var(--suave); }
+.sesion button { background: none; border: 1px solid var(--linea); border-radius: 8px; padding: 5px 12px; }
+
+.pestanas { display: flex; gap: 4px; padding-left: 12px; }
+.pestana { border: 0; border-radius: 12px 12px 0 0; padding: 10px 22px 12px; background: var(--c-f); color: var(--c); font-weight: 700; margin-bottom: -1px; }
+.pestana[aria-current="page"] { background: var(--hoja); border-top: 5px solid var(--c); padding-top: 6px; color: var(--texto); }
+.p-dash { --c: var(--indigo); --c-f: var(--indigo-f); }
+.p-cli { --c: var(--turquesa); --c-f: var(--turquesa-f); }
+.p-gas { --c: var(--ambar); --c-f: var(--ambar-f); }
+.p-ing { --c: var(--verde); --c-f: var(--verde-f); }
+
+.hoja { background: var(--hoja); border: 1px solid var(--linea); border-radius: 0 12px 12px 12px; padding: 28px clamp(16px, 4vw, 40px) 40px; }
+.cabecera { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.barra { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 28px; align-items: center; }
+.grupo { display: inline-flex; gap: 6px; }
+.chip { border: 1px solid var(--linea); background: none; border-radius: 8px; padding: 6px 12px; }
+.chip[aria-pressed="true"] { background: var(--indigo); border-color: var(--indigo); color: #fff; font-weight: 700; }
+@media (prefers-color-scheme: dark) { .chip[aria-pressed="true"] { color: #12151F; } }
+.boton { border: 1px solid var(--linea); background: none; border-radius: 8px; padding: 8px 14px; font-weight: 500; }
+
+/* Resumen: tres bloques con el color de su área, no cinco tarjetas iguales */
+.resumen { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; margin-bottom: 14px; }
+.bloque { border-radius: 10px; padding: 18px 20px; background: var(--c-f); border-left: 6px solid var(--c); }
+.bloque h2 { color: var(--c); margin-bottom: 8px; }
+.ing { --c: var(--verde); --c-f: var(--verde-f); } .gas { --c: var(--ambar); --c-f: var(--ambar-f); } .res { --c: var(--indigo); --c-f: var(--indigo-f); }
+.par { display: flex; gap: 28px; flex-wrap: wrap; }
+.dato small { display: block; color: var(--suave); font-size: .85rem; }
+.dato b { font-size: 1.7rem; font-weight: 800; }
+.res { grid-column: 1 / -1; display: flex; gap: 40px; flex-wrap: wrap; align-items: end; }
+.res .dato b { font-size: 2.3rem; }
+
+.listas { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 34px; }
+.fila { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0 11px 12px; border-bottom: 1px solid var(--linea); border-left: 4px solid var(--c, var(--linea)); margin-bottom: 6px; border-radius: 2px; }
+.fila small { display: block; color: var(--suave); }
+.fila b { font-weight: 700; }
+.neg { color: var(--negativo); }
+.borrador { background: var(--ambar-f); --c: var(--ambar); padding-right: 12px; }
+.aviso { background: var(--ambar-f); border-left: 6px solid var(--ambar); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.etiqueta { font-size: .8rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--ambar); color: #fff; align-self: start; }
+@media (prefers-color-scheme: dark) { .etiqueta { color: #12151F; } }
+.clientes-c { --c: var(--turquesa); } .ingresos-c { --c: var(--verde); }
+
+@media (max-width: 760px) {
+  .resumen, .listas { grid-template-columns: 1fr; }
+  .pestanas { overflow-x: auto; padding-left: 0; }
+}
+</style>
+</head>
+<body>
+<div class="carpeta">
+  <div class="superior">
+    <span class="marca">GestionFacturas</span>
+    <span class="sesion">ana@example.com <button>Cerrar sesión</button></span>
+  </div>
+
+  <nav class="pestanas" aria-label="Principal">
+    <button class="pestana p-dash" aria-current="page">Dashboard</button>
+    <button class="pestana p-cli">Clientes</button>
+    <button class="pestana p-gas">Gastos</button>
+    <button class="pestana p-ing">Ingresos</button>
+  </nav>
+
+  <main class="hoja">
+    <div class="cabecera">
+      <h1>Tu trimestre, ordenado por colores</h1>
+      <button class="boton">Exportar a Excel</button>
+    </div>
+    <div class="barra">
+      <div class="grupo" role="group" aria-label="Periodo">
+        <button class="chip" aria-pressed="false">Este mes</button>
+        <button class="chip" aria-pressed="true">Trimestre actual</button>
+        <button class="chip" aria-pressed="false">Este año</button>
+        <button class="chip" aria-pressed="false">Personalizado</button>
+      </div>
+      <div class="grupo" role="group" aria-label="Importes">
+        <button class="chip" id="con" aria-pressed="true">Con IVA</button>
+        <button class="chip" id="sin" aria-pressed="false">Sin IVA</button>
+      </div>
+    </div>
+
+    <section class="resumen" aria-label="Resumen del periodo">
+      <div class="bloque ing">
+        <h2>Ingresos</h2>
+        <div class="par">
+          <div class="dato"><small>Facturado</small><b data-con="12.100,00 €" data-sin="10.000,00 €"></b></div>
+          <div class="dato"><small>Cobrado</small><b data-con="7.260,00 €" data-sin="6.000,00 €"></b></div>
+        </div>
+      </div>
+      <div class="bloque gas">
+        <h2>Gastos</h2>
+        <div class="dato"><small>Gastos del periodo</small><b data-con="3.841,50 €" data-sin="3.175,21 €"></b></div>
+      </div>
+      <div class="bloque res">
+        <div class="dato"><small>Beneficio de caja (cobrado menos gastos)</small><b data-con="3.418,50 €" data-sin="2.824,79 €"></b></div>
+        <div class="dato"><small>Beneficio facturado (facturado menos gastos)</small><b data-con="8.258,50 €" data-sin="6.824,79 €"></b></div>
+      </div>
+    </section>
+
+    <div class="listas">
+      <section class="clientes-c">
+        <h2 style="margin-bottom:12px">Rentabilidad por cliente</h2>
+        <div class="fila"><span>Estudio Mar y Sol</span><b>5.445,00 €</b></div>
+        <div class="fila"><span>Taller Cobre</span><b>2.904,00 €</b></div>
+        <div class="fila"><span>Gastos generales (sin cliente)</span><b class="neg">-181,50 €</b></div>
+      </section>
+      <section class="ingresos-c">
+        <h2 style="margin-bottom:12px">Pendientes de cobro</h2>
+        <div class="fila"><span>Rediseño de catálogo<small>Estudio Mar y Sol, emitida el 2026-10-03</small></span><b>2.420,00 €</b></div>
+        <div class="fila"><span>Mantenimiento web<small>Taller Cobre, emitida el 2026-10-21</small></span><b>1.452,00 €</b></div>
+        <div class="fila"><span>Fotografía de producto<small>Estudio Mar y Sol, emitida el 2026-11-02</small></span><b>968,00 €</b></div>
+        <div class="fila"><strong>Total pendiente</strong><b>4.840,00 €</b></div>
+      </section>
+    </div>
+
+    <section style="margin-top:34px">
+      <h2>Gastos</h2>
+      <p class="aviso">Revisa los datos extraídos antes de marcarlo como revisado</p>
+      <div class="fila borrador"><span>Papelería Lola<small>2026-10-20, base 100,00 €, IVA 21,00 €</small></span><span class="etiqueta">Pendiente de revisión</span></div>
+      <div class="fila" style="--c: var(--ambar)"><span>Hosting y dominios<small>2026-10-12, base 24,79 €, IVA 5,21 €</small></span><span>Revisado</span></div>
+    </section>
+  </main>
+</div>
+<script>
+  const valores = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    valores.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+</script>
+</body>
+</html>

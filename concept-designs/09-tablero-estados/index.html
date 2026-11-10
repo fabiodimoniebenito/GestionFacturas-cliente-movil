@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · concepto tablero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Concepto 09: la vida de un documento. Ingresos y gastos se muestran en columnas por estado
+   (pendiente, cobrada; borrador, procesada, revisada, exportada). Es solo lectura: las transiciones
+   las decide el backend, aquí cada tarjeta ofrece su acción. */
+:root {
+  --fondo: #F6F7F9; --hoja: #FFFFFF; --texto: #1B1F27; --suave: #5B6472; --linea: #DDE1E8;
+  --pend: #B97800; --pend-f: #FFF1CC; --cob: #1F8A5B; --cob-f: #DDF3E8; --borr: #B97800; --borr-f: #FFF1CC;
+  --proc: #3F6FD8; --proc-f: #E3EBFC; --rev: #1F8A5B; --rev-f: #DDF3E8; --exp: #6B5BC9; --exp-f: #ECE8FA;
+  --negativo: #C42B3D; --primario: #1B1F27; --sobre-primario: #fff; --foco: #3F6FD8;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --fondo: #12141A; --hoja: #1C2029; --texto: #ECEFF5; --suave: #A0A8B8; --linea: #2D3340;
+    --pend: #FFC85A; --pend-f: #3F3411; --cob: #6FDBA5; --cob-f: #14382A; --borr: #FFC85A; --borr-f: #3F3411;
+    --proc: #8FB0FF; --proc-f: #1F2C52; --rev: #6FDBA5; --rev-f: #14382A; --exp: #BDB1FF; --exp-f: #2B2552;
+    --negativo: #FF8A97; --primario: #ECEFF5; --sobre-primario: #12141A; --foco: #8FB0FF; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font-family: "Figtree", system-ui, sans-serif; line-height: 1.45; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.top { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; padding: 14px clamp(14px, 3vw, 32px); background: var(--hoja); border-bottom: 1px solid var(--linea); }
+.marca { font-weight: 800; }
+.top nav { display: flex; gap: 4px; }
+.top nav button { border: 0; background: none; padding: 6px 12px; border-radius: 8px; color: var(--suave); }
+.top nav button[aria-current="page"] { background: var(--primario); color: var(--sobre-primario); font-weight: 700; }
+.top .der { margin-left: auto; display: flex; gap: 10px; align-items: center; color: var(--suave); font-size: .9rem; }
+.top .der button { background: none; border: 1px solid var(--linea); border-radius: 8px; padding: 5px 12px; }
+
+main { padding: 22px clamp(14px, 3vw, 32px) 56px; }
+h1 { font-size: 1.5rem; margin: 0 0 14px; font-weight: 800; }
+.resumen { display: flex; flex-wrap: wrap; gap: 8px 36px; align-items: end; margin-bottom: 8px; }
+.resumen div small { display: block; color: var(--suave); font-size: .85rem; }
+.resumen div b { font-size: 1.4rem; font-weight: 700; }
+.resumen .grande b { font-size: 2rem; font-weight: 800; }
+.modos { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 14px 0 26px; }
+.seg { display: inline-flex; background: var(--hoja); border: 1px solid var(--linea); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: none; padding: 4px 12px; border-radius: 7px; }
+.seg button[aria-pressed="true"] { background: var(--primario); color: var(--sobre-primario); font-weight: 700; }
+
+h2 { font-size: 1.1rem; margin: 30px 0 10px; font-weight: 700; }
+.tablero { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 8px; }
+.col { background: var(--c-f); border-radius: 12px; padding: 12px; min-height: 150px; }
+.col > header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 700; color: var(--c); }
+.col > header span { font-weight: 500; font-size: .85rem; background: var(--hoja); color: var(--texto); padding: 0 8px; border-radius: 999px; }
+.tarjeta { background: var(--hoja); border-radius: 8px; padding: 11px 12px; margin-bottom: 8px; border-top: 3px solid var(--c); }
+.tarjeta small { display: block; color: var(--suave); }
+.tarjeta .imp { font-weight: 700; margin-top: 4px; }
+.tarjeta .acc { margin-top: 8px; border: 1px solid var(--linea); background: none; border-radius: 6px; padding: 2px 10px; font-size: .85rem; }
+.vacia { color: var(--suave); font-size: .9rem; padding: 6px 2px; }
+.neg { color: var(--negativo); }
+.pendiente { --c: var(--pend); --c-f: var(--pend-f); } .cobrada { --c: var(--cob); --c-f: var(--cob-f); }
+.borrador { --c: var(--borr); --c-f: var(--borr-f); } .procesada { --c: var(--proc); --c-f: var(--proc-f); }
+.revisada { --c: var(--rev); --c-f: var(--rev-f); } .exportada { --c: var(--exp); --c-f: var(--exp-f); }
+.aviso { background: var(--pend-f); color: var(--texto); border-left: 5px solid var(--pend); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 0 0 10px; }
+.clientes { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.clientes span { padding: 4px 0; } .clientes b { margin-left: 8px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="marca">GestionFacturas</span>
+  <nav aria-label="Principal"><button aria-current="page">Dashboard</button><button>Clientes</button><button>Gastos</button><button>Ingresos</button></nav>
+  <span class="der">ana@example.com <button>Exportar a Excel</button><button>Cerrar sesión</button></span>
+</header>
+
+<main>
+  <h1>Trimestre actual</h1>
+  <section class="resumen" aria-label="Resumen del periodo">
+    <div><small>Facturado</small><b data-con="12.100,00 €" data-sin="10.000,00 €"></b></div>
+    <div><small>Cobrado</small><b data-con="7.260,00 €" data-sin="6.000,00 €"></b></div>
+    <div><small>Gastos</small><b data-con="3.841,50 €" data-sin="3.175,21 €"></b></div>
+    <div class="grande"><small>Beneficio de caja, lo cobrado menos los gastos</small><b data-con="3.418,50 €" data-sin="2.824,79 €"></b></div>
+    <div class="grande"><small>Beneficio facturado, lo facturado menos los gastos</small><b data-con="8.258,50 €" data-sin="6.824,79 €"></b></div>
+  </section>
+  <div class="modos">
+    <span class="seg" role="group" aria-label="Periodo"><button aria-pressed="false">Este mes</button><button aria-pressed="true">Trimestre actual</button><button aria-pressed="false">Este año</button><button aria-pressed="false">Personalizado</button></span>
+    <span class="seg" role="group" aria-label="Importes"><button id="con" aria-pressed="true">Con IVA</button><button id="sin" aria-pressed="false">Sin IVA</button></span>
+  </div>
+
+  <h2>Ingresos por estado de cobro</h2>
+  <div class="tablero">
+    <section class="col pendiente" aria-label="Pendientes">
+      <header>Pendientes <span>3</span></header>
+      <article class="tarjeta"><b>Rediseño de catálogo</b><small>Estudio Mar y Sol, 2026-10-03</small><div class="imp">2.420,00 €</div><button class="acc">Registrar cobro</button></article>
+      <article class="tarjeta"><b>Mantenimiento web</b><small>Taller Cobre, 2026-10-21</small><div class="imp">1.452,00 €</div><button class="acc">Registrar cobro</button></article>
+      <article class="tarjeta"><b>Fotografía de producto</b><small>Estudio Mar y Sol, 2026-11-02</small><div class="imp">968,00 €</div><button class="acc">Registrar cobro</button></article>
+      <p class="vacia">Total pendiente: <b>4.840,00 €</b></p>
+    </section>
+    <section class="col cobrada" aria-label="Cobradas">
+      <header>Cobradas <span>1</span></header>
+      <article class="tarjeta"><b>Factura 2026-014</b><small>Taller Cobre, cobrada el 2026-10-28</small><div class="imp">3.630,00 €</div><button class="acc">Revertir cobro</button></article>
+    </section>
+  </div>
+
+  <h2>Gastos por estado</h2>
+  <p class="aviso">Revisa los datos extraídos antes de marcarlo como revisado</p>
+  <div class="tablero">
+    <section class="col borrador" aria-label="Borrador">
+      <header>Borrador <span>1</span></header>
+      <article class="tarjeta"><b>Papelería Lola</b><small>2026-10-20, base 100,00 €, IVA 21,00 €</small><button class="acc">Revisar datos</button></article>
+    </section>
+    <section class="col procesada" aria-label="Procesada"><header>Procesada <span>0</span></header><p class="vacia">Nada por aquí.</p></section>
+    <section class="col revisada" aria-label="Revisada">
+      <header>Revisada <span>1</span></header>
+      <article class="tarjeta"><b>Hosting y dominios</b><small>2026-10-12, base 24,79 €, IVA 5,21 €</small></article>
+    </section>
+    <section class="col exportada" aria-label="Exportada"><header>Exportada <span>0</span></header><p class="vacia">Nada por aquí.</p></section>
+  </div>
+
+  <h2>Rentabilidad por cliente</h2>
+  <div class="clientes">
+    <span>Estudio Mar y Sol<b>5.445,00 €</b></span>
+    <span>Taller Cobre<b>2.904,00 €</b></span>
+    <span>Gastos generales (sin cliente)<b class="neg">-181,50 €</b></span>
+  </div>
+</main>
+<script>
+  const valores = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    valores.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+</script>
+</body>
+</html>

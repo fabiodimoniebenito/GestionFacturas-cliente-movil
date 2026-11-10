@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · concepto noche</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Concepto 06: oscuro de origen, como un panel de instrumentos. Cada magnitud tiene un color fijo con significado:
+   azul hielo = facturado, menta = cobrado, ámbar = gastos, rosa = negativo. Las cifras clave van en peso ligero y gran tamaño. */
+:root {
+  --fondo: #14161B;
+  --panel: #1C1F26;
+  --linea: #2C313B;
+  --texto: #ECE8E1;
+  --suave: #9AA0AD;
+  --hielo: #8FC2FF;
+  --menta: #7FE0B5;
+  --ambar: #FFB454;
+  --rosa: #FF7A90;
+  --foco: #8FC2FF;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --fondo: #F2F0EC; --panel: #FFFFFF; --linea: #D9D5CD; --texto: #1A1C21; --suave: #5E6370;
+    --hielo: #1F5FB4; --menta: #12744F; --ambar: #8F5600; --rosa: #B4234A; --foco: #1F5FB4;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font-family: "Hanken Grotesk", system-ui, sans-serif; font-size: 16px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+h1, h2 { margin: 0; font-weight: 500; }
+h1 { font-size: 1.5rem; } h2 { font-size: 1rem; color: var(--suave); font-weight: 500; }
+
+.app { display: grid; grid-template-columns: 76px 1fr; min-height: 100vh; }
+.riel { border-right: 1px solid var(--linea); display: flex; flex-direction: column; align-items: center; padding: 18px 0; gap: 6px; }
+.logo { font-weight: 700; margin-bottom: 18px; letter-spacing: -0.04em; font-size: 1.15rem; }
+.riel button { width: 60px; border: 0; background: none; border-radius: 10px; padding: 8px 0 6px; font-size: .72rem; color: var(--suave); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.riel button[aria-current="page"] { background: var(--panel); color: var(--texto); box-shadow: inset 3px 0 0 var(--hielo); }
+.riel svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.riel .fondo-pie { margin-top: auto; }
+
+main { padding: 28px clamp(16px, 4vw, 52px) 64px; max-width: 1120px; }
+.cabecera { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.barra { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 36px; align-items: center; }
+.seg button { background: none; border: 0; padding: 4px 0; margin-right: 18px; color: var(--suave); border-bottom: 2px solid transparent; }
+.seg button[aria-pressed="true"] { color: var(--texto); border-bottom-color: var(--hielo); }
+.boton { border: 1px solid var(--linea); background: var(--panel); border-radius: 8px; padding: 8px 14px; }
+
+.magnitudes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-bottom: 40px; }
+.mag { border-left: 3px solid var(--c); padding-left: 16px; }
+.mag b { display: block; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 200; line-height: 1.1; letter-spacing: -0.02em; }
+.mag span { color: var(--suave); }
+.f { --c: var(--hielo); } .c { --c: var(--menta); } .g { --c: var(--ambar); }
+
+.resultado { background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; padding: 22px 26px; display: flex; flex-wrap: wrap; gap: 24px 64px; margin-bottom: 40px; }
+.resultado b { display: block; font-size: 2.4rem; font-weight: 300; line-height: 1.1; }
+.resultado span { color: var(--suave); }
+
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+.fila { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--linea); }
+.fila small { display: block; color: var(--suave); }
+.neg { color: var(--rosa); }
+.pend { box-shadow: inset 3px 0 0 var(--ambar); padding-left: 14px; background: linear-gradient(90deg, color-mix(in srgb, var(--ambar) 14%, transparent), transparent 70%); }
+.aviso { color: var(--ambar); margin: 8px 0 10px; }
+.estado { color: var(--ambar); }
+
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .riel { flex-direction: row; justify-content: space-around; border-right: 0; border-bottom: 1px solid var(--linea); padding: 8px; } .logo { display: none; } .riel .fondo-pie { margin-top: 0; }
+  .magnitudes, .dos { grid-template-columns: 1fr; gap: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="riel" aria-label="Principal">
+    <div class="logo">GF</div>
+    <button aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Inicio</button>
+    <button><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/></svg>Clientes</button>
+    <button><svg viewBox="0 0 24 24"><path d="M12 3v14M6 11l6 6 6-6M4 21h16"/></svg>Gastos</button>
+    <button><svg viewBox="0 0 24 24"><path d="M12 21V7M6 13l6-6 6 6M4 3h16"/></svg>Ingresos</button>
+    <button class="fondo-pie" aria-label="Cerrar sesión de ana@example.com"><svg viewBox="0 0 24 24"><path d="M10 4H4v16h6M16 8l4 4-4 4M20 12H9"/></svg>Salir</button>
+  </nav>
+
+  <main>
+    <div class="cabecera">
+      <h1>Trimestre actual</h1>
+      <button class="boton">Exportar a Excel</button>
+    </div>
+    <div class="barra">
+      <div class="seg" role="group" aria-label="Periodo">
+        <button aria-pressed="false">Este mes</button><button aria-pressed="true">Trimestre actual</button><button aria-pressed="false">Este año</button><button aria-pressed="false">Personalizado</button>
+      </div>
+      <div class="seg" role="group" aria-label="Importes">
+        <button id="con" aria-pressed="true">Con IVA</button><button id="sin" aria-pressed="false">Sin IVA</button>
+      </div>
+    </div>
+
+    <section class="magnitudes" aria-label="Resumen del periodo">
+      <div class="mag f"><span>Facturado</span><b data-con="12.100,00 €" data-sin="10.000,00 €"></b></div>
+      <div class="mag c"><span>Cobrado</span><b data-con="7.260,00 €" data-sin="6.000,00 €"></b></div>
+      <div class="mag g"><span>Gastos</span><b data-con="3.841,50 €" data-sin="3.175,21 €"></b></div>
+    </section>
+
+    <section class="resultado" aria-label="Resultado">
+      <div><span>Beneficio de caja, lo cobrado menos los gastos</span><b data-con="3.418,50 €" data-sin="2.824,79 €"></b></div>
+      <div><span>Beneficio facturado, lo facturado menos los gastos</span><b data-con="8.258,50 €" data-sin="6.824,79 €"></b></div>
+    </section>
+
+    <div class="dos">
+      <section>
+        <h2>Rentabilidad por cliente</h2>
+        <div class="fila"><span>Estudio Mar y Sol</span><span>5.445,00 €</span></div>
+        <div class="fila"><span>Taller Cobre</span><span>2.904,00 €</span></div>
+        <div class="fila"><span>Gastos generales (sin cliente)</span><span class="neg">-181,50 €</span></div>
+      </section>
+      <section>
+        <h2>Pendientes de cobro</h2>
+        <div class="fila"><span>Rediseño de catálogo<small>Estudio Mar y Sol, emitida el 2026-10-03</small></span><span>2.420,00 €</span></div>
+        <div class="fila"><span>Mantenimiento web<small>Taller Cobre, emitida el 2026-10-21</small></span><span>1.452,00 €</span></div>
+        <div class="fila"><span>Fotografía de producto<small>Estudio Mar y Sol, emitida el 2026-11-02</small></span><span>968,00 €</span></div>
+        <div class="fila"><strong>Total pendiente</strong><strong>4.840,00 €</strong></div>
+      </section>
+    </div>
+
+    <section style="margin-top:40px">
+      <h2>Gastos</h2>
+      <p class="aviso">Revisa los datos extraídos antes de marcarlo como revisado</p>
+      <div class="fila pend"><span>Papelería Lola<small>2026-10-20, base 100,00 €, IVA 21,00 €</small></span><span class="estado">Pendiente de revisión</span></div>
+      <div class="fila"><span>Hosting y dominios<small>2026-10-12, base 24,79 €, IVA 5,21 €</small></span><span>Revisado</span></div>
+    </section>
+  </main>
+</div>
+<script>
+  const valores = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    valores.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+</script>
+</body>
+</html>
