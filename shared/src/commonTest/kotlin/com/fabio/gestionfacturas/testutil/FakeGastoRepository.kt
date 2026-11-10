@@ -1,5 +1,6 @@
 package com.fabio.gestionfacturas.testutil
 
+import com.fabio.gestionfacturas.domain.model.ArchivoSeleccionado
 import com.fabio.gestionfacturas.domain.model.DatosGasto
 import com.fabio.gestionfacturas.domain.model.ErrorAuth
 import com.fabio.gestionfacturas.domain.model.EstadoGasto
@@ -30,17 +31,20 @@ class FakeGastoRepository : GastoRepository {
     var resultadoCrear: Result<Gasto> = Result.failure(ErrorAuth.Inesperado)
     var resultadoEditar: Result<Gasto> = Result.failure(ErrorAuth.Inesperado)
     var resultadoRevisar: Result<Gasto> = Result.failure(ErrorAuth.Inesperado)
+    var resultadoDigitalizar: Result<Gasto> = Result.failure(ErrorAuth.Inesperado)
     var puertaListar: CompletableDeferred<Unit>? = null
     var puertaObtener: CompletableDeferred<Unit>? = null
     /** Gates both [crear] and [editar]. */
     var puertaGuardar: CompletableDeferred<Unit>? = null
     var puertaRevisar: CompletableDeferred<Unit>? = null
+    var puertaDigitalizar: CompletableDeferred<Unit>? = null
 
     var llamadasListar = 0
     val obtenidos = mutableListOf<Long>()
     val creados = mutableListOf<NuevoGasto>()
     val editados = mutableListOf<Pair<Long, DatosGasto>>()
     val revisados = mutableListOf<Long>()
+    val digitalizados = mutableListOf<ArchivoSeleccionado>()
 
     override suspend fun listar(): Result<List<Gasto>> {
         llamadasListar++
@@ -70,5 +74,11 @@ class FakeGastoRepository : GastoRepository {
         revisados.add(id)
         puertaRevisar?.await()
         return resultadoRevisar
+    }
+
+    override suspend fun digitalizar(archivo: ArchivoSeleccionado): Result<Gasto> {
+        digitalizados.add(archivo)
+        puertaDigitalizar?.await()
+        return resultadoDigitalizar
     }
 }

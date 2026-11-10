@@ -37,7 +37,11 @@ data class RutaDetalleGasto(val id: Long)
 data object RutaNuevoGasto
 
 @Serializable
-data class RutaEditarGasto(val id: Long)
+data object RutaDigitalizarGasto
+
+/** [revisarDatosExtraidos] shows the "review the extracted data" banner (set after digitalizar). */
+@Serializable
+data class RutaEditarGasto(val id: Long, val revisarDatosExtraidos: Boolean = false)
 
 @Serializable
 data object RutaIngresos

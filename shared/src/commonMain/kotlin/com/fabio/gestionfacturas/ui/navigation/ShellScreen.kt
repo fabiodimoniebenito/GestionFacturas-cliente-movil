@@ -45,6 +45,7 @@ import com.fabio.gestionfacturas.ui.clientes.ClienteFormScreen
 import com.fabio.gestionfacturas.ui.clientes.ClientesScreen
 import com.fabio.gestionfacturas.ui.clientes.ResultadoFormulario
 import com.fabio.gestionfacturas.ui.dashboard.DashboardScreen
+import com.fabio.gestionfacturas.ui.gastos.DigitalizarScreen
 import com.fabio.gestionfacturas.ui.gastos.GastoDetalleScreen
 import com.fabio.gestionfacturas.ui.gastos.GastoFormScreen
 import com.fabio.gestionfacturas.ui.gastos.GastosScreen
@@ -66,7 +67,8 @@ fun ShellScreen(
     val navController = rememberNavController()
     val destino = navController.currentBackStackEntryAsState().value?.destination
     val enDashboard = destino?.hasRoute<RutaDashboard>() == true
-    val enGastos = destino?.hasRoute<RutaGastos>() == true || destino?.hasRoute<RutaDetalleGasto>() == true
+    val enGastos = destino?.hasRoute<RutaGastos>() == true || destino?.hasRoute<RutaDetalleGasto>() == true ||
+        destino?.hasRoute<RutaDigitalizarGasto>() == true
     val enIngresos = destino?.hasRoute<RutaIngresos>() == true ||
         destino?.hasRoute<RutaNuevoIngreso>() == true ||
         destino?.hasRoute<RutaDetalleIngreso>() == true
@@ -220,9 +222,27 @@ private fun ContenidoShell(navController: NavHostController) {
                 .collectAsStateWithLifecycle()
             GastosScreen(
                 alNuevo = { navController.navigate(RutaNuevoGasto) },
+                alDigitalizar = { navController.navigate(RutaDigitalizarGasto) },
                 alAbrir = { id -> navController.navigate(RutaDetalleGasto(id)) },
                 resultadoFormulario = resultado?.let { ResultadoFormulario.valueOf(it) },
                 alConsumirResultadoFormulario = { entrada.savedStateHandle[CLAVE_RESULTADO_FORMULARIO] = null },
+            )
+        }
+        composable<RutaDigitalizarGasto> {
+            DigitalizarScreen(
+                alVolver = { navController.popBackStack() },
+                alCrearGasto = { id ->
+                    // The list below must refresh; then this screen is replaced by the edit form of the new gasto.
+                    avisarALaLista(navController, ResultadoFormulario.GUARDADO)
+                    navController.navigate(RutaEditarGasto(id, revisarDatosExtraidos = true)) {
+                        popUpTo<RutaDigitalizarGasto> { inclusive = true }
+                    }
+                },
+                alCrearManual = {
+                    navController.navigate(RutaNuevoGasto) {
+                        popUpTo<RutaDigitalizarGasto> { inclusive = true }
+                    }
+                },
             )
         }
         composable<RutaDetalleGasto> { entrada ->
@@ -302,6 +322,7 @@ private fun ContenidoShell(navController: NavHostController) {
                 idGasto = ruta.id,
                 alVolver = { navController.popBackStack() },
                 alTerminar = terminarFormulario,
+                mostrarAvisoRevision = ruta.revisarDatosExtraidos,
             )
         }
         composable<RutaNuevoCliente> {

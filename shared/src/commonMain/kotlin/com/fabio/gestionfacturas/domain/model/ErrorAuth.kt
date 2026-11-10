@@ -34,6 +34,12 @@ sealed class ErrorAuth(message: String) : Exception(message) {
     /** 409 with the backend's `error` message, e.g. an invalid state transition. */
     data class ConflictoConDetalle(val detalle: String?) : ErrorAuth("Conflicto")
 
+    /** 413: the uploaded file is over the server's limit; [detalle] is the backend's `error` message, if any. */
+    data class ArchivoDemasiadoGrande(val detalle: String?) : ErrorAuth("Archivo demasiado grande")
+
+    /** 422: the server could not read the document (e.g. OCR failed); [detalle] is the backend's `error` message, if any. */
+    data class NoSePudoLeer(val detalle: String?) : ErrorAuth("No se pudo leer el documento")
+
     /** The server could not be reached (no network, refused connection, timeout). */
     data object ServidorInaccesible : ErrorAuth("Servidor inaccesible")
 

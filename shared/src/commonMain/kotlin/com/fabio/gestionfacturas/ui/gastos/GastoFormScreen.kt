@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -22,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fabio.gestionfacturas.domain.model.ErrorAuth
 import com.fabio.gestionfacturas.resources.Res
+import com.fabio.gestionfacturas.resources.gasto_form_aviso_revision
 import com.fabio.gestionfacturas.resources.gasto_form_base_imponible
 import com.fabio.gestionfacturas.resources.gasto_form_cancelar
 import com.fabio.gestionfacturas.resources.gasto_form_categoria
@@ -62,6 +65,7 @@ fun GastoFormScreen(
     idGasto: Long?,
     alVolver: () -> Unit,
     alTerminar: (ResultadoFormulario) -> Unit,
+    mostrarAvisoRevision: Boolean = false,
     viewModel: GastoFormViewModel = koinViewModel(
         parameters = { if (idGasto != null) parametersOf(idGasto) else parametersOf() },
     ),
@@ -78,6 +82,7 @@ fun GastoFormScreen(
 
     GastoFormContent(
         estado = estado,
+        mostrarAvisoRevision = mostrarAvisoRevision,
         alVolver = alVolver,
         alEmisorChange = viewModel::onEmisorChange,
         alFechaChange = viewModel::onFechaEmisionChange,
@@ -97,6 +102,7 @@ fun GastoFormScreen(
 @Composable
 fun GastoFormContent(
     estado: GastoFormUiState,
+    mostrarAvisoRevision: Boolean = false,
     alVolver: () -> Unit,
     alEmisorChange: (String) -> Unit,
     alFechaChange: (String) -> Unit,
@@ -122,6 +128,9 @@ fun GastoFormContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         BarraTitulo(titulo = titulo, alVolver = { if (!estado.guardando) alVolver() })
+        if (mostrarAvisoRevision) {
+            AvisoRevision()
+        }
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             when (val carga = estado.carga) {
                 CargaFormGasto.Cargando -> EstadoCargando()
@@ -318,4 +327,22 @@ private fun mensajeDeCampo(campo: CampoGasto, estado: GastoFormUiState): String?
         return error.campos[campo.claveApi]
     }
     return null
+}
+
+/** Shown after digitalizar: the OCR can be wrong, so the user must check the fields before marking it reviewed. */
+@Composable
+private fun AvisoRevision() {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            text = stringResource(Res.string.gasto_form_aviso_revision),
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(16.dp),
+        )
+    }
 }

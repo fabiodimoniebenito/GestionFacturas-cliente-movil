@@ -3,10 +3,12 @@ package com.fabio.gestionfacturas.di
 import com.fabio.gestionfacturas.data.local.EstadoSesion
 import com.fabio.gestionfacturas.data.local.SettingsTokenStorage
 import com.fabio.gestionfacturas.data.local.TokenStorage
+import com.fabio.gestionfacturas.data.local.crearFileOpener
 import com.fabio.gestionfacturas.data.local.crearFileSaver
 import com.fabio.gestionfacturas.data.remote.ApiClient
 import com.fabio.gestionfacturas.data.repository.ExportRepositoryImpl
 import com.fabio.gestionfacturas.domain.repository.ExportRepository
+import com.fabio.gestionfacturas.domain.repository.FileOpener
 import com.fabio.gestionfacturas.domain.repository.FileSaver
 import com.fabio.gestionfacturas.data.remote.urlBaseApi
 import com.fabio.gestionfacturas.data.repository.AuthRepositoryImpl
@@ -27,6 +29,7 @@ import com.fabio.gestionfacturas.domain.repository.ClienteRepository
 import com.fabio.gestionfacturas.ui.clientes.ClienteFormViewModel
 import com.fabio.gestionfacturas.ui.clientes.ClientesViewModel
 import com.fabio.gestionfacturas.ui.dashboard.DashboardViewModel
+import com.fabio.gestionfacturas.ui.gastos.DigitalizarViewModel
 import com.fabio.gestionfacturas.ui.gastos.GastoDetalleViewModel
 import com.fabio.gestionfacturas.ui.gastos.GastoFormViewModel
 import com.fabio.gestionfacturas.ui.gastos.GastosViewModel
@@ -57,6 +60,7 @@ val moduloDatos = module {
     single<DashboardRepository> { DashboardRepositoryImpl(api = get<ApiClient>().dashboardApi) }
     single<ExportRepository> { ExportRepositoryImpl(api = get<ApiClient>().exportApi) }
     single<FileSaver> { crearFileSaver() }
+    single<FileOpener> { crearFileOpener() }
 }
 
 val moduloUi = module {
@@ -67,6 +71,7 @@ val moduloUi = module {
     viewModel { DashboardViewModel(get(), get(), get(), get()) }
     viewModel { ClientesViewModel(get()) }
     viewModel { GastosViewModel(get()) }
+    viewModel { DigitalizarViewModel(get(), get()) }
     viewModel { parametros -> GastoFormViewModel(parametros.getOrNull<Long>(), get(), get(), get()) }
     viewModel { parametros -> GastoDetalleViewModel(parametros.get<Long>(), get(), get()) }
     viewModel { IngresosViewModel(get(), get()) }
