@@ -37,6 +37,7 @@ class FakeGastoRepository : GastoRepository {
     /** Gates both [crear] and [editar]. */
     var puertaGuardar: CompletableDeferred<Unit>? = null
     var puertaRevisar: CompletableDeferred<Unit>? = null
+    var puertaDigitalizar: CompletableDeferred<Unit>? = null
 
     var llamadasListar = 0
     val obtenidos = mutableListOf<Long>()
@@ -77,6 +78,7 @@ class FakeGastoRepository : GastoRepository {
 
     override suspend fun digitalizar(archivo: ArchivoSeleccionado): Result<Gasto> {
         digitalizados.add(archivo)
+        puertaDigitalizar?.await()
         return resultadoDigitalizar
     }
 }
