@@ -2,11 +2,17 @@ package com.fabio.gestionfacturas.ui.common
 
 import androidx.compose.runtime.Composable
 import com.fabio.gestionfacturas.domain.model.ErrorAuth
+import com.fabio.gestionfacturas.ui.gastos.ErrorDigitalizar
 import com.fabio.gestionfacturas.resources.Res
 import com.fabio.gestionfacturas.resources.campo_error_email_invalido
 import com.fabio.gestionfacturas.resources.campo_error_email_vacio
 import com.fabio.gestionfacturas.resources.campo_error_nombre_vacio
 import com.fabio.gestionfacturas.resources.campo_error_password_vacia
+import com.fabio.gestionfacturas.resources.digitalizar_error_formato
+import com.fabio.gestionfacturas.resources.digitalizar_error_grande
+import com.fabio.gestionfacturas.resources.digitalizar_error_no_leer
+import com.fabio.gestionfacturas.resources.digitalizar_error_pdf
+import com.fabio.gestionfacturas.resources.digitalizar_error_vacio
 import com.fabio.gestionfacturas.resources.error_archivo_demasiado_grande
 import com.fabio.gestionfacturas.resources.error_conflicto
 import com.fabio.gestionfacturas.resources.error_credenciales
@@ -81,4 +87,21 @@ fun ErrorAuth?.detalleDelServidor(): String? {
         return campos["error"]
     }
     return null
+}
+
+/** Texts for the digitalizar screen; rate limit, offline and unexpected reuse the common ones. */
+@Composable
+fun ErrorDigitalizar.mensaje(): String {
+    return when (this) {
+        ErrorDigitalizar.ArchivoVacio -> stringResource(Res.string.digitalizar_error_vacio)
+        ErrorDigitalizar.FormatoNoSoportado -> stringResource(Res.string.digitalizar_error_formato)
+        ErrorDigitalizar.EsPdf -> stringResource(Res.string.digitalizar_error_pdf)
+        ErrorDigitalizar.DemasiadoGrande -> stringResource(Res.string.digitalizar_error_grande)
+        ErrorDigitalizar.NoSePudoLeer -> stringResource(Res.string.digitalizar_error_no_leer)
+        is ErrorDigitalizar.DemasiadasPeticiones ->
+            ErrorAuth.DemasiadasPeticiones(reintentarEnSegundos).mensaje()
+        ErrorDigitalizar.SinConexion -> ErrorAuth.ServidorInaccesible.mensaje()
+        ErrorDigitalizar.Inesperado -> ErrorAuth.Inesperado.mensaje()
+        is ErrorDigitalizar.Seleccion -> mensaje
+    }
 }
