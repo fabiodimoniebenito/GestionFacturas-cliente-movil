@@ -121,7 +121,14 @@ Los gastos son lo que pagas en tu actividad (facturas de proveedores, herramient
   borrador o procesados.
 - Si el servidor dice que un gasto "ya no se puede editar en su estado actual", es una regla del servidor.
 
-Aún no existe la subida de facturas escaneadas (digitalización) ni el borrado de gastos.
+- **Digitalizar factura:** el botón **Digitalizar factura**, junto a **Nuevo gasto**, te deja elegir una imagen
+  de la factura (**JPG o PNG, hasta 10 MB**; los PDF todavía no se admiten). Pulsa **Subir** y espera unos
+  segundos mientras se lee. Se crea un gasto en **borrador** y se abre su pantalla de edición con un aviso:
+  **revisa los datos extraídos** (pueden contener errores) y escribe el **Total** antes de guardar y marcarlo como
+  revisado. Si no se puede leer la factura, puedes crear el gasto manualmente. La aplicación no muestra la imagen
+  original dentro del gasto. En Android esta función aún no está disponible.
+
+Todavía no existe el borrado de gastos.
 
 ---
 

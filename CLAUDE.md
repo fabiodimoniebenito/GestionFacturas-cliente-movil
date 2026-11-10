@@ -127,7 +127,7 @@ Layers at the top, feature areas only inside `ui/`:
 shared/src/commonMain/kotlin/com/fabio/gestionfacturas/
 ├── data/
 │   ├── remote/      ApiClient (Ktor), @Serializable DTOs, one service per resource
-│   ├── local/       token storage (Multiplatform Settings); expect fun crearFileSaver() (actuals in jvmMain / androidMain)
+│   ├── local/       token storage (Multiplatform Settings); expect fun crearFileSaver() and crearFileOpener() (actuals in jvmMain / androidMain)
 │   └── repository/  implementations of the domain interfaces + mappers
 ├── domain/
 │   ├── model/       data classes (Gasto, Ingreso, Cliente, ResumenPeriodo...)
@@ -294,10 +294,27 @@ out as pending review), read-only detail, one create/edit form (cliente selector
 clientes; category selector and `deducible` switch on edit only, because the create request has
 neither; fecha as a `yyyy-MM-dd` text field, no date picker; required `total` checked on the client,
 everything else per field from the backend's 400 map) and the "Marcar como revisado" action with
-confirmation (enabled for BORRADOR / PROCESADA only). Invoice digitization (`/digitalizar`) is NOT
-built. `GastoResponse` has no `total`, so the list shows base imponible and IVA, and the edit form
+confirmation (enabled for BORRADOR / PROCESADA only). Invoice digitization is a separate slice (see below).
+`GastoResponse` has no `total`, so the list shows base imponible and IVA, and the edit form
 cannot prefill the total: the user types it again. Unit tests cover the list, detail and form
 ViewModels with fake repositories, and the repositories with MockEngine.
+The **digitalizar slice is DONE** (code, unit tests, builds; not yet run against the real backend or on screen):
+a "Digitalizar factura" button next to "Nuevo gasto" opens `DigitalizarScreen` (states: initial with an
+explanation, selected with file name and size and "Subir" / "Cambiar", uploading with an indeterminate bar and
+the back control disabled, and error with a typed Spanish message). Only images (jpg, jpeg, png) up to 10 MB
+(`TAMANO_MAXIMO_IMAGEN_BYTES`, the single constant) are accepted; `validarImagen` checks extension AND mime and
+rejects empty files, PDFs (own message) and oversize files BEFORE any request. The upload is a multipart
+`POST /api/gastos/digitalizar` (part `archivo`, authenticated client, bytes as `ByteArray` so a request is
+replayable after a token refresh, 90 s timeout for that call only); the backend persists the gasto as BORRADOR
+and returns it. After an upload error the selected file is kept for "Reintentar"; a 429 is never retried
+automatically; 422 offers "Crear el gasto manualmente". On success the screen is REPLACED in the back stack by the
+EDIT form of the created gasto (`RutaEditarGasto(id, revisarDatosExtraidos = true)`) with a banner "Revisa los
+datos extraídos antes de marcarlo como revisado", and the list is refreshed when the user returns. Cancelling the
+picker changes nothing and shows no message. Desktop picks with a native AWT open dialog (`FileOpenerJvm`;
+Windows ignores the dialog's filename filter, so a `*.jpg;*.jpeg;*.png` pattern is also set); the Android actual
+is a STUB that returns an Error (see Pending). Unit tests cover `validarImagen`, `formatearTamano`, the
+`DigitalizarViewModel` with fake repository and fake `FileOpener`, and the upload with MockEngine (multipart
+body, bytes, filename, content type, Authorization, same bytes after a 401 + refresh, 400/413/422/429/network).
 The **ingresos vertical slice is DONE** (code, unit tests, builds; not yet run against the real
 backend): domain (`Ingreso`, `EstadoCobro` with a `DESCONOCIDO` fallback for unknown values),
 data (`IngresoApi`, DTOs with `Importe`), list with Todos / Pendientes / Cobrados chips applied
@@ -367,8 +384,15 @@ All planned slices are done; what remains is in "Pending / deferred".
 - Mobile layout adaptation (bottom navigation) after the desktop version works.
 - Android `FileSaver`: the actual in `androidMain` only returns an Error. Finish it with the Storage Access
   Framework (`CreateDocument`, needs an Activity result launcher) in the Android phase.
-- Invoice digitization upload (`POST /api/gastos/digitalizar`): file picker on desktop, camera/gallery
-  on Android (expect/actual).
+- Android `FileOpener`: the actual in `androidMain` only returns an Error. Finish it with the Activity Result
+  API (`GetContent` for images; `registerForActivityResult` must run while `MainActivity` is created, so it needs
+  wiring there) in the Android phase. Camera capture is not built either.
+- Digitalizar: PDFs are not supported (images only); a PDF gets its own "not supported yet" message.
+- KNOWN LIMITATION (digitalizar): the client cannot show the stored original invoice, because the API has no
+  endpoint to download it; the user reviews the extracted fields without seeing the image in the app.
+- UNVERIFIED (digitalizar): the 413 (too large) and 422 (could not read) statuses and the `error` message in their
+  body come from the owner's decision, not from the OpenAPI (which only declares `200`); check them against the
+  real backend.
 - Gastos: the backend does not return `total` in `GastoResponse` (open item in the API contract), and
   does not document whether REVISADA / EXPORTADA gastos can be edited; "Editar" is offered for every
   estado and the backend's 409 is explained in the form. A date picker was not adopted because it was
