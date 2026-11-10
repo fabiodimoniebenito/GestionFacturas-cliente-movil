@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · concepto narrativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* Concepto 10: el dashboard se lee como una frase. La pantalla abre con lo que un autónomo quiere saber,
+   en palabras, con las cifras del backend subrayadas con marcador. El detalle queda debajo, plegado. */
+:root {
+  --fondo: #FBFCFD; --texto: #11151C; --suave: #566070; --linea: #DCE1E8; --marcador: #FFE45C; --sobre-marcador: #11151C;
+  --enlace: #1646C9; --negativo: #BC1F33; --aviso-f: #FFF2BD; --foco: #1646C9;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --fondo: #101319; --texto: #EDF0F5; --suave: #A3ABB9; --linea: #2A303B; --marcador: #6A5A00; --sobre-marcador: #FFF3B5;
+    --enlace: #8EAAFF; --negativo: #FF8A98; --aviso-f: #3B3410; --foco: #8EAAFF; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font-family: "Instrument Sans", system-ui, sans-serif; line-height: 1.55; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 3px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.pagina { max-width: 880px; margin: 0 auto; padding: 28px clamp(18px, 5vw, 48px) 80px; }
+.top { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; margin-bottom: 56px; font-size: .95rem; }
+.top .marca { font-weight: 700; margin-right: 8px; }
+.top button { background: none; border: 0; padding: 2px 0; color: var(--suave); border-bottom: 2px solid transparent; }
+.top button[aria-current="page"] { color: var(--texto); border-bottom-color: var(--texto); }
+.top .der { margin-left: auto; color: var(--suave); display: flex; gap: 14px; }
+
+.periodo { color: var(--suave); margin: 0 0 14px; }
+.periodo button { background: none; border: 0; padding: 0; color: var(--enlace); text-decoration: underline; text-underline-offset: 3px; }
+.frase { font-family: "Instrument Serif", Georgia, serif; font-size: clamp(1.9rem, 4.6vw, 2.9rem); line-height: 1.22; margin: 0 0 22px; font-weight: 400; max-width: 22em; }
+.n { background: linear-gradient(transparent 58%, var(--marcador) 58% 92%, transparent 92%); padding: 0 .12em; white-space: nowrap; }
+.n.neg { color: var(--negativo); }
+.sub { font-size: 1.1rem; color: var(--suave); max-width: 36em; margin: 0 0 40px; }
+.sub .n { background: none; color: var(--texto); font-weight: 700; }
+
+.modos { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 44px; font-size: .95rem; }
+.modos button { background: none; border: 1px solid var(--linea); border-radius: 999px; padding: 4px 14px; }
+.modos button[aria-pressed="true"] { background: var(--texto); color: var(--fondo); border-color: var(--texto); }
+
+h2 { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 1.7rem; margin: 0 0 12px; }
+.bloque { margin-bottom: 44px; }
+.item { display: flex; justify-content: space-between; gap: 18px; padding: 12px 0; border-top: 1px solid var(--linea); }
+.item:last-child { border-bottom: 1px solid var(--linea); }
+.item small { display: block; color: var(--suave); }
+.item .neg { color: var(--negativo); }
+.aviso { background: var(--aviso-f); border-radius: 6px; padding: 10px 14px; margin: 0 0 12px; }
+.estado { color: var(--suave); }
+.estado.revisar { color: var(--texto); font-weight: 700; }
+details { border-top: 1px solid var(--linea); padding: 14px 0; }
+details:last-of-type { border-bottom: 1px solid var(--linea); }
+summary { cursor: pointer; font-weight: 500; }
+details table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+details td { padding: 6px 0; } details td:last-child { text-align: right; }
+.acciones { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 34px; }
+.acciones button { background: none; border: 0; padding: 0; color: var(--enlace); text-decoration: underline; text-underline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="top">
+    <span class="marca">GestionFacturas</span>
+    <nav style="display:flex;gap:18px" aria-label="Principal">
+      <button aria-current="page">Dashboard</button><button>Clientes</button><button>Gastos</button><button>Ingresos</button>
+    </nav>
+    <span class="der"><span>ana@example.com</span><button style="color:inherit;text-decoration:underline">Cerrar sesión</button></span>
+  </header>
+
+  <main>
+    <p class="periodo">Este es tu <button>trimestre actual</button>. También puedes ver <button>este mes</button>, <button>este año</button> o <button>un periodo a medida</button>.</p>
+
+    <h1 class="frase" style="font-weight:400">
+      Has cobrado <span class="n" data-con="7.260,00 €" data-sin="6.000,00 €"></span>
+      y has gastado <span class="n" data-con="3.841,50 €" data-sin="3.175,21 €"></span>:
+      te quedan <span class="n" data-con="3.418,50 €" data-sin="2.824,79 €"></span> en caja.
+    </h1>
+    <p class="sub">
+      Has facturado <span class="n" data-con="12.100,00 €" data-sin="10.000,00 €"></span>, así que cuando cobres todo
+      tu beneficio facturado será de <span class="n" data-con="8.258,50 €" data-sin="6.824,79 €"></span>.
+      Te faltan por cobrar <span class="n">4.840,00 €</span>.
+    </p>
+
+    <div class="modos" role="group" aria-label="Importes">
+      <button id="con" aria-pressed="true">Con IVA</button><button id="sin" aria-pressed="false">Sin IVA</button>
+    </div>
+
+    <section class="bloque">
+      <h2>Lo que te deben</h2>
+      <div class="item"><span>Rediseño de catálogo<small>Estudio Mar y Sol, emitida el 2026-10-03</small></span><b>2.420,00 €</b></div>
+      <div class="item"><span>Mantenimiento web<small>Taller Cobre, emitida el 2026-10-21</small></span><b>1.452,00 €</b></div>
+      <div class="item"><span>Fotografía de producto<small>Estudio Mar y Sol, emitida el 2026-11-02</small></span><b>968,00 €</b></div>
+    </section>
+
+    <section class="bloque">
+      <h2>Qué te queda por revisar</h2>
+      <p class="aviso">Revisa los datos extraídos antes de marcarlo como revisado</p>
+      <div class="item"><span>Papelería Lola<small>2026-10-20, base 100,00 €, IVA 21,00 €</small></span><span class="estado revisar">Pendiente de revisión</span></div>
+      <div class="item"><span>Hosting y dominios<small>2026-10-12, base 24,79 €, IVA 5,21 €</small></span><span class="estado">Revisado</span></div>
+    </section>
+
+    <section class="bloque">
+      <h2>Con quién ganas más</h2>
+      <details open>
+        <summary>Beneficio de caja por cliente</summary>
+        <table>
+          <tr><td>Estudio Mar y Sol</td><td>5.445,00 €</td></tr>
+          <tr><td>Taller Cobre</td><td>2.904,00 €</td></tr>
+          <tr><td>Gastos generales (sin cliente)</td><td style="color:var(--negativo)">-181,50 €</td></tr>
+        </table>
+      </details>
+    </section>
+
+    <div class="acciones"><button>Digitalizar una factura</button><button>Nuevo gasto</button><button>Exportar a Excel</button></div>
+  </main>
+</div>
+<script>
+  const valores = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    valores.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+</script>
+</body>
+</html>

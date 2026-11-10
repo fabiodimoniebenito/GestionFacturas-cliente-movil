@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · identidad sobria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --fondo: #E8ECE9;
+  --hoja: #F9FBF9;
+  --cabecera-tabla: #DDE4DF;
+  --linea: #C3CCC6;
+  --texto: #14201C;
+  --texto-suave: #4B5C55;
+  --primario: #12392F;
+  --sobre-primario: #FFFFFF;
+  --lateral: #12392F;
+  --sobre-lateral: #E6EFEA;
+  --negativo: #A32035;
+  --pendiente: #9A6B12;
+  --pendiente-fondo: #F2E6C6;
+  --sobre-pendiente: #4A3305;
+  --cobrado: #1F6B4F;
+  --foco: #1B6FD1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fondo: #0E1512; --hoja: #16201C; --cabecera-tabla: #1E2B26; --linea: #2E3D36; --texto: #E3EAE5; --texto-suave: #9DB0A6;
+    --primario: #7FC8A9; --sobre-primario: #08201A; --lateral: #0A100E; --sobre-lateral: #CFE0D7;
+    --negativo: #FF8FA0; --pendiente: #E3B964; --pendiente-fondo: #3A2F12; --sobre-pendiente: #F3DFA6; --cobrado: #7FD3AE; --foco: #7DB4FF;
+  }
+}
+:root[data-theme="dark"] {
+  --fondo: #0E1512; --hoja: #16201C; --cabecera-tabla: #1E2B26; --linea: #2E3D36; --texto: #E3EAE5; --texto-suave: #9DB0A6;
+  --primario: #7FC8A9; --sobre-primario: #08201A; --lateral: #0A100E; --sobre-lateral: #CFE0D7;
+  --negativo: #FF8FA0; --pendiente: #E3B964; --pendiente-fondo: #3A2F12; --sobre-pendiente: #F3DFA6; --cobrado: #7FD3AE; --foco: #7DB4FF;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font-family: "Public Sans", system-ui, sans-serif; font-size: 15px; line-height: 1.5; }
+h1, h2, h3 { margin: 0; line-height: 1.2; font-weight: 700; letter-spacing: -0.005em; }
+h1 { font-size: 1.6rem; } h2 { font-size: 1.1rem; } h3 { font-size: 1rem; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.cifra { font-family: "Source Serif 4", Georgia, serif; font-variant-numeric: lining-nums tabular-nums; text-align: right; white-space: nowrap; }
+.neg { color: var(--negativo); }
+
+.app { display: grid; grid-template-columns: 224px 1fr; min-height: 100vh; }
+.lateral { background: var(--lateral); color: var(--sobre-lateral); padding: 24px 12px; display: flex; flex-direction: column; gap: 2px; }
+.marca { font-weight: 700; font-size: 1.05rem; padding: 0 12px 24px; color: #fff; }
+.nav { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 9px 12px; border-radius: 4px; color: var(--sobre-lateral); border-left: 3px solid transparent; }
+.nav[aria-current="page"] { background: rgba(255,255,255,.08); border-left-color: var(--sobre-lateral); font-weight: 700; }
+.pie { margin-top: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: .85rem; }
+.pie button { align-self: flex-start; border: 1px solid rgba(255,255,255,.3); background: none; border-radius: 4px; padding: 6px 12px; color: var(--sobre-lateral); }
+
+main { padding: 28px clamp(16px, 4vw, 48px) 64px; max-width: 1080px; }
+.cabecera { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.barra { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 22px; }
+.segmentos { display: inline-flex; border: 1px solid var(--linea); border-radius: 6px; overflow: hidden; background: var(--hoja); }
+.segmentos button { border: 0; background: none; padding: 7px 14px; border-right: 1px solid var(--linea); }
+.segmentos button:last-child { border-right: 0; }
+.segmentos button[aria-pressed="true"] { background: var(--primario); color: var(--sobre-primario); font-weight: 500; }
+.boton { border: 1px solid var(--primario); background: var(--primario); color: var(--sobre-primario); border-radius: 6px; padding: 8px 16px; font-weight: 500; }
+.boton.sec { background: none; color: var(--texto); border-color: var(--linea); }
+
+.panel { background: var(--hoja); border: 1px solid var(--linea); border-radius: 6px; overflow: hidden; margin-bottom: 28px; }
+.panel > h2 { padding: 12px 16px; background: var(--cabecera-tabla); border-bottom: 1px solid var(--linea); }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-weight: 500; color: var(--texto-suave); padding: 8px 16px; border-bottom: 1px solid var(--linea); font-size: .85rem; }
+th.cifra { text-align: right; }
+td { padding: 10px 16px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td small { display: block; color: var(--texto-suave); font-size: .82rem; }
+
+/* Estado de resultados: convenciones contables. Raya simple sobre el subtotal, doble raya bajo el resultado final. */
+.estado td { padding: 9px 16px; border-bottom: 0; }
+.estado .grupo td { padding-top: 16px; font-weight: 700; }
+.estado .linea td:first-child { padding-left: 32px; }
+.estado .subtotal td { border-top: 1px solid var(--texto); font-weight: 700; }
+.estado .final td { font-weight: 700; padding-bottom: 14px; }
+.estado .final td.cifra { font-size: 1.35rem; border-bottom: 5px double var(--texto); }
+.estado .subtotal td small, .estado .final td small { font-weight: 400; }
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+
+.estado-tag { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: .82rem; font-weight: 500; border: 1px solid currentColor; }
+.estado-tag.pend { color: var(--sobre-pendiente); background: var(--pendiente-fondo); border-color: var(--pendiente); }
+.estado-tag.cob { color: var(--cobrado); }
+.borrador td { background: var(--pendiente-fondo); color: var(--sobre-pendiente); }
+.borrador td:first-child { box-shadow: inset 4px 0 0 var(--pendiente); }
+.borrador td small { color: inherit; opacity: .85; }
+.aviso { padding: 12px 16px; background: var(--pendiente-fondo); color: var(--sobre-pendiente); border-left: 4px solid var(--pendiente); border-radius: 0 6px 6px 0; margin-bottom: 14px; }
+
+.tokens { margin-top: 48px; padding-top: 20px; border-top: 3px double var(--texto); }
+.muestras { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin: 14px 0 22px; }
+.muestra { border: 1px solid var(--linea); border-radius: 6px; overflow: hidden; background: var(--hoja); font-size: .82rem; }
+.muestra i { display: block; height: 44px; }
+.muestra div { padding: 8px 10px; }
+code { font-size: .85em; background: var(--cabecera-tabla); padding: 1px 5px; border-radius: 3px; }
+
+@media (max-width: 820px) {
+  .app { grid-template-columns: 1fr; }
+  .lateral { flex-direction: row; flex-wrap: wrap; align-items: center; padding: 12px; }
+  .marca { padding: 0 12px 0 0; } .pie { margin: 0 0 0 auto; flex-direction: row; align-items: center; padding: 0; }
+  .dos { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="lateral" aria-label="Principal">
+    <div class="marca">GestionFacturas</div>
+    <button class="nav" aria-current="page">Dashboard</button>
+    <button class="nav">Clientes</button>
+    <button class="nav">Gastos</button>
+    <button class="nav">Ingresos</button>
+    <div class="pie">
+      <span>ana@example.com</span>
+      <button id="tema" aria-label="Cambiar entre tema claro y oscuro">Cambiar tema</button>
+      <button>Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="cabecera">
+      <h1>Resumen del trimestre actual</h1>
+      <button class="boton sec">Exportar a Excel</button>
+    </div>
+
+    <div class="barra">
+      <div class="segmentos" role="group" aria-label="Periodo">
+        <button aria-pressed="false">Este mes</button>
+        <button aria-pressed="true">Trimestre actual</button>
+        <button aria-pressed="false">Este año</button>
+        <button aria-pressed="false">Personalizado</button>
+      </div>
+      <div class="segmentos" role="group" aria-label="Importes">
+        <button id="con" aria-pressed="true">Con IVA</button>
+        <button id="sin" aria-pressed="false">Sin IVA</button>
+      </div>
+    </div>
+
+    <section class="panel" aria-label="Estado de resultados">
+      <h2>Estado de resultados</h2>
+      <table class="estado">
+        <tr class="grupo"><td colspan="2">Ingresos</td></tr>
+        <tr class="linea"><td>Facturado</td><td class="cifra" data-con="12.100,00 €" data-sin="10.000,00 €"></td></tr>
+        <tr class="linea"><td>Cobrado</td><td class="cifra" data-con="7.260,00 €" data-sin="6.000,00 €"></td></tr>
+        <tr class="grupo"><td colspan="2">Gastos</td></tr>
+        <tr class="linea"><td>Gastos del periodo</td><td class="cifra" data-con="3.841,50 €" data-sin="3.175,21 €"></td></tr>
+        <tr class="grupo"><td colspan="2">Resultado</td></tr>
+        <tr class="subtotal"><td>Beneficio de caja<small>lo cobrado menos los gastos</small></td><td class="cifra" data-con="3.418,50 €" data-sin="2.824,79 €"></td></tr>
+        <tr class="final"><td>Beneficio facturado<small>lo facturado menos los gastos</small></td><td class="cifra" data-con="8.258,50 €" data-sin="6.824,79 €"></td></tr>
+      </table>
+    </section>
+
+    <div class="dos">
+      <section class="panel">
+        <h2>Rentabilidad por cliente</h2>
+        <table>
+          <tr><th>Cliente</th><th class="cifra">Beneficio de caja</th></tr>
+          <tr><td>Estudio Mar y Sol</td><td class="cifra">5.445,00 €</td></tr>
+          <tr><td>Taller Cobre</td><td class="cifra">2.904,00 €</td></tr>
+          <tr><td>Gastos generales (sin cliente)</td><td class="cifra neg">-181,50 €</td></tr>
+        </table>
+      </section>
+      <section class="panel">
+        <h2>Pendientes de cobro</h2>
+        <table>
+          <tr><th>Concepto</th><th class="cifra">Total</th></tr>
+          <tr><td>Rediseño de catálogo<small>Estudio Mar y Sol, emitida el 2026-10-03</small></td><td class="cifra">2.420,00 €</td></tr>
+          <tr><td>Mantenimiento web<small>Taller Cobre, emitida el 2026-10-21</small></td><td class="cifra">1.452,00 €</td></tr>
+          <tr><td>Fotografía de producto<small>Estudio Mar y Sol, emitida el 2026-11-02</small></td><td class="cifra">968,00 €</td></tr>
+          <tr><td><strong>Total pendiente</strong></td><td class="cifra"><strong>4.840,00 €</strong></td></tr>
+        </table>
+      </section>
+    </div>
+
+    <section>
+      <h2 style="margin-bottom:12px">Gastos</h2>
+      <p class="aviso">Revisa los datos extraídos antes de marcarlo como revisado</p>
+      <div class="panel">
+        <table>
+          <tr><th>Emisor</th><th>Fecha</th><th class="cifra">Base imponible</th><th class="cifra">IVA</th><th>Estado</th></tr>
+          <tr class="borrador"><td>Papelería Lola</td><td>2026-10-20</td><td class="cifra">100,00 €</td><td class="cifra">21,00 €</td><td><span class="estado-tag pend">Pendiente de revisión</span></td></tr>
+          <tr><td>Hosting y dominios</td><td>2026-10-12</td><td class="cifra">24,79 €</td><td class="cifra">5,21 €</td><td>Revisado</td></tr>
+          <tr><td>Software de contabilidad</td><td>2026-10-02</td><td class="cifra">19,01 €</td><td class="cifra">3,99 €</td><td>Revisado</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="tokens" aria-label="Sistema de diseño">
+      <h2>Sistema de diseño</h2>
+      <p>Una herramienta que se lee como un informe: tabla, subtotal, resultado. Sin ornamento; la única marca de carácter es la contable (raya simple y doble raya) y el verde botella.</p>
+      <div class="muestras">
+        <div class="muestra"><i style="background:var(--fondo)"></i><div><strong>Fondo</strong><br><code>background</code></div></div>
+        <div class="muestra"><i style="background:var(--hoja)"></i><div><strong>Hoja</strong><br><code>surface</code></div></div>
+        <div class="muestra"><i style="background:var(--primario)"></i><div><strong>Verde botella</strong><br><code>primary</code></div></div>
+        <div class="muestra"><i style="background:var(--pendiente-fondo)"></i><div><strong>Latón claro</strong><br><code>tertiaryContainer</code></div></div>
+        <div class="muestra"><i style="background:var(--negativo)"></i><div><strong>Burdeos</strong><br><code>error</code></div></div>
+        <div class="muestra"><i style="background:var(--cobrado)"></i><div><strong>Verde cobrado</strong><br><code>secondary</code></div></div>
+      </div>
+      <div class="panel">
+        <table>
+          <tr><th>Rol</th><th>Claro</th><th>Oscuro</th><th>Uso</th></tr>
+          <tr><td><code>background</code></td><td>#E8ECE9</td><td>#0E1512</td><td>Fondo de pantalla</td></tr>
+          <tr><td><code>surface</code></td><td>#F9FBF9</td><td>#16201C</td><td>Paneles y tablas</td></tr>
+          <tr><td><code>surfaceVariant</code></td><td>#DDE4DF</td><td>#1E2B26</td><td>Cabeceras de tabla</td></tr>
+          <tr><td><code>onSurface</code></td><td>#14201C</td><td>#E3EAE5</td><td>Texto</td></tr>
+          <tr><td><code>primary</code> / <code>onPrimary</code></td><td>#12392F / #FFFFFF</td><td>#7FC8A9 / #08201A</td><td>Acción principal, selección, barra lateral</td></tr>
+          <tr><td><code>tertiaryContainer</code> / <code>onTertiaryContainer</code></td><td>#F2E6C6 / #4A3305</td><td>#3A2F12 / #F3DFA6</td><td>Borrador, aviso de revisión</td></tr>
+          <tr><td><code>error</code></td><td>#A32035</td><td>#FF8FA0</td><td>Importes negativos y errores</td></tr>
+          <tr><td><code>secondary</code></td><td>#1F6B4F</td><td>#7FD3AE</td><td>Estado cobrado</td></tr>
+          <tr><td><code>outlineVariant</code></td><td>#C3CCC6</td><td>#2E3D36</td><td>Separadores</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <table>
+          <tr><td>Interfaz</td><td>Public Sans 400, 500 y 700 · 15 px · títulos 25 y 18 px</td></tr>
+          <tr><td>Cifras</td><td>Source Serif 4 · numerales alineados y tabulares · siempre a la derecha</td></tr>
+          <tr><td>Formas</td><td>Radio de 6 px en paneles, botones y segmentos · 3 px en etiquetas de estado · sin sombras</td></tr>
+          <tr><td>Movimiento</td><td>Ninguno</td></tr>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+  const importes = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    importes.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+  document.getElementById('tema').onclick = () => {
+    const r = document.documentElement, oscuro = getComputedStyle(r).getPropertyValue('--fondo').trim() === '#0E1512';
+    r.dataset.theme = oscuro ? 'light' : 'dark';
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GestionFacturas · concepto hoja de cálculo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Concepto 08: los autónomos ya viven en hojas de cálculo. Rejilla con cabeceras de columna y fila,
+   barra de fórmulas que explica cada celda, y la navegación como pestañas de hoja abajo. */
+:root {
+  --fondo: #FFFFFF; --cabecera: #F1F3F5; --linea: #D3D8DE; --texto: #1D232B; --suave: #5F6A77;
+  --seleccion: #1A6DE3; --seleccion-f: #E7F0FD; --negativo: #C42B3D; --aviso-f: #FFF4C2; --aviso: #6B5200; --foco: #1A6DE3;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --fondo: #14181D; --cabecera: #1D232B; --linea: #2E3640; --texto: #E6EAF0; --suave: #9AA5B3;
+    --seleccion: #6AA7FF; --seleccion-f: #1B2D4A; --negativo: #FF8A97; --aviso-f: #3B3210; --aviso: #F5E19A; --foco: #6AA7FF; }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 15px; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: -2px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+.barra { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 8px 12px; background: var(--cabecera); border-bottom: 1px solid var(--linea); }
+.barra b { margin-right: 8px; }
+.barra .seg { display: inline-flex; border: 1px solid var(--linea); border-radius: 4px; overflow: hidden; background: var(--fondo); }
+.barra .seg button { border: 0; background: none; padding: 3px 10px; border-right: 1px solid var(--linea); }
+.barra .seg button:last-child { border-right: 0; }
+.barra .seg button[aria-pressed="true"] { background: var(--seleccion); color: #fff; }
+@media (prefers-color-scheme: dark) { .barra .seg button[aria-pressed="true"] { color: #08111F; } }
+.barra .der { margin-left: auto; display: flex; gap: 12px; align-items: center; color: var(--suave); }
+.barra .der button { background: none; border: 1px solid var(--linea); border-radius: 4px; padding: 3px 10px; }
+
+.formula { display: flex; border-bottom: 1px solid var(--linea); }
+.formula .ref { width: 72px; padding: 5px 8px; border-right: 1px solid var(--linea); background: var(--cabecera); text-align: center; font-weight: 600; }
+.formula .fx { padding: 5px 12px; color: var(--suave); font-style: italic; }
+.formula .txt { padding: 5px 0; flex: 1; }
+
+.rejilla { flex: 1; overflow: auto; }
+table { border-collapse: collapse; min-width: 100%; }
+th, td { border: 1px solid var(--linea); padding: 4px 10px; white-space: nowrap; }
+thead th { background: var(--cabecera); color: var(--suave); font-weight: 600; text-align: center; position: sticky; top: 0; }
+tbody th { background: var(--cabecera); color: var(--suave); font-weight: 400; width: 44px; text-align: center; position: sticky; left: 0; }
+td.n { text-align: right; }
+td.t { font-weight: 700; background: var(--cabecera); }
+td.sec { font-weight: 700; background: var(--cabecera); }
+td.neg { color: var(--negativo); }
+td.borr { background: var(--aviso-f); color: var(--aviso); }
+td[tabindex] { cursor: cell; }
+td.sel { outline: 2px solid var(--seleccion); outline-offset: -2px; background: var(--seleccion-f); }
+td.borr.sel { background: var(--aviso-f); }
+.pestanas { display: flex; background: var(--cabecera); border-top: 1px solid var(--linea); padding: 0 8px; }
+.pestanas button { border: 0; border-bottom: 3px solid transparent; background: none; padding: 8px 18px; color: var(--suave); }
+.pestanas button[aria-current="page"] { background: var(--fondo); border-bottom-color: var(--seleccion); color: var(--texto); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="barra">
+  <b>GestionFacturas</b>
+  <span class="seg" role="group" aria-label="Periodo">
+    <button aria-pressed="false">Este mes</button><button aria-pressed="true">Trimestre actual</button><button aria-pressed="false">Este año</button><button aria-pressed="false">Personalizado</button>
+  </span>
+  <span class="seg" role="group" aria-label="Importes"><button id="con" aria-pressed="true">Con IVA</button><button id="sin" aria-pressed="false">Sin IVA</button></span>
+  <span class="der">ana@example.com <button>Exportar a Excel</button><button>Cerrar sesión</button></span>
+</div>
+<div class="formula" aria-live="polite">
+  <span class="ref" id="ref">A2</span><span class="fx">fx</span><span class="txt" id="desc">Facturado en el periodo seleccionado</span>
+</div>
+
+<div class="rejilla">
+<table id="rejilla">
+  <thead><tr><th></th><th>A</th><th>B</th><th>C</th></tr></thead>
+  <tbody>
+    <tr><th>1</th><td class="sec">Resumen</td><td class="sec n">Importe</td><td class="sec">Nota</td></tr>
+    <tr><th>2</th><td tabindex="0" data-d="Facturado en el periodo seleccionado">Facturado</td><td tabindex="0" class="n" data-con="12.100,00 €" data-sin="10.000,00 €" data-d="Facturado en el periodo seleccionado"></td><td></td></tr>
+    <tr><th>3</th><td tabindex="0" data-d="Cobrado en el periodo seleccionado">Cobrado</td><td tabindex="0" class="n" data-con="7.260,00 €" data-sin="6.000,00 €" data-d="Cobrado en el periodo seleccionado"></td><td></td></tr>
+    <tr><th>4</th><td tabindex="0" data-d="Gastos del periodo seleccionado">Gastos</td><td tabindex="0" class="n" data-con="3.841,50 €" data-sin="3.175,21 €" data-d="Gastos del periodo seleccionado"></td><td></td></tr>
+    <tr><th>5</th><td class="t" tabindex="0" data-d="Beneficio de caja: lo cobrado menos los gastos">Beneficio de caja</td><td class="t n" tabindex="0" data-con="3.418,50 €" data-sin="2.824,79 €" data-d="Beneficio de caja: lo cobrado menos los gastos"></td><td>lo cobrado menos los gastos</td></tr>
+    <tr><th>6</th><td class="t" tabindex="0" data-d="Beneficio facturado: lo facturado menos los gastos">Beneficio facturado</td><td class="t n" tabindex="0" data-con="8.258,50 €" data-sin="6.824,79 €" data-d="Beneficio facturado: lo facturado menos los gastos"></td><td>lo facturado menos los gastos</td></tr>
+    <tr><th>7</th><td></td><td></td><td></td></tr>
+    <tr><th>8</th><td class="sec">Cliente</td><td class="sec n">Beneficio de caja</td><td class="sec"></td></tr>
+    <tr><th>9</th><td tabindex="0" data-d="Cliente">Estudio Mar y Sol</td><td tabindex="0" class="n" data-d="Beneficio de caja de Estudio Mar y Sol en el periodo">5.445,00 €</td><td></td></tr>
+    <tr><th>10</th><td tabindex="0" data-d="Cliente">Taller Cobre</td><td tabindex="0" class="n" data-d="Beneficio de caja de Taller Cobre en el periodo">2.904,00 €</td><td></td></tr>
+    <tr><th>11</th><td tabindex="0" data-d="Gastos que no pertenecen a ningún cliente">Gastos generales (sin cliente)</td><td tabindex="0" class="n neg" data-d="Importe negativo: los gastos generales superan lo cobrado de ese grupo">-181,50 €</td><td></td></tr>
+    <tr><th>12</th><td></td><td></td><td></td></tr>
+    <tr><th>13</th><td class="sec">Pendiente de cobro</td><td class="sec n">Total</td><td class="sec">Cliente</td></tr>
+    <tr><th>14</th><td tabindex="0" data-d="Ingreso pendiente de cobro">Rediseño de catálogo</td><td tabindex="0" class="n" data-d="Total del ingreso pendiente">2.420,00 €</td><td>Estudio Mar y Sol</td></tr>
+    <tr><th>15</th><td tabindex="0" data-d="Ingreso pendiente de cobro">Mantenimiento web</td><td tabindex="0" class="n" data-d="Total del ingreso pendiente">1.452,00 €</td><td>Taller Cobre</td></tr>
+    <tr><th>16</th><td tabindex="0" data-d="Ingreso pendiente de cobro">Fotografía de producto</td><td tabindex="0" class="n" data-d="Total del ingreso pendiente">968,00 €</td><td>Estudio Mar y Sol</td></tr>
+    <tr><th>17</th><td class="t">Total pendiente</td><td class="t n" tabindex="0" data-d="Total pendiente de cobro (no depende del periodo)">4.840,00 €</td><td></td></tr>
+    <tr><th>18</th><td></td><td></td><td></td></tr>
+    <tr><th>19</th><td class="sec">Gasto</td><td class="sec n">Base imponible</td><td class="sec">Estado</td></tr>
+    <tr><th>20</th><td class="borr" tabindex="0" data-d="Revisa los datos extraídos antes de marcarlo como revisado">Papelería Lola</td><td class="borr n" tabindex="0" data-d="Base imponible del gasto pendiente de revisión">100,00 €</td><td class="borr" tabindex="0" data-d="Revisa los datos extraídos antes de marcarlo como revisado">Pendiente de revisión</td></tr>
+    <tr><th>21</th><td tabindex="0" data-d="Gasto revisado">Hosting y dominios</td><td tabindex="0" class="n" data-d="Base imponible del gasto">24,79 €</td><td>Revisado</td></tr>
+  </tbody>
+</table>
+</div>
+<nav class="pestanas" aria-label="Hojas">
+  <button aria-current="page">Dashboard</button><button>Clientes</button><button>Gastos</button><button>Ingresos</button>
+</nav>
+<script>
+  const valores = document.querySelectorAll('[data-con]');
+  const con = document.getElementById('con'), sin = document.getElementById('sin');
+  function modo(conIva) {
+    valores.forEach(e => e.textContent = conIva ? e.dataset.con : e.dataset.sin);
+    con.setAttribute('aria-pressed', conIva); sin.setAttribute('aria-pressed', !conIva);
+  }
+  con.onclick = () => modo(true); sin.onclick = () => modo(false); modo(true);
+  // Seleccionar una celda muestra su descripción en la barra de fórmulas.
+  const ref = document.getElementById('ref'), desc = document.getElementById('desc');
+  document.querySelectorAll('td[tabindex]').forEach(td => {
+    const elegir = () => {
+      document.querySelectorAll('td.sel').forEach(x => x.classList.remove('sel'));
+      td.classList.add('sel');
+      ref.textContent = 'ABC'[td.cellIndex - 1] + (td.parentElement.rowIndex);
+      desc.textContent = td.dataset.d;
+    };
+    td.addEventListener('click', elegir); td.addEventListener('focus', elegir);
+  });
+</script>
+</body>
+</html>
