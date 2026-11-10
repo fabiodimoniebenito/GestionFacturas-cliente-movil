@@ -31,6 +31,8 @@
     <string name="error_inesperado">Ha ocurrido un error inesperado. Inténtalo de nuevo.</string>
     <string name="error_no_encontrado">El elemento ya no existe.</string>
     <string name="error_conflicto">La operación entra en conflicto con datos existentes.</string>
+    <string name="error_archivo_demasiado_grande">El archivo es demasiado grande. El máximo es 10 MB.</string>
+    <string name="error_no_se_pudo_leer">No se pudo leer el documento. Prueba con una imagen más nítida.</string>
 
     <!-- Estados comunes (carga, vacío, error) -->
     <string name="estado_reintentar">Reintentar</string>

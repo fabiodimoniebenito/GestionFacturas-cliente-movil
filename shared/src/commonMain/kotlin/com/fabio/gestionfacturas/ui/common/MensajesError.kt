@@ -7,6 +7,7 @@ import com.fabio.gestionfacturas.resources.campo_error_email_invalido
 import com.fabio.gestionfacturas.resources.campo_error_email_vacio
 import com.fabio.gestionfacturas.resources.campo_error_nombre_vacio
 import com.fabio.gestionfacturas.resources.campo_error_password_vacia
+import com.fabio.gestionfacturas.resources.error_archivo_demasiado_grande
 import com.fabio.gestionfacturas.resources.error_conflicto
 import com.fabio.gestionfacturas.resources.error_credenciales
 import com.fabio.gestionfacturas.resources.error_demasiadas_peticiones
@@ -14,6 +15,7 @@ import com.fabio.gestionfacturas.resources.error_demasiadas_peticiones_espera
 import com.fabio.gestionfacturas.resources.error_email_registrado
 import com.fabio.gestionfacturas.resources.error_inesperado
 import com.fabio.gestionfacturas.resources.error_no_encontrado
+import com.fabio.gestionfacturas.resources.error_no_se_pudo_leer
 import com.fabio.gestionfacturas.resources.error_sin_conexion
 import com.fabio.gestionfacturas.resources.error_validacion
 import org.jetbrains.compose.resources.stringResource
@@ -37,6 +39,8 @@ fun ErrorAuth.mensaje(): String {
         ErrorAuth.Conflicto -> stringResource(Res.string.error_conflicto)
         is ErrorAuth.NoEncontradoConDetalle -> stringResource(Res.string.error_no_encontrado)
         is ErrorAuth.ConflictoConDetalle -> stringResource(Res.string.error_conflicto)
+        is ErrorAuth.ArchivoDemasiadoGrande -> stringResource(Res.string.error_archivo_demasiado_grande)
+        is ErrorAuth.NoSePudoLeer -> stringResource(Res.string.error_no_se_pudo_leer)
         ErrorAuth.ServidorInaccesible -> stringResource(Res.string.error_sin_conexion)
         ErrorAuth.Inesperado -> stringResource(Res.string.error_inesperado)
     }
