@@ -35,6 +35,7 @@ import com.fabio.gestionfacturas.resources.Res
 import com.fabio.gestionfacturas.resources.gastos_actualizar
 import com.fabio.gestionfacturas.resources.gastos_actualizar_fallido
 import com.fabio.gestionfacturas.resources.gastos_base_imponible
+import com.fabio.gestionfacturas.resources.gastos_digitalizar
 import com.fabio.gestionfacturas.resources.gastos_iva
 import com.fabio.gestionfacturas.resources.gastos_nuevo
 import com.fabio.gestionfacturas.resources.gastos_ya_no_existe
@@ -58,6 +59,7 @@ private val AnchoMaximo = 900.dp
 @Composable
 fun GastosScreen(
     alNuevo: () -> Unit,
+    alDigitalizar: () -> Unit,
     alAbrir: (Long) -> Unit,
     resultadoFormulario: ResultadoFormulario? = null,
     alConsumirResultadoFormulario: () -> Unit = {},
@@ -74,6 +76,7 @@ fun GastosScreen(
     GastosContent(
         estado = estado,
         alNuevo = alNuevo,
+        alDigitalizar = alDigitalizar,
         alAbrir = alAbrir,
         alRefrescar = viewModel::onRefrescar,
         alConsumirMensaje = viewModel::onMensajeConsumido,
@@ -84,6 +87,7 @@ fun GastosScreen(
 fun GastosContent(
     estado: GastosUiState,
     alNuevo: () -> Unit,
+    alDigitalizar: () -> Unit,
     alAbrir: (Long) -> Unit,
     alRefrescar: () -> Unit,
     alConsumirMensaje: () -> Unit,
@@ -116,6 +120,7 @@ fun GastosContent(
                 Cabecera(
                     habilitado = estado.carga !is CargaGastos.Cargando && !estado.refrescando,
                     alNuevo = alNuevo,
+                    alDigitalizar = alDigitalizar,
                     alRefrescar = alRefrescar,
                 )
                 if (estado.refrescando) {
@@ -137,7 +142,12 @@ fun GastosContent(
 }
 
 @Composable
-private fun Cabecera(habilitado: Boolean, alNuevo: () -> Unit, alRefrescar: () -> Unit) {
+private fun Cabecera(
+    habilitado: Boolean,
+    alNuevo: () -> Unit,
+    alDigitalizar: () -> Unit,
+    alRefrescar: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -151,6 +161,7 @@ private fun Cabecera(habilitado: Boolean, alNuevo: () -> Unit, alRefrescar: () -
         OutlinedButton(onClick = alRefrescar, enabled = habilitado) {
             Text(stringResource(Res.string.gastos_actualizar))
         }
+        OutlinedButton(onClick = alDigitalizar) { Text(stringResource(Res.string.gastos_digitalizar)) }
         Button(onClick = alNuevo) { Text(stringResource(Res.string.gastos_nuevo)) }
     }
 }
